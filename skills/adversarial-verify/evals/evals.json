@@ -1,0 +1,41 @@
+{
+  "skill_name": "adversarial-verify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run an adversarial verification on my last commit",
+      "expected_output": "Full CoV review with decomposed claims, adversarial questions, independent verification, and evidence-based report",
+      "assertions": [
+        "Runs git diff to identify changed files",
+        "Decomposes code changes into individual verifiable claims",
+        "Generates adversarial counter-questions for each claim",
+        "Traces actual code paths to verify each claim independently",
+        "Produces a structured report with PASS/FAIL results, file:line references, and confidence scores"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "CoV check this function that adds items to a list while iterating over it",
+      "expected_output": "Detection of concurrent modification bug with specific evidence and fix",
+      "assertions": [
+        "Identifies the concurrent modification as a verifiable claim",
+        "Generates adversarial question about nested calls modifying the list",
+        "Reports a FAIL with confidence >= 80",
+        "Provides the exact file and line number of the issue",
+        "Suggests a concrete fix (e.g., iterate over a copy or use a separate buffer)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Verify this code — it looks fine to me, just a simple getter",
+      "expected_output": "Skeptical analysis that does not trust surface-level simplicity",
+      "assertions": [
+        "Does not accept 'looks correct' as evidence of correctness",
+        "Decomposes even simple code into verifiable claims",
+        "Checks for initialization order, null safety, and boundary conditions",
+        "Applies the anti-pattern rule: 'simple code has simple bugs'",
+        "Produces a structured verification report regardless of code complexity"
+      ]
+    }
+  ]
+}
