@@ -123,8 +123,10 @@ Or ask naturally:
 ### Agent Meta-Verification
 - **Sycophantic deference** — agrees without challenging assumptions
 - **Hidden agenda** — favors one approach without justification
+- **Anchoring bias** — first evidence disproportionately shapes conclusions
 - **Confabulated confidence** — high confidence on weak evidence
 - **Premature convergence** — jumps to one hypothesis
+- **Evidence cherry-picking** — selects only supporting evidence
 
 ## Trust Integration
 
