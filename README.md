@@ -1,3 +1,8 @@
+[![Skill Version](https://img.shields.io/badge/skill-v1.0-blue)](SKILL.md)
+[![Skills](https://img.shields.io/badge/skills-1-green)](SKILL.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
+
 # Claude Adversarial Verification Skill
 
 A Claude Code skill that performs rigorous adversarial code review using **Chain-of-Verification (CoV)** methodology.
@@ -13,17 +18,16 @@ When invoked, this skill launches a skeptical verifier agent that:
 
 ## Install
 
-Copy the skill file to your Claude Code skills directory:
+Copy the skill file:
 
 ```bash
 cp SKILL.md ~/.claude/skills/adversarial-verify.md
 ```
 
-Or clone and symlink:
+Or clone as plugin:
 
 ```bash
-git clone https://github.com/fullo/claude-adversarial-skill.git
-ln -s $(pwd)/claude-adversarial-skill/SKILL.md ~/.claude/skills/adversarial-verify.md
+git clone https://github.com/fullo/claude-adversarial-skill.git ~/.claude/skills/adversarial-verify
 ```
 
 ## Usage
@@ -72,6 +76,10 @@ Track trust in `.claude/agent-trust.json`:
   }
 }
 ```
+
+## Compatibility
+
+Follows the [Agent Skills format](https://agentskills.io/) and works with Claude Code, Cursor, Windsurf, Cline and other compatible agents.
 
 ## References
 
