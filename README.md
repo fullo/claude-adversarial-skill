@@ -1,20 +1,33 @@
-[![Skill Version](https://img.shields.io/badge/skill-v1.0-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v2.0-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial code review using **Chain-of-Verification (CoV)** methodology.
+A Claude Code skill that performs rigorous adversarial verification using **Chain-of-Verification (CoV)** methodology across code, architecture, data, and analysis.
 
 ## What it does
 
 When invoked, this skill launches a skeptical verifier agent that:
 
-1. **Decomposes** code changes into individual verifiable claims
-2. **Generates adversarial questions** for each claim ("what would make this fail?")
-3. **Independently verifies** each claim by tracing actual code paths
-4. **Reports findings** with evidence, line numbers, and concrete fix suggestions
+1. **Identifies** what needs verification — code, architecture, data, or analysis
+2. **Gathers artifacts** — the actual outputs to verify
+3. **Establishes ground truth** — what to verify against
+4. **Decomposes** artifacts into individual verifiable claims
+5. **Generates adversarial questions** for each claim ("what would make this fail?")
+6. **Independently verifies** each claim by tracing actual paths
+7. **Reports findings** with evidence, references, and concrete fix suggestions
+8. **Proposes project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)
+
+## Verification Domains
+
+| Domain | What it verifies | Ground truth |
+|--------|-----------------|--------------|
+| **Code** | Source changes, logic, behavior | Tests, type system, spec |
+| **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
+| **Data** | Schemas, migrations, contracts | Production schema, validation rules |
+| **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 
 ## Install
 
@@ -45,12 +58,14 @@ Or ask naturally:
 "run an adversarial review on my recent changes"
 "CoV check the last commit"
 "verify this code with total skepticism"
+"verify the PLAN.md against the SPEC.md"
+"adversarial check on this migration"
+"verify this agent's analysis report"
 ```
 
 ## What it catches
 
-The skill is designed to find **pernicious** bugs that surface-level reviews miss:
-
+### Code
 - **Silent data corruption** — values that look correct but aren't
 - **Logic flaws** — code that passes simple tests but fails edge cases
 - **Initialization order bugs** — field A used before field B is set
@@ -58,6 +73,25 @@ The skill is designed to find **pernicious** bugs that surface-level reviews mis
 - **State leaks** — data persisting across frames/calls when it shouldn't
 - **Boundary conditions** — off-by-one, coordinate system errors
 - **Resource exhaustion** — unbounded lists, missing cleanup
+
+### Architecture
+- **Spec drift** — implementation diverges from SPEC.md
+- **Missing constraints** — PLAN.md doesn't address known edge cases
+- **Over-engineering** — abstraction without justification
+- **Dependency risk** — new deps without evaluation
+- **Breaking changes** — API contract violations
+
+### Data
+- **Schema inconsistency** — migration doesn't match model
+- **Data loss risk** — destructive migration without backup
+- **Constraint gaps** — missing NOT NULL, FK, uniqueness
+- **Backward compat** — old code reading new schema
+
+### Analysis
+- **Hallucinated facts** — claims without traceable source
+- **Stale references** — citing removed/renamed code
+- **Logical leaps** — conclusion doesn't follow from evidence
+- **Confirmation bias** — only supporting evidence presented
 
 ## Trust Integration
 
