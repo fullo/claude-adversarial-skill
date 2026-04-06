@@ -9,16 +9,21 @@ A Claude Code skill that performs rigorous adversarial verification using **Chai
 
 ## What it does
 
-When invoked, this skill launches a skeptical verifier agent that:
+When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
 
-1. **Identifies** what needs verification — code, architecture, data, or analysis
-2. **Gathers artifacts** — the actual outputs to verify
-3. **Establishes ground truth** — what to verify against
-4. **Decomposes** artifacts into individual verifiable claims
-5. **Generates adversarial questions** for each claim ("what would make this fail?")
-6. **Independently verifies** each claim by tracing actual paths
-7. **Reports findings** with evidence, references, and concrete fix suggestions
-8. **Proposes project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)
+**Pre-verification (Steps 0–0b):**
+- **Identify** what needs verification — code, architecture, data, or analysis
+- **Gather artifacts** — the actual outputs to verify
+- **Establish ground truth** — what to verify against
+
+**Chain-of-Verification (Steps 1–4):**
+- **Decompose** artifacts into individual verifiable claims
+- **Generate adversarial questions** for each claim ("what would make this fail?")
+- **Independently verify** each claim by tracing actual paths
+- **Report findings** with evidence, references, and concrete fix suggestions
+
+**Discovery (Step 5):**
+- **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)
 
 ## Verification Domains
 

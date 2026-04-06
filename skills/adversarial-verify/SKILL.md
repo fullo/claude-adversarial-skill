@@ -36,7 +36,8 @@ Determine what needs verification. There are four domains:
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schema, migration, or API spec files involved → **Data**
 - Reviewing another agent's output or report → **Analysis**
-- Multiple domains may apply — verify each separately
+- Multiple domains may apply — verify each separately, one section per domain
+- When domains overlap (e.g., ORM model change = Code + Data), assign each claim to its primary domain — avoid duplicating the same claim across domains
 
 ## Step 0a: GATHER ARTIFACTS
 
@@ -167,6 +168,8 @@ For each finding, provide:
 
 ## Output Format
 
+For single-domain verification:
+
 ```
 ## VERIFICATION DOMAIN
 [Code | Architecture | Data | Analysis]
@@ -194,6 +197,32 @@ For each finding, provide:
 ### SUMMARY
 - Domain: [Code/Architecture/Data/Analysis]
 - Claims: X verified, Y failed
+- Critical issues: N
+- Recommendation: [trust adjustment or approval]
+```
+
+For multi-domain verification, repeat the structure per domain:
+
+```
+# Domain 1: Code
+## GROUND TRUTH
+...
+## DECOMPOSED CLAIMS
+...
+## VERIFICATION RESULTS
+...
+
+# Domain 2: Data
+## GROUND TRUTH
+...
+## DECOMPOSED CLAIMS
+...
+## VERIFICATION RESULTS
+...
+
+## CROSS-DOMAIN SUMMARY
+- Domains verified: [list]
+- Total claims: X verified, Y failed
 - Critical issues: N
 - Recommendation: [trust adjustment or approval]
 ```
