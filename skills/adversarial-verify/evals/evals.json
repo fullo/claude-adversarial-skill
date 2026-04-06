@@ -4,25 +4,30 @@
     {
       "id": 1,
       "prompt": "Run an adversarial verification on my last commit",
-      "expected_output": "Full CoV review with decomposed claims, adversarial questions, independent verification, and evidence-based report",
+      "expected_output": "Full CoV review with failure categories, hidden behavior probing, adversarial scaffold, and evidence-based report",
       "assertions": [
         "Identifies the verification domain (Code) via auto-detection",
         "Gathers artifacts via git diff",
         "Establishes ground truth sources (tests, type system, spec)",
         "Decomposes code changes into individual verifiable claims",
         "Generates adversarial counter-questions for each claim",
+        "Abstracts questions into failure categories and searches for patterns across codebase",
         "Traces actual code paths to verify each claim independently",
-        "Produces a structured report with PASS/FAIL results, file:line references, and confidence scores",
+        "Applies hidden behavior probing (indirect, scaffolded, cross-reference, absence)",
+        "Applies adversarial scaffold (suspicion modeling, attack selection, subtlety detection)",
+        "Produces a structured report with PASS/FAIL, failure categories, hidden behaviors, and scaffold findings",
         "Checks for project docs (TODO.md, SPEC.md, PLAN.md) and proposes updates if relevant"
       ]
     },
     {
       "id": 2,
       "prompt": "CoV check this function that adds items to a list while iterating over it",
-      "expected_output": "Detection of concurrent modification bug with specific evidence and fix",
+      "expected_output": "Detection of concurrent modification bug with failure category abstraction",
       "assertions": [
         "Identifies the concurrent modification as a verifiable claim",
         "Generates adversarial question about nested calls modifying the list",
+        "Abstracts to failure category: 'Frequency assumptions' or 'Implicit ordering'",
+        "Searches for other instances of the same pattern across the codebase",
         "Reports a FAIL with confidence >= 80",
         "Provides the exact file and line number of the issue",
         "Suggests a concrete fix (e.g., iterate over a copy or use a separate buffer)"
@@ -31,12 +36,13 @@
     {
       "id": 3,
       "prompt": "Verify this code — it looks fine to me, just a simple getter",
-      "expected_output": "Skeptical analysis that does not trust surface-level simplicity",
+      "expected_output": "Skeptical analysis applying subtlety detection from adversarial scaffold",
       "assertions": [
         "Does not accept 'looks correct' as evidence of correctness",
+        "Applies suspicion modeling: what would a normal reviewer miss here?",
+        "Applies subtlety detection: flags code that appears clean but hides complexity",
         "Decomposes even simple code into verifiable claims",
-        "Checks for initialization order, null safety, and boundary conditions",
-        "Applies the anti-pattern rule: 'simple code has simple bugs'",
+        "Uses hidden behavior probing: traces actual execution rather than trusting the interface",
         "Produces a structured verification report regardless of code complexity"
       ]
     },
@@ -49,6 +55,7 @@
         "Reads both PLAN.md and SPEC.md as artifacts",
         "Uses SPEC.md as ground truth source",
         "Decomposes PLAN.md steps into claims about requirement coverage",
+        "Abstracts gaps into failure category: 'Missing completeness'",
         "Detects any SPEC requirements without a corresponding PLAN step",
         "Reports spec drift with severity and confidence scores"
       ]
@@ -56,26 +63,28 @@
     {
       "id": 5,
       "prompt": "Adversarial check on this database migration that adds a new column",
-      "expected_output": "Data domain verification checking schema consistency, defaults, and backward compatibility",
+      "expected_output": "Data domain verification with hidden behavior probing on schema changes",
       "assertions": [
         "Identifies the verification domain as Data",
         "Reads the migration file and the ORM model as artifacts",
         "Checks for NOT NULL without default value on existing table",
-        "Verifies the ORM model matches the migration schema",
-        "Checks for rollback migration existence",
-        "Evaluates backward compatibility with existing queries"
+        "Applies absence probing: looks for missing rollback migration",
+        "Applies cross-reference probing: verifies ORM model matches migration schema",
+        "Evaluates backward compatibility with existing queries",
+        "Abstracts issues into failure categories if systemic patterns found"
       ]
     },
     {
       "id": 6,
       "prompt": "Verify this agent's analysis report — it claims our API handles 10k req/s based on the benchmarks",
-      "expected_output": "Analysis domain verification checking for hallucinated facts and stale references",
+      "expected_output": "Analysis domain verification with agent meta-verification detecting hallucination and bias",
       "assertions": [
         "Identifies the verification domain as Analysis",
         "Reads the analysis report and attempts to locate cited benchmark data",
-        "Checks if performance claims are traceable to actual benchmark results",
+        "Applies agent meta-verification: checks for confabulated confidence",
+        "Applies agent meta-verification: checks for evidence cherry-picking",
+        "Applies agent meta-verification: checks for sycophantic deference",
         "Detects any hallucinated or unsupported claims",
-        "Checks for confirmation bias (only positive results cited)",
         "Reports findings with confidence and specific source discrepancies"
       ]
     },
@@ -84,12 +93,51 @@
       "prompt": "Run adversarial verification on the last commit and update project docs with findings",
       "expected_output": "Full CoV review followed by proposed project doc updates, waiting for user confirmation",
       "assertions": [
-        "Completes the full CoV verification protocol (Steps 0-4)",
+        "Completes the full verification protocol (Steps 0-4 including 2b, 3b, 3c)",
         "Scans for project files: TODO.md, SPEC.md, PLAN.md, CHANGELOG.md",
         "Proposes specific additions to relevant project docs",
         "Does NOT auto-write to any project files",
         "Presents proposed updates in the structured format with file names and changes",
         "Waits for explicit user confirmation before applying updates"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Look for systemic failure patterns across the entire codebase, not just the last change",
+      "expected_output": "Abstractive red-teaming: identification of failure categories across the whole project",
+      "assertions": [
+        "Searches for recurring failure categories across the full codebase, not just recent changes",
+        "Checks for frequency assumptions in event handlers and callbacks",
+        "Checks for implicit ordering in init sequences and async chains",
+        "Checks for stale state in cached values and shared references",
+        "Checks for missing completeness in enums, switches, and factory methods",
+        "Reports systemic patterns with instance count and affected files"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "This code has a function called safeParse that handles user input. Probe it for hidden behaviors.",
+      "expected_output": "Hidden behavior probing revealing undocumented behaviors in a function that claims safety",
+      "assertions": [
+        "Does not trust the 'safe' prefix — applies cross-reference probing",
+        "Traces what actually happens with malformed input (indirect probing)",
+        "Checks what the function does NOT handle (absence probing)",
+        "Uses scaffolded probing: chains findings from one check into the next",
+        "Converts every piece of evidence into a hypothesis with confidence level",
+        "Reports advertised vs actual behavior in the Hidden Behaviors table"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Review the output of the planning agent — check if its recommendations are biased or incomplete",
+      "expected_output": "Agent meta-verification detecting cognitive biases in another agent's output",
+      "assertions": [
+        "Identifies the verification domain as Analysis with agent meta-verification",
+        "Checks for sycophantic deference: does the output just agree with the user?",
+        "Checks for anchoring bias: is the first finding overweighted?",
+        "Checks for premature convergence: were alternatives considered?",
+        "Checks for hidden agenda: does the output favor a specific approach without justification?",
+        "Reports each detected bias with evidence and confidence score"
       ]
     }
   ]

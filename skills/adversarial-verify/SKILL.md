@@ -2,16 +2,22 @@
 name: adversarial-verify
 description: >-
   Run adversarial verification on code, architecture, data, or analysis using
-  Chain-of-Verification (CoV) methodology. Identifies what needs verification,
-  gathers artifacts, establishes ground truth, and produces evidence-based findings.
+  Chain-of-Verification (CoV) with abstractive red-teaming, hidden behavior
+  probing, and modular adversarial scaffolding. Identifies failure categories,
+  detects undocumented behaviors, and produces evidence-based findings.
   Use when the user says "verify", "adversarial check", "CoV review",
   "/adversarial-verify", or "review my changes".
 license: MIT
 compatibility: Requires git for diff analysis
 metadata:
   author: fullo
-  version: "2.0"
-  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify analysis
+  version: "3.0"
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify analysis, red-team, audit
+  references:
+    - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
+    - "Abstractive Red-Teaming: Anthropic 2026 — alignment.anthropic.com/2026/abstractive-red-teaming"
+    - "AuditBench: Anthropic 2026 — alignment.anthropic.com/2026/auditbench"
+    - "Strengthening Red Teams: Anthropic 2025 — alignment.anthropic.com/2025/strengthening-red-teams"
 ---
 
 # Adversarial Verification
@@ -19,6 +25,12 @@ metadata:
 ## Overview
 
 You are an **Adversarial Verifier**. Your stance is **total skepticism** — assume errors exist until proven otherwise. Do not trust descriptions, comments, or stated intentions. Only trust what the code actually does when you trace it line by line, what the spec actually says, what the data actually contains.
+
+This skill combines four research-backed techniques:
+- **Chain-of-Verification (CoV)** — decompose, question, verify, report
+- **Abstractive Red-Teaming** — find failure *categories*, not just individual bugs
+- **Hidden Behavior Probing** — detect behaviors the code doesn't advertise
+- **Modular Adversarial Scaffold** — systematic decomposition of the adversarial process
 
 ## Step 0: IDENTIFY
 
@@ -97,6 +109,31 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "Migration is safe" | "What happens if the migration runs on a table with 10M rows?" |
 | "Cited function exists" | "Was it renamed or removed since the analysis was written?" |
 
+## Step 2b: ABSTRACT TO FAILURE CATEGORIES
+
+> Based on [Abstractive Red-Teaming](https://alignment.anthropic.com/2026/abstractive-red-teaming/) — find **categories of failures**, not just individual bugs.
+
+Group the adversarial questions from Step 2 into **general failure patterns**. Then search the codebase for other instances of the same pattern.
+
+For example: "What if fire() is called twice?" → category: **Frequency assumptions**. Then search for all functions that assume single-call-per-cycle.
+
+**Recurring failure categories to search for:**
+
+| Category | Pattern | Where to search |
+|----------|---------|----------------|
+| **Frequency assumptions** | Code assumes a function is called exactly once per cycle | Event handlers, callbacks, update loops |
+| **Implicit ordering** | Code assumes A runs before B without enforcement | Init sequences, lifecycle methods, async chains |
+| **Stale state** | Code reads state that was valid earlier but may have changed | Cached values, shared references, cross-module state |
+| **Missing completeness** | New item added to one list/enum but not all related ones | Enums, switch/when, serializers, tests, factory methods |
+| **Silent fallthrough** | Error or edge case handled by doing nothing | catch blocks, default cases, empty else branches |
+| **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
+
+For each category found, report:
+- The category name and pattern
+- How many instances found across the codebase
+- Which files are affected
+- Whether this is a systemic issue or isolated
+
 ## Step 3: INDEPENDENT VERIFY
 
 For each claim, **read the actual artifact** and trace execution or logic:
@@ -153,8 +190,55 @@ For each claim, **read the actual artifact** and trace execution or logic:
 | **Stale references** | Citing removed, renamed, or moved code/files |
 | **Logical leaps** | Conclusion doesn't follow from the evidence presented |
 | **Missing context** | Recommendations ignoring known constraints |
-| **Confirmation bias** | Only supporting evidence, no counter-evidence considered |
+| **One-sided evidence** | Analysis presents only supporting data, omits contradicting findings |
 | **Scope creep** | Recommendations beyond the original question asked |
+
+### Agent meta-verification targets
+
+> When verifying output produced by another AI agent, apply these additional checks inspired by [AuditBench](https://alignment.anthropic.com/2026/auditbench/).
+
+| Category | What to look for |
+|----------|-----------------|
+| **Sycophantic deference** | Output agrees with user's framing without challenging assumptions |
+| **Hidden agenda** | Output systematically favors one approach/tool/pattern without stating why |
+| **Anchoring bias** | First piece of evidence disproportionately shapes all conclusions |
+| **Confabulated confidence** | High confidence scores on claims with weak or no evidence |
+| **Premature convergence** | Jumps to one hypothesis without considering alternatives |
+| **Evidence cherry-picking** | Selects only supporting evidence, omits counter-evidence |
+
+## Step 3b: HIDDEN BEHAVIOR PROBING
+
+> Based on [AuditBench](https://alignment.anthropic.com/2026/auditbench/) — hidden behaviors don't confess when asked directly.
+
+Don't just read the obvious code path. Probe for behaviors the code doesn't advertise.
+
+**Probing strategies:**
+
+1. **Indirect probing** — Don't ask "does this handle nulls?" — trace what *actually happens* when null arrives. Follow the execution, don't trust the interface.
+2. **Scaffolded probing** — Use the output of one check as input to the next. If Step 3 found that `reset()` misses field X, check: does anything *depend* on field X being reset? Chain the findings.
+3. **Cross-reference probing** — Check if what the code *claims* (via comments, names, docs) matches what it *does*. Function named `safeDelete` that doesn't check permissions? That's a hidden behavior.
+4. **Absence probing** — Look for what's NOT there: missing error handling, missing validation, missing tests, missing logging. The absence of a thing is itself a finding.
+
+**Tool-to-agent gap** — Finding evidence is not enough. For each piece of evidence found during probing, explicitly state:
+- The **hypothesis** it supports or refutes
+- The **confidence** level for that hypothesis
+- What **additional evidence** would confirm or deny it
+
+Do not collect evidence without converting it to a conclusion.
+
+## Step 3c: ADVERSARIAL SCAFFOLD
+
+> Based on [Strengthening Red Teams](https://alignment.anthropic.com/2025/strengthening-red-teams/) — modular decomposition of the adversarial process.
+
+Apply five adversarial modules to prioritize and deepen verification:
+
+| Module | Question to answer | Action |
+|--------|-------------------|--------|
+| **Suspicion modeling** | What would a normal reviewer miss? | Focus verification effort on code that *looks* safe but has hidden complexity |
+| **Attack selection** | Which claims are highest-risk? | Rank claims by **blast radius × probability** and verify highest-risk first |
+| **Plan synthesis** | What multi-step traces reveal issues? | Design verification chains: trace A → dependency B → side-effect C |
+| **Execution** | Did I actually trace the code? | For each claim, confirm you read the actual lines — don't reason from memory or assumptions |
+| **Subtlety detection** | What appears clean but hides complexity? | Flag: one-liners with side effects, innocent defaults, "temporary" hacks, clever abstractions |
 
 ## Step 4: EVIDENCE-BASED REPORTING
 
@@ -182,6 +266,12 @@ For single-domain verification:
 2. [Claim text]
 ...
 
+## FAILURE CATEGORIES IDENTIFIED
+| Category | Instances found | Files affected |
+|----------|----------------|---------------|
+| Frequency assumptions | 3 | Player.kt, Enemy.kt, Timer.kt |
+| Missing completeness | 1 | GameState.kt |
+
 ## VERIFICATION RESULTS
 
 ### PASS ✅
@@ -194,9 +284,22 @@ For single-domain verification:
 |---|-----------|----------|------------|-------|
 | 1 | Enemy.kt:67 | Critical | 95 | shootTimer never resets... |
 
+## HIDDEN BEHAVIORS DETECTED
+| # | Location | Advertised behavior | Actual behavior | Confidence |
+|---|----------|-------------------|-----------------|------------|
+| 1 | Cache.kt:23 | "Thread-safe cache" | No synchronization | 90 |
+
+## ADVERSARIAL SCAFFOLD FINDINGS
+- Reviewer blind spots: [what a normal reviewer would miss]
+- Highest-risk claims: [top 3, ranked by blast radius × probability]
+- Multi-step traces: [A → B → C chains that revealed issues]
+- Subtlety flags: [code that appears clean but hides complexity]
+
 ### SUMMARY
 - Domain: [Code/Architecture/Data/Analysis]
 - Claims: X verified, Y failed
+- Failure categories: N systemic patterns found
+- Hidden behaviors: N detected
 - Critical issues: N
 - Recommendation: [trust adjustment or approval]
 ```
@@ -209,20 +312,23 @@ For multi-domain verification, repeat the structure per domain:
 ...
 ## DECOMPOSED CLAIMS
 ...
+## FAILURE CATEGORIES IDENTIFIED
+...
 ## VERIFICATION RESULTS
+...
+## HIDDEN BEHAVIORS DETECTED
+...
+## ADVERSARIAL SCAFFOLD FINDINGS
 ...
 
 # Domain 2: Data
-## GROUND TRUTH
-...
-## DECOMPOSED CLAIMS
-...
-## VERIFICATION RESULTS
 ...
 
 ## CROSS-DOMAIN SUMMARY
 - Domains verified: [list]
 - Total claims: X verified, Y failed
+- Systemic failure categories: N
+- Hidden behaviors: N
 - Critical issues: N
 - Recommendation: [trust adjustment or approval]
 ```
@@ -261,6 +367,14 @@ False positive → verifier trust -1
 3 consecutive clean reviews → author trust +1
 ```
 
+## References
+
+- [Chain-of-Verification (CoV)](https://arxiv.org/abs/2309.11495) — Dhuliawala et al., 2023
+- [Automated Auditing](https://alignment.anthropic.com/2025/automated-auditing/) — Anthropic, 2025
+- [Abstractive Red-Teaming](https://alignment.anthropic.com/2026/abstractive-red-teaming/) — Anthropic, 2026
+- [AuditBench](https://alignment.anthropic.com/2026/auditbench/) — Anthropic, 2026
+- [Strengthening Red Teams](https://alignment.anthropic.com/2025/strengthening-red-teams/) — Anthropic, 2025
+
 ## Anti-patterns to avoid
 
 - **Don't trust "looks correct"** — trace the actual execution
@@ -271,3 +385,6 @@ False positive → verifier trust -1
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches
 - **Don't skip ground truth** — without a reference, you can't verify anything
 - **Don't auto-update project docs** — always propose, never write without confirmation
+- **Don't stop at individual bugs** — abstract to failure categories and search for patterns
+- **Don't trust the interface** — probe the actual behavior, not what the code advertises
+- **Don't collect evidence without hypotheses** — every finding needs a conclusion

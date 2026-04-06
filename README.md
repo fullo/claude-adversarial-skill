@@ -1,11 +1,11 @@
-[![Skill Version](https://img.shields.io/badge/skill-v2.0-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v3.0-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial verification using **Chain-of-Verification (CoV)** methodology across code, architecture, data, and analysis.
+A Claude Code skill that performs rigorous adversarial verification using **Chain-of-Verification (CoV)** methodology enhanced with **abstractive red-teaming**, **hidden behavior probing**, and **modular adversarial scaffolding**.
 
 ## What it does
 
@@ -16,13 +16,18 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
 
-**Chain-of-Verification (Steps 1–4):**
+**Chain-of-Verification (Steps 1–2b):**
 - **Decompose** artifacts into individual verifiable claims
 - **Generate adversarial questions** for each claim ("what would make this fail?")
-- **Independently verify** each claim by tracing actual paths
-- **Report findings** with evidence, references, and concrete fix suggestions
+- **Abstract to failure categories** — find patterns, not just individual bugs
 
-**Discovery (Step 5):**
+**Deep Verification (Steps 3–3c):**
+- **Independently verify** each claim by tracing actual paths
+- **Probe for hidden behaviors** — detect what the code doesn't advertise
+- **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
+
+**Reporting (Steps 4–5):**
+- **Report findings** with evidence, failure categories, hidden behaviors, and scaffold insights
 - **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)
 
 ## Verification Domains
@@ -33,6 +38,20 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
 | **Data** | Schemas, migrations, contracts | Production schema, validation rules |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
+
+## Techniques
+
+### Abstractive Red-Teaming
+Instead of finding individual bugs, identifies **failure categories** — general patterns that produce bugs repeatedly. Searches the entire codebase for instances of the same pattern (frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment).
+
+### Hidden Behavior Probing
+Detects behaviors the code doesn't advertise using four probing strategies: indirect probing (trace actual execution), scaffolded probing (chain findings), cross-reference probing (claims vs reality), and absence probing (what's NOT there).
+
+### Modular Adversarial Scaffold
+Decomposes the adversarial process into five modules: suspicion modeling (what would a reviewer miss?), attack selection (highest-risk claims first), plan synthesis (multi-step trace chains), execution (actually read the code), and subtlety detection (code that hides complexity).
+
+### Agent Meta-Verification
+When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.
 
 ## Install
 
@@ -66,6 +85,9 @@ Or ask naturally:
 "verify the PLAN.md against the SPEC.md"
 "adversarial check on this migration"
 "verify this agent's analysis report"
+"look for systemic failure patterns in the codebase"
+"probe this function for hidden behaviors"
+"check if the planning agent's output is biased"
 ```
 
 ## What it catches
@@ -96,7 +118,13 @@ Or ask naturally:
 - **Hallucinated facts** — claims without traceable source
 - **Stale references** — citing removed/renamed code
 - **Logical leaps** — conclusion doesn't follow from evidence
-- **Confirmation bias** — only supporting evidence presented
+- **One-sided evidence** — only supporting data, contradicting findings omitted
+
+### Agent Meta-Verification
+- **Sycophantic deference** — agrees without challenging assumptions
+- **Hidden agenda** — favors one approach without justification
+- **Confabulated confidence** — high confidence on weak evidence
+- **Premature convergence** — jumps to one hypothesis
 
 ## Trust Integration
 
@@ -125,6 +153,9 @@ Follows the [Agent Skills format](https://agentskills.io/) and works with Claude
 
 - [Chain-of-Verification (CoV)](https://arxiv.org/abs/2309.11495) — Dhuliawala et al., 2023
 - [Automated Auditing](https://alignment.anthropic.com/2025/automated-auditing/) — Anthropic, 2025
+- [Abstractive Red-Teaming](https://alignment.anthropic.com/2026/abstractive-red-teaming/) — Anthropic, 2026
+- [AuditBench](https://alignment.anthropic.com/2026/auditbench/) — Anthropic, 2026
+- [Strengthening Red Teams](https://alignment.anthropic.com/2025/strengthening-red-teams/) — Anthropic, 2025
 
 ## Origin
 
