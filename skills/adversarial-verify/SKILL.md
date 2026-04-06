@@ -3,12 +3,15 @@ name: adversarial-verify
 description: >-
   Run adversarial verification on code changes using Chain-of-Verification (CoV)
   methodology. Launches a skeptical agent that decomposes claims, generates
-  adversarial questions, and independently verifies each one.
-trigger: When user says "verify", "adversarial check", "CoV review", "/adversarial-verify", or "review my changes"
+  adversarial questions, and independently verifies each one. Use when the user
+  says "verify", "adversarial check", "CoV review", "/adversarial-verify", or
+  "review my changes".
 license: MIT
+compatibility: Requires git for diff analysis
 metadata:
   author: fullo
   version: "1.0"
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes
 ---
 
 # Adversarial Verification

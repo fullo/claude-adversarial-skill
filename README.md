@@ -1,5 +1,5 @@
-[![Skill Version](https://img.shields.io/badge/skill-v1.0-blue)](SKILL.md)
-[![Skills](https://img.shields.io/badge/skills-1-green)](SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v1.0-blue)](skills/adversarial-verify/SKILL.md)
+[![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
 
@@ -18,16 +18,17 @@ When invoked, this skill launches a skeptical verifier agent that:
 
 ## Install
 
-Copy the skill file:
+Copy the skill directory:
 
 ```bash
-cp SKILL.md ~/.claude/skills/adversarial-verify.md
+cp -r skills/adversarial-verify ~/.claude/skills/
 ```
 
 Or clone as plugin:
 
 ```bash
-git clone https://github.com/fullo/claude-adversarial-skill.git ~/.claude/skills/adversarial-verify
+git clone https://github.com/fullo/claude-adversarial-skill.git
+cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/
 ```
 
 ## Usage
