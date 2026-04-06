@@ -1,7 +1,7 @@
 ---
 name: adversarial-verify
 description: >-
-  Run adversarial verification on code, architecture, data, or analysis using
+  Run adversarial verification on code, architecture, data, documentation, or analysis using
   Chain-of-Verification (CoV) with abstractive red-teaming, hidden behavior
   probing, and modular adversarial scaffolding. Identifies failure categories,
   detects undocumented behaviors, and produces evidence-based findings.
@@ -12,7 +12,7 @@ compatibility: Requires git for diff analysis
 metadata:
   author: fullo
   version: "3.0"
-  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify analysis, red-team, audit
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify analysis, red-team, audit
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
     - "Abstractive Red-Teaming: Anthropic 2026 — alignment.anthropic.com/2026/abstractive-red-teaming"
@@ -34,19 +34,21 @@ This skill combines four research-backed techniques:
 
 ## Step 0: IDENTIFY
 
-Determine what needs verification. There are four domains:
+Determine what needs verification. There are five domains:
 
 | Domain | Scope | Examples |
 |--------|-------|---------|
 | **Code** | Source changes, logic, behavior | git diff, staged files, specific modules |
 | **Architecture** | Design decisions, structure | PLAN.md, SPEC.md, ADRs, dependency choices |
 | **Data** | Data integrity, schemas, contracts | migrations, DB schemas, API specs, configs |
+| **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
 | **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
 
 **Auto-detect from context:**
 - `git diff` has changes → **Code**
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schema, migration, or API spec files involved → **Data**
+- README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Reviewing another agent's output or report → **Analysis**
 - Multiple domains may apply — verify each separately, one section per domain
 - When domains overlap (e.g., ORM model change = Code + Data), assign each claim to its primary domain — avoid duplicating the same claim across domains
@@ -58,6 +60,7 @@ Collect the actual outputs to verify:
 - **Code**: read every changed file completely (`git diff --name-only HEAD~1` or `git diff --cached --name-only` for staged changes)
 - **Architecture**: read PLAN.md, SPEC.md, ADRs, and any referenced design docs
 - **Data**: read schema files, migration scripts, API specs, config files
+- **Documentation**: read doc files, then read the code/features they describe to cross-reference
 - **Analysis**: read the full agent output, report, or document under review
 
 ## Step 0b: ESTABLISH GROUND TRUTH
@@ -69,6 +72,7 @@ Identify what you can verify against:
 | **Code** | Tests, type system, runtime traces, spec requirements |
 | **Architecture** | Requirements docs, existing patterns, constraints, NFRs |
 | **Data** | Production schema, existing data contracts, validation rules |
+| **Documentation** | Actual codebase, current API, running application, git history |
 | **Analysis** | Source material, original data, cited references, actual codebase |
 
 ## Step 1: DECOMPOSE
@@ -90,6 +94,12 @@ Break every artifact into **individual verifiable claims**. Each claim should be
 - "The new column is referenced in the ORM model"
 - "The rollback migration reverses all changes"
 
+**Documentation claims:**
+- "The README install instructions produce a working setup"
+- "The API docs match the actual endpoints and parameters"
+- "The error messages accurately describe the error conditions"
+- "All code examples in the docs compile and run"
+
 **Analysis claims:**
 - "The cited function exists at the referenced path"
 - "The performance numbers match the benchmark data"
@@ -108,6 +118,9 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "PLAN addresses all requirements" | "Which SPEC requirements have no matching PLAN step?" |
 | "Migration is safe" | "What happens if the migration runs on a table with 10M rows?" |
 | "Cited function exists" | "Was it renamed or removed since the analysis was written?" |
+| "README install works" | "Was a dependency added since the install instructions were written?" |
+| "API docs are current" | "Were any endpoints renamed, deprecated, or given new parameters?" |
+| "Error messages are accurate" | "Does the error code X actually trigger under the described condition?" |
 
 ## Step 2b: ABSTRACT TO FAILURE CATEGORIES
 
@@ -193,6 +206,19 @@ For each claim, **read the actual artifact** and trace execution or logic:
 | **One-sided evidence** | Analysis presents only supporting data, omits contradicting findings |
 | **Scope creep** | Recommendations beyond the original question asked |
 
+### Documentation verification targets
+
+| Category | What to look for |
+|----------|-----------------|
+| **Stale instructions** | Install/setup steps that no longer work due to code changes |
+| **API drift** | Documented endpoints, parameters, or return types don't match implementation |
+| **Missing docs** | New features, flags, or config options with no documentation |
+| **Broken examples** | Code samples in docs that don't compile, run, or produce the stated output |
+| **Misleading error messages** | Error text that doesn't match the actual error condition or suggests wrong fix |
+| **Version mismatch** | Docs reference old versions, removed features, or deprecated APIs |
+| **Orphaned references** | Links to removed files, renamed functions, moved endpoints, or dead URLs |
+| **UI copy drift** | Help text, tooltips, onboarding copy diverge from actual application behavior |
+
 ### Agent meta-verification targets
 
 > When verifying output produced by another AI agent, apply these additional checks inspired by [AuditBench](https://alignment.anthropic.com/2026/auditbench/).
@@ -256,7 +282,7 @@ For single-domain verification:
 
 ```
 ## VERIFICATION DOMAIN
-[Code | Architecture | Data | Analysis]
+[Code | Architecture | Data | Documentation | Analysis]
 
 ## GROUND TRUTH
 [Sources used for verification]
@@ -296,7 +322,7 @@ For single-domain verification:
 - Subtlety flags: [code that appears clean but hides complexity]
 
 ### SUMMARY
-- Domain: [Code/Architecture/Data/Analysis]
+- Domain: [Code/Architecture/Data/Documentation/Analysis]
 - Claims: X verified, Y failed
 - Failure categories: N systemic patterns found
 - Hidden behaviors: N detected

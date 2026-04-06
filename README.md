@@ -5,14 +5,14 @@
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial verification using **Chain-of-Verification (CoV)** methodology enhanced with **abstractive red-teaming**, **hidden behavior probing**, and **modular adversarial scaffolding**.
+A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, and analysis using **Chain-of-Verification (CoV)** methodology enhanced with **abstractive red-teaming**, **hidden behavior probing**, and **modular adversarial scaffolding**.
 
 ## What it does
 
 When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
 
 **Pre-verification (Steps 0–0b):**
-- **Identify** what needs verification — code, architecture, data, or analysis
+- **Identify** what needs verification — code, architecture, data, documentation, or analysis
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
 
@@ -37,6 +37,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Code** | Source changes, logic, behavior | Tests, type system, spec |
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
 | **Data** | Schemas, migrations, contracts | Production schema, validation rules |
+| **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 
 ## Techniques
@@ -87,6 +88,7 @@ Or ask naturally:
 "verify this agent's analysis report"
 "look for systemic failure patterns in the codebase"
 "probe this function for hidden behaviors"
+"verify the README matches the actual install process"
 "check if the planning agent's output is biased"
 ```
 
@@ -113,6 +115,16 @@ Or ask naturally:
 - **Data loss risk** — destructive migration without backup
 - **Constraint gaps** — missing NOT NULL, FK, uniqueness
 - **Backward compat** — old code reading new schema
+
+### Documentation
+- **Stale instructions** — install/setup steps that no longer work
+- **API drift** — documented endpoints don't match implementation
+- **Missing docs** — new features with no documentation
+- **Broken examples** — code samples that don't compile or run
+- **Misleading error messages** — error text doesn't match error condition
+- **Version mismatch** — docs reference old versions or deprecated features
+- **Orphaned references** — links to removed files or dead URLs
+- **UI copy drift** — help text diverges from actual behavior
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source

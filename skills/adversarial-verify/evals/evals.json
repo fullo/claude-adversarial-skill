@@ -139,6 +139,21 @@
         "Checks for hidden agenda: does the output favor a specific approach without justification?",
         "Reports each detected bias with evidence and confidence score"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "Verify the README install instructions — do they actually produce a working setup?",
+      "expected_output": "Documentation domain verification detecting stale instructions, missing steps, and broken examples",
+      "assertions": [
+        "Identifies the verification domain as Documentation",
+        "Reads the README install section as artifact",
+        "Uses the actual codebase and file structure as ground truth",
+        "Checks if referenced files and paths exist",
+        "Checks if commands produce the expected result",
+        "Detects any stale instructions due to recent code changes",
+        "Checks for missing prerequisites or undocumented dependencies",
+        "Reports findings with specific line references and suggested fixes"
+      ]
     }
   ]
 }
