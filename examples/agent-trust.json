@@ -1,0 +1,26 @@
+{
+  "agents": {
+    "plan": { "trust": 7, "clean_commits": 0 },
+    "dev": { "trust": 7, "clean_commits": 0 },
+    "test": { "trust": 7, "clean_commits": 0 }
+  },
+  "control_rules": {
+    "trust_gte_7": { "reviewers": 1, "label": "standard review" },
+    "trust_5_6": { "reviewers": 2, "label": "double review" },
+    "trust_lt_5": { "reviewers": "all", "label": "triple review" }
+  },
+  "verification_method": {
+    "name": "Adversarial Verifier (Chain-of-Verification)",
+    "refs": [
+      "https://arxiv.org/abs/2309.11495",
+      "https://alignment.anthropic.com/2025/automated-auditing/"
+    ],
+    "protocol": [
+      "1. DECOMPOSE: Break code into verifiable claims",
+      "2. ADVERSARIAL: Generate counter-questions per claim",
+      "3. VERIFY: Trace actual code paths independently",
+      "4. REPORT: Evidence-based findings with line numbers"
+    ]
+  },
+  "history": []
+}
