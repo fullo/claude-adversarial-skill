@@ -221,6 +221,19 @@ a:hover {
 }
 
 /* === Pipeline (How It Works) === */
+.phase-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 32px 0 12px;
+}
+
+.phase-title:first-of-type {
+  margin-top: 0;
+}
+
 .pipeline {
   display: flex;
   align-items: flex-start;

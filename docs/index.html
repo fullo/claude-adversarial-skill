@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adversarial Verify — Chain-of-Verification Skill for Claude Code</title>
-  <meta name="description" content="Research-backed adversarial verification skill for Claude Code. Uses Chain-of-Verification, red-teaming, and hidden behavior probing to catch bugs that normal reviews miss.">
+  <meta name="description" content="Research-backed adversarial verification skill for Claude Code. Uses Chain-of-Verification, stress techniques, tri-modal reasoning, and anti-fabrication discipline to catch bugs that normal reviews miss.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1f6e1;</text></svg>">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,9 +33,9 @@
   <!-- Hero -->
   <header class="hero">
     <div class="container">
-      <div class="hero-badge">Claude Code Skill &middot; v3.0</div>
+      <div class="hero-badge">Claude Code Skill &middot; v3.5</div>
       <h1>Adversarial Verify</h1>
-      <p class="hero-tagline">Chain-of-Verification meets red-teaming.<br>Catch the bugs that normal code reviews miss.</p>
+      <p class="hero-tagline">Chain-of-Verification meets stress testing and tri-modal reasoning.<br>Catch what normal reviews miss. Know what's genuinely robust.</p>
       <div class="hero-actions">
         <a href="#installation" class="btn btn-primary">Install Now</a>
         <a href="https://github.com/fullo/claude-adversarial-skill" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
@@ -47,26 +47,34 @@
   <section id="how-it-works" class="section">
     <div class="container">
       <h2>How It Works</h2>
-      <p class="section-subtitle">A rigorous 6-step pipeline inspired by Chain-of-Verification research</p>
+      <p class="section-subtitle">A structured pipeline with tri-modal reasoning and stress testing</p>
+
+      <h3 class="phase-title">Pre-verification (Steps 0&ndash;0b)</h3>
       <div class="pipeline">
         <div class="pipeline-step">
           <div class="step-number">0</div>
           <h3>Identify &amp; Gather</h3>
           <p>Detect the verification domain, collect artifacts, and establish ground truth from tests, specs, and production state.</p>
         </div>
-        <div class="pipeline-arrow">&rarr;</div>
+      </div>
+
+      <h3 class="phase-title">Chain-of-Verification (Steps 1&ndash;2b)</h3>
+      <div class="pipeline">
         <div class="pipeline-step">
           <div class="step-number">1</div>
-          <h3>Decompose</h3>
-          <p>Break every artifact into individual, verifiable claims. Each claim becomes a target for independent verification.</p>
+          <h3>Decompose &amp; Classify</h3>
+          <p>Break artifacts into verifiable claims. Classify each by reasoning mode: deductive, inductive, or abductive.</p>
         </div>
         <div class="pipeline-arrow">&rarr;</div>
         <div class="pipeline-step">
           <div class="step-number">2</div>
           <h3>Adversarial Questions</h3>
-          <p>Generate counter-questions for each claim and abstract findings into recurring failure categories.</p>
+          <p>Generate counter-questions, then abstract into recurring failure categories across the codebase.</p>
         </div>
-        <div class="pipeline-arrow">&rarr;</div>
+      </div>
+
+      <h3 class="phase-title">Deep Verification (Steps 3&ndash;3d)</h3>
+      <div class="pipeline">
         <div class="pipeline-step">
           <div class="step-number">3</div>
           <h3>Independent Verify</h3>
@@ -74,15 +82,24 @@
         </div>
         <div class="pipeline-arrow">&rarr;</div>
         <div class="pipeline-step">
+          <div class="step-number">3d</div>
+          <h3>Stress Test</h3>
+          <p>Existence Question, Scale Shift, Time Travel, Requirement Inversion. Produce <strong>Survived: yes/no</strong> verdicts.</p>
+        </div>
+      </div>
+
+      <h3 class="phase-title">Reporting (Steps 4&ndash;5)</h3>
+      <div class="pipeline">
+        <div class="pipeline-step">
           <div class="step-number">4</div>
           <h3>Evidence-Based Report</h3>
-          <p>Structured findings with file:line references, quoted evidence, reproduction scenarios, and confidence scores.</p>
+          <p>Findings with reasoning-aware confidence, anti-fabrication discipline, and Survived verdicts. Hypotheses reported separately.</p>
         </div>
         <div class="pipeline-arrow">&rarr;</div>
         <div class="pipeline-step">
           <div class="step-number">5</div>
           <h3>Project Discovery</h3>
-          <p>Propose updates to TODO.md, SPEC.md, PLAN.md, and CHANGELOG based on findings. Waits for user confirmation.</p>
+          <p>Propose updates to TODO.md, SPEC.md, PLAN.md based on findings. Waits for user confirmation.</p>
         </div>
       </div>
     </div>
@@ -132,27 +149,42 @@
   <section id="techniques" class="section">
     <div class="container">
       <h2>Core Techniques</h2>
-      <p class="section-subtitle">Four research-backed methodologies working together</p>
+      <p class="section-subtitle">Seven research-backed methodologies working together</p>
       <div class="techniques-grid">
         <div class="technique-card">
           <h3>Chain-of-Verification</h3>
-          <p>Decompose artifacts into verifiable claims, generate adversarial counter-questions, then verify each claim independently against ground truth. Prevents confirmation bias by separating generation from verification.</p>
+          <p>Decompose artifacts into verifiable claims, generate adversarial counter-questions, then verify each claim independently against ground truth.</p>
           <cite>Dhuliawala et al., 2023</cite>
         </div>
         <div class="technique-card">
           <h3>Abstractive Red-Teaming</h3>
-          <p>Don't just find individual bugs &mdash; identify recurring failure <em>categories</em> across the codebase. Six patterns tracked: frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment.</p>
+          <p>Identify recurring failure <em>categories</em> across the codebase: frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment.</p>
           <cite>Anthropic, 2026</cite>
         </div>
         <div class="technique-card">
           <h3>Hidden Behavior Probing</h3>
-          <p>Four probing strategies that go beyond surface-level review: indirect probing (trace execution), scaffolded probing (chain findings), cross-reference probing (claims vs reality), and absence probing (what's NOT there).</p>
+          <p>Four probing strategies: indirect (trace execution), scaffolded (chain findings), cross-reference (claims vs reality), and absence (what's NOT there).</p>
           <cite>AuditBench &mdash; Anthropic, 2026</cite>
         </div>
         <div class="technique-card">
-          <h3>Modular Adversarial Scaffold</h3>
-          <p>Five-module framework: suspicion modeling (what would a normal reviewer miss?), attack selection (highest-risk claims first), plan synthesis, execution (actually read the code), and subtlety detection.</p>
+          <h3>Adversarial Scaffold</h3>
+          <p>Five modules: suspicion modeling, attack selection (blast radius &times; probability), plan synthesis, execution, and subtlety detection.</p>
           <cite>Anthropic, 2025</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Stress Techniques</h3>
+          <p>Four techniques with forced variety: <strong>Existence Question</strong> (should this exist?), <strong>Scale Shift</strong> (10x? zero?), <strong>Time Travel</strong> (6 months later?), <strong>Requirement Inversion</strong> (exact opposite?). Produces <strong>Survived: yes/no</strong> verdicts.</p>
+          <cite>Principles of Chaos Engineering</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Tri-Modal Reasoning</h3>
+          <p>Each claim classified as <strong>deductive</strong> (verify against source), <strong>inductive</strong> (generalize from 3+ instances), or <strong>abductive</strong> (best explanation from observations). Abductive findings reported as hypotheses with alternatives, never as facts.</p>
+          <cite>v3.5</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Anti-Fabrication</h3>
+          <p>Confidence tied to reasoning mode: 80&ndash;100 requires cited source, 60&ndash;79 requires 3+ instances, 40&ndash;59 requires hypothesis with alternatives. <strong>Can't score &gt;79 without citing where you looked.</strong> Absence claims must state what was checked.</p>
+          <cite>v3.5</cite>
         </div>
       </div>
     </div>
@@ -239,15 +271,15 @@
       <div class="benefits-grid">
         <div class="benefit">
           <h3>Research-Backed</h3>
-          <p>Built on 5 peer-reviewed papers from Anthropic and academia. Not heuristics &mdash; proven methodology.</p>
+          <p>Built on 6 research references from Anthropic, academia, and industry. Not heuristics &mdash; proven methodology.</p>
         </div>
         <div class="benefit">
           <h3>Multi-Domain</h3>
           <p>Verifies code, architecture, data, documentation, and analysis &mdash; not just syntax or style.</p>
         </div>
         <div class="benefit">
-          <h3>Evidence-Based</h3>
-          <p>Every finding includes file:line references, quoted evidence, reproduction scenarios, and confidence scores (&ge;80%).</p>
+          <h3>Anti-Fabrication</h3>
+          <p>Reasoning-aware confidence scoring. Can't claim absence without citing where you looked. Abductive findings are hypotheses, not facts.</p>
         </div>
         <div class="benefit">
           <h3>Pattern Detection</h3>
@@ -301,6 +333,12 @@
           <p>Anthropic, 2025 &mdash; Modular adversarial scaffolding for systematic security testing.</p>
           <span class="paper-link">alignment.anthropic.com &nearr;</span>
         </a>
+        <a href="https://principlesofchaos.org/" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">Stress</span>
+          <h3>Principles of Chaos Engineering</h3>
+          <p>Hypothesis-driven resilience testing adapted for code review: formulate steady-state, vary conditions, observe, conclude.</p>
+          <span class="paper-link">principlesofchaos.org &nearr;</span>
+        </a>
       </div>
     </div>
   </section>
@@ -351,6 +389,8 @@ claude plugin install adversarial-verify@fullo-plugins</code></pre>
         <pre><code>look for systemic failure patterns in the codebase</code></pre>
         <pre><code>probe this function for hidden behaviors</code></pre>
         <pre><code>verify the README matches the actual install process</code></pre>
+        <pre><code>stress test the auth module</code></pre>
+        <pre><code>what happens at 10x scale?</code></pre>
         <pre><code>check if the planning agent's output is biased</code></pre>
       </div>
     </div>
