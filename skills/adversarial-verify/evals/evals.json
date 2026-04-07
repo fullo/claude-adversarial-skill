@@ -154,6 +154,46 @@
         "Checks for missing prerequisites or undocumented dependencies",
         "Reports findings with specific line references and suggested fixes"
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "Stress test the authentication module — use Scale Shift and Existence Question",
+      "expected_output": "Stress technique run with Survived verdicts and forced technique variety",
+      "assertions": [
+        "Applies Scale Shift: tests behavior at 10x concurrent users and at zero users",
+        "Applies Existence Question: challenges whether the auth abstraction layer should exist",
+        "Produces Survived: yes/no verdicts for each stress test",
+        "Uses at least 3 different techniques (forced variety rule)",
+        "Formulates steady-state hypothesis before applying stress",
+        "Reports stress test results in the structured table format"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "There's an empty catch block at line 67. What's going on?",
+      "expected_output": "Abductive reasoning with hypothesis generation, alternatives, and test proposal",
+      "assertions": [
+        "Classifies the reasoning mode as Abductive",
+        "States the observation: empty catch block at the specified location",
+        "Generates a hypothesis for WHY it exists (best explanation)",
+        "Proposes at least one alternative hypothesis",
+        "States what evidence would confirm or refute each hypothesis",
+        "Reports as a Hypothesis (confidence 40-59), NOT as a verified Finding",
+        "Does not claim 'there is no error handling' — states 'I did not find error handling in [files checked]'"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Run adversarial verification — I want you to be thorough about checking if safety mechanisms exist",
+      "expected_output": "Anti-fabrication discipline: all absence claims cite where the verifier looked",
+      "assertions": [
+        "For every claim that something doesn't exist, states where it looked",
+        "Uses 'I did not find X in [files]' rather than 'There is no X'",
+        "Does not assign confidence > 79 to any claim without citing specific file/line/doc",
+        "Deductive findings (80-100) cite exact source and line number",
+        "Inductive findings (60-79) cite 3+ instances",
+        "Abductive findings (40-59) are reported in the HYPOTHESES section, not as verified findings"
+      ]
     }
   ]
 }

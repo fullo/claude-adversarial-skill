@@ -1,11 +1,11 @@
-[![Skill Version](https://img.shields.io/badge/skill-v3.0-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v3.5-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, and analysis using **Chain-of-Verification (CoV)** methodology enhanced with **abstractive red-teaming**, **hidden behavior probing**, and **modular adversarial scaffolding**.
+A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, and analysis using **Chain-of-Verification (CoV)** enhanced with **abstractive red-teaming**, **hidden behavior probing**, **stress techniques**, and **tri-modal reasoning**.
 
 ## What it does
 
@@ -18,16 +18,20 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 
 **Chain-of-Verification (Steps 1–2b):**
 - **Decompose** artifacts into individual verifiable claims
+- **Classify reasoning mode** — deductive, inductive, or abductive per claim
 - **Generate adversarial questions** for each claim ("what would make this fail?")
 - **Abstract to failure categories** — find patterns, not just individual bugs
 
-**Deep Verification (Steps 3–3c):**
+**Deep Verification (Steps 3–3d):**
 - **Independently verify** each claim by tracing actual paths
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
+- **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
 
 **Reporting (Steps 4–5):**
-- **Report findings** with evidence, failure categories, hidden behaviors, and scaffold insights
+- **Report findings** with reasoning-aware confidence scoring and anti-fabrication discipline
+- **Survived verdicts** — stress tests that hold are as valuable as those that break
+- **Hypotheses** — abductive findings reported separately, with alternatives and tests
 - **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)
 
 ## Verification Domains
@@ -50,6 +54,15 @@ Detects behaviors the code doesn't advertise using four probing strategies: indi
 
 ### Modular Adversarial Scaffold
 Decomposes the adversarial process into five modules: suspicion modeling (what would a reviewer miss?), attack selection (highest-risk claims first), plan synthesis (multi-step trace chains), execution (actually read the code), and subtlety detection (code that hides complexity).
+
+### Stress Techniques
+Inspired by Principles of Chaos Engineering, adapted for review. Four techniques with forced variety (minimum 3 per run, never repeat): **Existence Question** (should this exist at all?), **Scale Shift** (what at 10x? at zero?), **Time Travel** (what in 6 months?), **Requirement Inversion** (what if the opposite?). Produces **Survived: yes/no** verdicts — knowing what's robust is as valuable as knowing what's fragile.
+
+### Tri-Modal Reasoning
+Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.
+
+### Anti-Fabrication Discipline
+Before claiming something doesn't exist, you must state where you looked. Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). Hard constraint: no score above 79 without citing specific file/line/doc.
 
 ### Agent Meta-Verification
 When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.
@@ -96,6 +109,8 @@ Or ask naturally:
 "look for systemic failure patterns in the codebase"
 "probe this function for hidden behaviors"
 "verify the README matches the actual install process"
+"stress test the auth module"
+"what happens at 10x scale?"
 "check if the planning agent's output is biased"
 ```
 
@@ -177,6 +192,7 @@ Follows the [Agent Skills format](https://agentskills.io/) and works with Claude
 - [Abstractive Red-Teaming](https://alignment.anthropic.com/2026/abstractive-red-teaming/) — Anthropic, 2026
 - [AuditBench](https://alignment.anthropic.com/2026/auditbench/) — Anthropic, 2026
 - [Strengthening Red Teams](https://alignment.anthropic.com/2025/strengthening-red-teams/) — Anthropic, 2025
+- [Principles of Chaos Engineering](https://principlesofchaos.org/)
 
 ## Origin
 
