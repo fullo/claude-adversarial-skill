@@ -62,11 +62,18 @@ Copy the skill directory:
 cp -r skills/adversarial-verify ~/.claude/skills/
 ```
 
-Or clone as plugin:
+Or clone and copy:
 
 ```bash
 git clone https://github.com/fullo/claude-adversarial-skill.git
 cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/
+```
+
+Or install via Claude marketplace:
+
+```bash
+claude marketplace add fullo-plugins https://github.com/fullo/claude-plugins-marketplace
+claude plugin install adversarial-verify@fullo-plugins
 ```
 
 ## Usage
