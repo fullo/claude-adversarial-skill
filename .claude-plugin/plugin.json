@@ -7,5 +7,6 @@
   },
   "repository": "https://github.com/fullo/claude-adversarial-skill",
   "license": "MIT",
-  "keywords": ["verification", "code-review", "adversarial", "security", "red-team"]
+  "keywords": ["verification", "code-review", "adversarial", "security", "red-team"],
+  "skills": "./skills/"
 }
