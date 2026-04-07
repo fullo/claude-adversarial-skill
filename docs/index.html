@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adversarial Verify — Chain-of-Verification Skill for Claude Code</title>
+  <meta name="description" content="Research-backed adversarial verification skill for Claude Code. Uses Chain-of-Verification, red-teaming, and hidden behavior probing to catch bugs that normal reviews miss.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-badge">Claude Code Skill &middot; v3.0</div>
+      <h1>Adversarial Verify</h1>
+      <p class="hero-tagline">Chain-of-Verification meets red-teaming.<br>Catch the bugs that normal code reviews miss.</p>
+      <div class="hero-actions">
+        <a href="#installation" class="btn btn-primary">Install Now</a>
+        <a href="https://github.com/fullo/claude-adversarial-skill" class="btn btn-secondary" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="section">
+    <div class="container">
+      <h2>How It Works</h2>
+      <p class="section-subtitle">A rigorous 5-step pipeline inspired by Chain-of-Verification research</p>
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <div class="step-number">0</div>
+          <h3>Identify &amp; Gather</h3>
+          <p>Detect the verification domain, collect artifacts, and establish ground truth from tests, specs, and production state.</p>
+        </div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step">
+          <div class="step-number">1</div>
+          <h3>Decompose</h3>
+          <p>Break every artifact into individual, verifiable claims. Each claim becomes a target for independent verification.</p>
+        </div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step">
+          <div class="step-number">2</div>
+          <h3>Adversarial Questions</h3>
+          <p>Generate counter-questions for each claim and abstract findings into recurring failure categories.</p>
+        </div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step">
+          <div class="step-number">3</div>
+          <h3>Independent Verify</h3>
+          <p>Trace actual code paths. Apply hidden behavior probing and the modular adversarial scaffold.</p>
+        </div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step">
+          <div class="step-number">4</div>
+          <h3>Evidence-Based Report</h3>
+          <p>Structured findings with file:line references, quoted evidence, reproduction scenarios, and confidence scores.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Verification Domains -->
+  <section id="domains" class="section section-alt">
+    <div class="container">
+      <h2>5 Verification Domains</h2>
+      <p class="section-subtitle">Every artifact type gets domain-specific verification with appropriate ground truth</p>
+      <div class="domains-grid">
+        <div class="domain-card">
+          <div class="domain-icon">{ }</div>
+          <h3>Code</h3>
+          <p>Source changes, logic flows, edge cases, concurrency issues</p>
+          <span class="domain-truth">Ground truth: tests, type system, spec</span>
+        </div>
+        <div class="domain-card">
+          <div class="domain-icon">&#9653;</div>
+          <h3>Architecture</h3>
+          <p>Design decisions, spec coverage, dependency risks, breaking changes</p>
+          <span class="domain-truth">Ground truth: requirements, constraints, patterns</span>
+        </div>
+        <div class="domain-card">
+          <div class="domain-icon">&#9638;</div>
+          <h3>Data</h3>
+          <p>Schemas, migrations, contracts, backward compatibility</p>
+          <span class="domain-truth">Ground truth: production schema, validation rules</span>
+        </div>
+        <div class="domain-card">
+          <div class="domain-icon">&#9998;</div>
+          <h3>Documentation</h3>
+          <p>Technical docs, process docs, user-facing content, install guides</p>
+          <span class="domain-truth">Ground truth: actual codebase, current API, git history</span>
+        </div>
+        <div class="domain-card">
+          <div class="domain-icon">&#9881;</div>
+          <h3>Analysis</h3>
+          <p>Agent outputs, performance reports, research summaries</p>
+          <span class="domain-truth">Ground truth: source material, cited references</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Techniques -->
+  <section id="techniques" class="section">
+    <div class="container">
+      <h2>Core Techniques</h2>
+      <p class="section-subtitle">Four research-backed methodologies working together</p>
+      <div class="techniques-grid">
+        <div class="technique-card">
+          <h3>Chain-of-Verification</h3>
+          <p>Decompose artifacts into verifiable claims, generate adversarial counter-questions, then verify each claim independently against ground truth. Prevents confirmation bias by separating generation from verification.</p>
+          <cite>Dhuliawala et al., 2023</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Abstractive Red-Teaming</h3>
+          <p>Don't just find individual bugs &mdash; identify recurring failure <em>categories</em> across the codebase. Six patterns tracked: frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment.</p>
+          <cite>Anthropic, 2026</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Hidden Behavior Probing</h3>
+          <p>Four probing strategies that go beyond surface-level review: indirect probing (trace execution), scaffolded probing (chain findings), cross-reference probing (claims vs reality), and absence probing (what's NOT there).</p>
+          <cite>AuditBench &mdash; Anthropic, 2026</cite>
+        </div>
+        <div class="technique-card">
+          <h3>Modular Adversarial Scaffold</h3>
+          <p>Five-module framework: suspicion modeling (what would a normal reviewer miss?), attack selection (highest-risk claims first), plan synthesis, execution (actually read the code), and subtlety detection.</p>
+          <cite>Anthropic, 2025</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What It Catches -->
+  <section id="catches" class="section section-alt">
+    <div class="container">
+      <h2>What It Catches</h2>
+      <p class="section-subtitle">Real bug categories discovered across production codebases</p>
+      <div class="catches-grid">
+        <div class="catch-group">
+          <h3>Code Issues</h3>
+          <ul>
+            <li>Silent data corruption</li>
+            <li>Logic flaws &amp; off-by-one errors</li>
+            <li>Initialization order bugs</li>
+            <li>Concurrent modification</li>
+            <li>State leaks across boundaries</li>
+            <li>Boundary condition failures</li>
+            <li>Resource exhaustion paths</li>
+          </ul>
+        </div>
+        <div class="catch-group">
+          <h3>Architecture Issues</h3>
+          <ul>
+            <li>Spec drift from implementation</li>
+            <li>Missing constraints</li>
+            <li>Over-engineering</li>
+            <li>Dependency risk</li>
+            <li>Breaking changes</li>
+          </ul>
+        </div>
+        <div class="catch-group">
+          <h3>Data Issues</h3>
+          <ul>
+            <li>Schema inconsistency</li>
+            <li>Data loss risk in migrations</li>
+            <li>Constraint gaps</li>
+            <li>Backward compatibility breaks</li>
+          </ul>
+        </div>
+        <div class="catch-group">
+          <h3>Documentation Issues</h3>
+          <ul>
+            <li>Stale instructions</li>
+            <li>API drift</li>
+            <li>Missing docs for new features</li>
+            <li>Broken examples</li>
+            <li>Misleading error messages</li>
+          </ul>
+        </div>
+        <div class="catch-group">
+          <h3>Analysis Issues</h3>
+          <ul>
+            <li>Hallucinated facts</li>
+            <li>Stale references</li>
+            <li>Logical leaps</li>
+            <li>One-sided evidence</li>
+          </ul>
+        </div>
+        <div class="catch-group">
+          <h3>Agent Meta-Verification</h3>
+          <ul>
+            <li>Sycophantic deference</li>
+            <li>Hidden agenda detection</li>
+            <li>Anchoring bias</li>
+            <li>Confabulated confidence</li>
+            <li>Premature convergence</li>
+            <li>Evidence cherry-picking</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section id="benefits" class="section">
+    <div class="container">
+      <h2>Why Use It</h2>
+      <div class="benefits-grid">
+        <div class="benefit">
+          <h3>Research-Backed</h3>
+          <p>Built on 5 peer-reviewed papers from Anthropic and academia. Not heuristics &mdash; proven methodology.</p>
+        </div>
+        <div class="benefit">
+          <h3>Multi-Domain</h3>
+          <p>Verifies code, architecture, data, documentation, and analysis &mdash; not just syntax or style.</p>
+        </div>
+        <div class="benefit">
+          <h3>Evidence-Based</h3>
+          <p>Every finding includes file:line references, quoted evidence, reproduction scenarios, and confidence scores (&ge;80%).</p>
+        </div>
+        <div class="benefit">
+          <h3>Pattern Detection</h3>
+          <p>Goes beyond individual bugs to find systemic failure categories that recur across your codebase.</p>
+        </div>
+        <div class="benefit">
+          <h3>Trust Integration</h3>
+          <p>Built-in agent trust scoring: tracks confirmed bugs, false positives, and clean reviews for multi-agent workflows.</p>
+        </div>
+        <div class="benefit">
+          <h3>Battle-Tested</h3>
+          <p>Extracted from real game development. Caught critical bugs including timer resets, patrol flip-flops, and missing collision bounds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reference Papers -->
+  <section id="papers" class="section section-alt">
+    <div class="container">
+      <h2>Reference Papers</h2>
+      <p class="section-subtitle">The research foundation behind every verification step</p>
+      <div class="papers-list">
+        <a href="https://arxiv.org/abs/2309.11495" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">CoV</span>
+          <h3>Chain-of-Verification Reduces Hallucination in Large Language Models</h3>
+          <p>Dhuliawala et al., 2023 &mdash; The core methodology: decompose, question, verify independently.</p>
+          <span class="paper-link">arxiv.org/abs/2309.11495 &nearr;</span>
+        </a>
+        <a href="https://alignment.anthropic.com/2025/automated-auditing/" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">Auditing</span>
+          <h3>Automated Auditing</h3>
+          <p>Anthropic, 2025 &mdash; Systematic approaches to automated code and behavior auditing.</p>
+          <span class="paper-link">alignment.anthropic.com &nearr;</span>
+        </a>
+        <a href="https://alignment.anthropic.com/2026/abstractive-red-teaming/" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">Red-Teaming</span>
+          <h3>Abstractive Red-Teaming</h3>
+          <p>Anthropic, 2026 &mdash; Finding failure categories, not just individual issues.</p>
+          <span class="paper-link">alignment.anthropic.com &nearr;</span>
+        </a>
+        <a href="https://alignment.anthropic.com/2026/auditbench/" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">Probing</span>
+          <h3>AuditBench</h3>
+          <p>Anthropic, 2026 &mdash; Benchmarks for hidden behavior probing and agent meta-verification.</p>
+          <span class="paper-link">alignment.anthropic.com &nearr;</span>
+        </a>
+        <a href="https://alignment.anthropic.com/2025/strengthening-red-teams/" class="paper-card" target="_blank" rel="noopener">
+          <span class="paper-tag">Scaffold</span>
+          <h3>Strengthening Red Teams</h3>
+          <p>Anthropic, 2025 &mdash; Modular adversarial scaffolding for systematic security testing.</p>
+          <span class="paper-link">alignment.anthropic.com &nearr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation -->
+  <section id="installation" class="section">
+    <div class="container">
+      <h2>Installation</h2>
+      <div class="install-methods">
+        <div class="install-method">
+          <h3>Option 1 &mdash; Clone &amp; Copy</h3>
+          <pre><code>git clone https://github.com/fullo/claude-adversarial-skill.git
+cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/</code></pre>
+        </div>
+        <div class="install-method">
+          <h3>Option 2 &mdash; Direct Copy</h3>
+          <p>If you already have the repository:</p>
+          <pre><code>cp -r skills/adversarial-verify ~/.claude/skills/</code></pre>
+        </div>
+      </div>
+      <div class="compat">
+        <h3>Compatibility</h3>
+        <div class="compat-list">
+          <span class="compat-badge">Claude Code</span>
+          <span class="compat-badge">Cursor</span>
+          <span class="compat-badge">Windsurf</span>
+          <span class="compat-badge">Cline</span>
+        </div>
+        <p class="compat-note">Works with any tool that supports the Agent Skills format. Requires <code>git</code> for diff analysis.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Usage -->
+  <section id="usage" class="section section-alt">
+    <div class="container">
+      <h2>Usage</h2>
+      <p class="section-subtitle">Trigger the skill with natural language or the slash command</p>
+      <div class="usage-examples">
+        <pre><code>/adversarial-verify</code></pre>
+        <pre><code>run an adversarial review on my recent changes</code></pre>
+        <pre><code>CoV check the last commit</code></pre>
+        <pre><code>verify this code with total skepticism</code></pre>
+        <pre><code>verify the PLAN.md against the SPEC.md</code></pre>
+        <pre><code>adversarial check on this migration</code></pre>
+        <pre><code>verify this agent's analysis report</code></pre>
+        <pre><code>look for systemic failure patterns in the codebase</code></pre>
+        <pre><code>probe this function for hidden behaviors</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <strong>Adversarial Verify</strong> &mdash; by <a href="https://darumahq.it" target="_blank" rel="noopener">Francesco Fullone &mdash; Daruma Consulting</a>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/fullo/claude-adversarial-skill" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://darumahq.it" target="_blank" rel="noopener">darumahq.it</a>
+        </div>
+      </div>
+      <div class="footer-license">
+        Released under the MIT License.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
