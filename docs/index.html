@@ -5,12 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Adversarial Verify — Chain-of-Verification Skill for Claude Code</title>
   <meta name="description" content="Research-backed adversarial verification skill for Claude Code. Uses Chain-of-Verification, red-teaming, and hidden behavior probing to catch bugs that normal reviews miss.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1f6e1;</text></svg>">
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <!-- Nav -->
+  <a href="#how-it-works" class="skip-link">Skip to content</a>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="nav-brand">Adversarial Verify</a>
+      <div class="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#domains">Domains</a>
+        <a href="#techniques">Techniques</a>
+        <a href="#catches">Catches</a>
+        <a href="#papers">Papers</a>
+        <a href="#installation">Install</a>
+        <a href="#usage">Usage</a>
+      </div>
+    </div>
+  </nav>
 
   <!-- Hero -->
   <header class="hero">
@@ -29,7 +47,7 @@
   <section id="how-it-works" class="section">
     <div class="container">
       <h2>How It Works</h2>
-      <p class="section-subtitle">A rigorous 5-step pipeline inspired by Chain-of-Verification research</p>
+      <p class="section-subtitle">A rigorous 6-step pipeline inspired by Chain-of-Verification research</p>
       <div class="pipeline">
         <div class="pipeline-step">
           <div class="step-number">0</div>
@@ -59,6 +77,12 @@
           <div class="step-number">4</div>
           <h3>Evidence-Based Report</h3>
           <p>Structured findings with file:line references, quoted evidence, reproduction scenarios, and confidence scores.</p>
+        </div>
+        <div class="pipeline-arrow">&rarr;</div>
+        <div class="pipeline-step">
+          <div class="step-number">5</div>
+          <h3>Project Discovery</h3>
+          <p>Propose updates to TODO.md, SPEC.md, PLAN.md, and CHANGELOG based on findings. Waits for user confirmation.</p>
         </div>
       </div>
     </div>
@@ -179,6 +203,9 @@
             <li>Missing docs for new features</li>
             <li>Broken examples</li>
             <li>Misleading error messages</li>
+            <li>Version mismatch</li>
+            <li>Orphaned references</li>
+            <li>UI copy drift</li>
           </ul>
         </div>
         <div class="catch-group">
@@ -289,9 +316,10 @@
 cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/</code></pre>
         </div>
         <div class="install-method">
-          <h3>Option 2 &mdash; Direct Copy</h3>
-          <p>If you already have the repository:</p>
-          <pre><code>cp -r skills/adversarial-verify ~/.claude/skills/</code></pre>
+          <h3>Option 2 &mdash; Claude Marketplace</h3>
+          <pre><code>claude marketplace add fullo-plugins https://github.com/fullo/claude-plugins-marketplace
+
+claude plugin install adversarial-verify@fullo-plugins</code></pre>
         </div>
       </div>
       <div class="compat">
@@ -302,7 +330,7 @@ cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/</code
           <span class="compat-badge">Windsurf</span>
           <span class="compat-badge">Cline</span>
         </div>
-        <p class="compat-note">Works with any tool that supports the Agent Skills format. Requires <code>git</code> for diff analysis.</p>
+        <p class="compat-note">Works with any tool that supports the <a href="https://agentskills.io/" target="_blank" rel="noopener">Agent Skills format</a>. Requires <code>git</code> for diff analysis.</p>
       </div>
     </div>
   </section>
@@ -322,6 +350,8 @@ cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/</code
         <pre><code>verify this agent's analysis report</code></pre>
         <pre><code>look for systemic failure patterns in the codebase</code></pre>
         <pre><code>probe this function for hidden behaviors</code></pre>
+        <pre><code>verify the README matches the actual install process</code></pre>
+        <pre><code>check if the planning agent's output is biased</code></pre>
       </div>
     </div>
   </section>
