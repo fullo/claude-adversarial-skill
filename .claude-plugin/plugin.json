@@ -1,0 +1,11 @@
+{
+  "name": "adversarial-verify",
+  "description": "Adversarial code verification — Chain-of-Verification (CoV) methodology for rigorous code review, skeptical claim decomposition, and evidence-based bug detection",
+  "version": "3.0.0",
+  "author": {
+    "name": "Francesco Fullone — Daruma Consulting"
+  },
+  "repository": "https://github.com/fullo/claude-adversarial-skill",
+  "license": "MIT",
+  "keywords": ["verification", "code-review", "adversarial", "security", "red-team"]
+}
