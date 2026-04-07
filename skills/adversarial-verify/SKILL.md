@@ -1,7 +1,7 @@
 ---
 name: adversarial-verify
 description: >-
-  Adversarial verification of code, architecture, data, documentation, or analysis
+  Adversarial verification of code, architecture, data, documentation, tests, or analysis
   using Chain-of-Verification (CoV) with abstractive red-teaming, hidden behavior
   probing, stress techniques, and tri-modal reasoning (deductive, inductive, abductive).
   Identifies failure categories, detects undocumented behaviors, stress-tests for
@@ -13,7 +13,7 @@ compatibility: Requires git for diff analysis
 metadata:
   author: fullo
   version: "3.5"
-  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify analysis, red-team, audit, stress test, chaos review
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
     - "Abstractive Red-Teaming: Anthropic 2026 — alignment.anthropic.com/2026/abstractive-red-teaming"
@@ -37,7 +37,7 @@ This skill combines five research-backed techniques:
 
 ## Step 0: IDENTIFY
 
-Determine what needs verification. There are five domains:
+Determine what needs verification. There are six domains:
 
 | Domain | Scope | Examples |
 |--------|-------|---------|
@@ -45,6 +45,7 @@ Determine what needs verification. There are five domains:
 | **Architecture** | Design decisions, structure | PLAN.md, SPEC.md, ADRs, dependency choices |
 | **Data** | Data integrity, schemas, contracts | migrations, DB schemas, API specs, configs |
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
+| **Tests** | Test suite integrity and honesty | test files, coverage reports, CI configs |
 | **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
 
 **Auto-detect from context:**
@@ -52,6 +53,7 @@ Determine what needs verification. There are five domains:
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schema, migration, or API spec files involved → **Data**
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
+- Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
 - Multiple domains may apply — verify each separately, one section per domain
 - When domains overlap (e.g., ORM model change = Code + Data), assign each claim to its primary domain
@@ -62,6 +64,7 @@ Determine what needs verification. There are five domains:
 - **Architecture**: read PLAN.md, SPEC.md, ADRs, and any referenced design docs
 - **Data**: read schema files, migration scripts, API specs, config files
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
+- **Tests**: read test files, then read the production code they claim to verify
 - **Analysis**: read the full agent output, report, or document under review
 
 ## Step 0b: ESTABLISH GROUND TRUTH
@@ -72,6 +75,7 @@ Determine what needs verification. There are five domains:
 | **Architecture** | Requirements docs, existing patterns, constraints, NFRs |
 | **Data** | Production schema, existing data contracts, validation rules |
 | **Documentation** | Actual codebase, current API, running application, git history |
+| **Tests** | Production code, requirements, coverage reports, CI results |
 | **Analysis** | Source material, original data, cited references, actual codebase |
 
 ## Step 1: DECOMPOSE
@@ -82,6 +86,7 @@ Break every artifact into **individual verifiable claims**. Each claim should be
 **Architecture:** "The PLAN.md addresses all requirements from SPEC.md" / "The API contract is backward compatible"
 **Data:** "The migration adds NOT NULL with a safe default" / "The rollback reverses all changes"
 **Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual endpoints"
+**Tests:** "This test fails when the bug it covers is reintroduced" / "The coverage report reflects actual branch execution"
 **Analysis:** "The cited function exists at the referenced path" / "The recommendation follows from the evidence"
 
 ## Step 1b: CLASSIFY REASONING MODE
@@ -114,6 +119,8 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "PLAN addresses all requirements" | "Which SPEC requirements have no matching PLAN step?" |
 | "Migration is safe" | "What happens on a table with 10M rows?" |
 | "README install works" | "Was a dependency added since the instructions were written?" |
+| "Tests cover the fix" | "Does this test still fail if I revert the fix?" |
+| "100% coverage" | "Is this line-coverage or branch-coverage? Are there branches inside covered lines?" |
 
 ## Step 2b: ABSTRACT TO FAILURE CATEGORIES
 
@@ -149,6 +156,8 @@ For each claim, **read the actual artifact** and trace execution or logic:
 **Data:** Schema inconsistency, data loss risk, constraint gaps (NOT NULL, FK, uniqueness), unsafe defaults, backward compat, migration ordering.
 
 **Documentation:** Stale instructions, API drift, missing docs, broken examples, misleading error messages, version mismatch, orphaned references, UI copy drift.
+
+**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`).
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
 
@@ -232,7 +241,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ```
 ## VERIFICATION DOMAIN
-[Code | Architecture | Data | Documentation | Analysis]
+[Code | Architecture | Data | Documentation | Tests | Analysis]
 
 ## GROUND TRUTH
 [Sources used for verification]
@@ -273,7 +282,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 - Subtlety flags: [code hiding complexity]
 
 ### SUMMARY
-- Domain: [Code/Architecture/Data/Documentation/Analysis]
+- Domain: [Code/Architecture/Data/Documentation/Tests/Analysis]
 - Claims: X verified, Y failed
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns

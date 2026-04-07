@@ -194,6 +194,21 @@
         "Inductive findings (60-79) cite 3+ instances",
         "Abductive findings (40-59) are reported in the HYPOTHESES section, not as verified findings"
       ]
+    },
+    {
+      "id": 15,
+      "prompt": "Verify the test suite — do these tests actually test what they claim?",
+      "expected_output": "Test domain verification detecting tautological tests, mock leakage, coverage lies, and test-code drift",
+      "assertions": [
+        "Identifies the verification domain as Tests",
+        "Reads test files and the production code they claim to verify",
+        "Uses production code and requirements as ground truth",
+        "Checks for tautological assertions that are always true",
+        "Checks for mock leakage: tests that verify mock behavior not real behavior",
+        "Checks for coverage lies: line-covered but branch-untested code",
+        "Checks for test-code drift: tests written for a previous version of the code",
+        "Checks for flaky indicators: sleep(), retry, @Ignore/skip"
+      ]
     }
   ]
 }

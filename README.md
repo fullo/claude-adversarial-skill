@@ -5,14 +5,14 @@
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, and analysis using **Chain-of-Verification (CoV)** enhanced with **abstractive red-teaming**, **hidden behavior probing**, **stress techniques**, and **tri-modal reasoning**.
+A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, tests, and analysis using **Chain-of-Verification (CoV)** enhanced with **abstractive red-teaming**, **hidden behavior probing**, **stress techniques**, and **tri-modal reasoning**.
 
 ## What it does
 
 When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
 
 **Pre-verification (Steps 0–0b):**
-- **Identify** what needs verification — code, architecture, data, documentation, or analysis
+- **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
 
@@ -42,6 +42,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
 | **Data** | Schemas, migrations, contracts | Production schema, validation rules |
 | **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
+| **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 
 ## Techniques
@@ -109,6 +110,7 @@ Or ask naturally:
 "look for systemic failure patterns in the codebase"
 "probe this function for hidden behaviors"
 "verify the README matches the actual install process"
+"verify the tests actually test what they claim"
 "stress test the auth module"
 "what happens at 10x scale?"
 "check if the planning agent's output is biased"
@@ -147,6 +149,15 @@ Or ask naturally:
 - **Version mismatch** — docs reference old versions or deprecated features
 - **Orphaned references** — links to removed files or dead URLs
 - **UI copy drift** — help text diverges from actual behavior
+
+### Tests
+- **Tautological tests** — assertions that are always true regardless of code
+- **Mock leakage** — tests verify the mock, not the actual behavior
+- **Coverage lies** — line-covered but branch-untested code
+- **Missing negative tests** — only happy path tested
+- **Fragile assertions** — pass by coincidence (order, timing, locale)
+- **Test-code drift** — tests written for a previous code version
+- **Flaky indicators** — `sleep()`, `retry`, `@Ignore`/`skip`
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source
