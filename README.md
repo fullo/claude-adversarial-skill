@@ -83,12 +83,23 @@ git clone https://github.com/fullo/claude-adversarial-skill.git
 cp -r claude-adversarial-skill/skills/adversarial-verify ~/.claude/skills/
 ```
 
-Or install via Claude marketplace:
+Or install from the marketplace (recommended):
 
 ```bash
-claude marketplace add fullo-plugins https://github.com/fullo/claude-plugins-marketplace
+# Add the marketplace (once)
+claude plugin marketplace add fullo/claude-plugins-marketplace
+
+# Install the plugin
 claude plugin install adversarial-verify@fullo-plugins
 ```
+
+## Update
+
+```bash
+claude plugin update adversarial-verify@fullo-plugins
+```
+
+The plugin system uses git commit hashes as versions. There is no automatic update notification: run the command above periodically to stay current.
 
 ## Usage
 
