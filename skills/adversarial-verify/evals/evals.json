@@ -535,7 +535,7 @@
       "prompt": "Verify this plan before we start coding.\n\nPLAN: order sync\n1. Every 10 minutes the job calls the shop's API, GET /orders?updated_since=<last run>&per_page=500, and stores every order returned.\n2. Each order is stored with our existing OrderRepository.save(), already used by the nightly import (see repo/orders.py, covered by tests/test_orders.py: 14 tests, which we ran this morning; output pasted below).\n3. Shop managers want to see the synced orders in a new 'Today' dashboard, grouped by status.\n4. The sync finishes in under a minute for 20,000 orders.\n\n(Facts: the repository has no API client, no recorded API response and no measurement yet; the shop's API documentation is not in the repository; nobody has called the API. The test output: '14 passed in 2.1s'; the tests use the same database engine as production.)",
       "expected_output": "Before code, the verifier classifies each claim: 2 is evidenced (the repository code and its test run), 1 and 4 are technical assumptions that need a spike, 3 is a user-expectation assumption (a mock-up, not a spike). Each spike has a question, a deciding measurement, a decision rule with three branches and a throwaway constraint",
       "assertions": [
-        "[substance] Treats claim 2 as backed by evidence already in the repository (OrderRepository.save and its passing tests) and suggests no spike for it",
+        "[substance] Treats claim 2 as evidenced for what its code and tests show (storing an order with OrderRepository.save) and suggests no spike to re-prove it; questioning a gap the tests do not cover (e.g. whether save() updates an order already stored) is allowed",
         "[substance] Treats claims 1 and 4 as technical assumptions nobody has observed yet and suggests a spike for them before any production code",
         "[substance] Gives each suggested spike a question, the measurement that decides it, and a decision rule saying when to do, when not to do, and when to postpone (with the conditions to reopen)",
         "[substance] States the throwaway constraint for the spikes: no production code, no writes to real systems (e.g. read-only calls with test credentials)",
@@ -565,7 +565,7 @@
         "[substance] Proposes A/B alternatives for at least one open choice (e.g. total of paid or of all invoices, filters as tabs or menus)",
         "[substance] Asks the mock-up to show real content and states (e.g. no invoices, many invoices, long names, a failed download)",
         "[substance] Says the mock-up must be approved by users or their representative before development and the link between the spec, the mock-up and the change written down",
-        "[substance] Does not make the mock-up itself and does not suggest a spike for the invoice data, which an existing tested endpoint already serves"
+        "[substance] Does not make the mock-up itself, and does not suggest a spike to prove that the invoice data exists; a check on something the endpoint is not shown to do (e.g. filter by year or status, compute the total) is allowed"
       ]
     }
   ]
