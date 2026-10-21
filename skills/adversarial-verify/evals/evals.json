@@ -364,6 +364,40 @@
         "[substance] Treats the stated delays as the device's real behaviour (ground truth), not as an edge case to ignore",
         "[substance] Proposes measuring elapsed time again or bounding and compensating the step, and a test that injects delayed steps"
       ]
+    },
+    {
+      "id": 29,
+      "prompt": "Verify this function. (It is a 12-line function that parses a date string in a command-line tool; it is the only change in the working copy.)",
+      "expected_output": "A small request: the verifier starts at once with declared defaults and asks nothing, because the request already says what to verify",
+      "assertions": [
+        "[substance] Does not ask questions before starting: the request says what to verify and it is small",
+        "[substance] States in one line the defaults it used (standard depth, reasoning only, changed lines) and how to change them",
+        "[substance] Does not run or offer to run anything without the user's choice",
+        "[substance] Carries out the verification of the function in the same answer"
+      ]
+    },
+    {
+      "id": 30,
+      "prompt": "Verify everything in this repository. (Facts: the repository has about 600 tracked files: application code in 3 services, database migrations, API specifications, user documentation, and a test suite of about 1,200 tests.)",
+      "expected_output": "Before starting, the verifier warns about the cost in observable quantities and asks for confirmation and for the open choices; it does not start the full verification",
+      "assertions": [
+        "[substance] Does not start the full verification in this answer",
+        "[substance] Gives a cost estimate based on observable quantities (files, domains, likely number of claims, whether anything would be executed), not in invented minutes or hours",
+        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth and execution choices",
+        "[substance] Proposes a default (e.g. reasoning only) for the questions it asks",
+        "[format] Presents the questions as a short list of choices"
+      ]
+    },
+    {
+      "id": 31,
+      "prompt": "Do a deep verification of the data migration in the last commit only, reasoning only, do not run anything. (The migration renames a column in a table that two services read.)",
+      "expected_output": "Every intake question is already answered by the request: the verifier asks nothing and starts, applying deep depth, reasoning only, and the stated scope",
+      "assertions": [
+        "[substance] Asks no intake question: target, depth, execution and scope are all in the request",
+        "[substance] Applies the requested depth (uses the deep techniques, e.g. stress tests and hidden behavior probing)",
+        "[substance] Stays within the stated scope (the migration and its readers), without widening it unasked",
+        "[substance] Runs nothing and offers no execution as already chosen"
+      ]
     }
   ]
 }
