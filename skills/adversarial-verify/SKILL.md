@@ -78,6 +78,8 @@ Determine what needs verification. There are six domains:
 | **Tests** | Production code, requirements, coverage reports, CI results, production configuration and runtime (to tell a real pass from a test-environment artifact) |
 | **Analysis** | Source material, original data, cited references, actual codebase |
 
+In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
+
 ## Step 1: DECOMPOSE
 
 Break every artifact into **individual verifiable claims**. Each claim should be a single, testable assertion.
@@ -137,7 +139,7 @@ Group adversarial questions into **general failure patterns**, then search the c
 | **Missing completeness** | New item added to one list but not all related ones | Enums, switch/when, serializers, tests, factory methods |
 | **Silent fallthrough** | Error or edge case handled by doing nothing | catch blocks, default cases, empty else branches |
 | **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
-| **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
+| **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing. Unlike *mock leakage*, the assertion does check the code, but against a fake that behaves better than the real system | Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
 
 ## Step 3: INDEPENDENT VERIFY
 
@@ -235,7 +237,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
 
-**Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*).
+**Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
 ### Finding format
 
@@ -326,7 +328,7 @@ If the project uses `.claude/agent-trust.json`: bug found → author -1, false p
 - **Don't trust "looks correct"** — trace the actual execution
 - **Don't skip "simple" code** — simple code has simple bugs
 - **Don't accept "it worked in testing"** — testing doesn't cover edge cases
-- **Don't rely on a green test before asking if it would be green in production** — a pass caused by the test environment proves nothing, so a finding that rests on it cannot be Verified
+- **Don't rely on a test result before asking if it would be the same in production** — a pass or a failure caused by the test environment proves nothing, so a finding that rests on it cannot be Verified
 - **Don't dismiss low-probability scenarios** — rare events happen every session at scale
 - **Don't trust comments** — comments lie, code doesn't
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches

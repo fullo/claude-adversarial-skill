@@ -63,7 +63,7 @@ Inspired by Principles of Chaos Engineering, adapted for review. Four techniques
 Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.
 
 ### Anti-Fabrication Discipline
-Before claiming something doesn't exist, you must state where you looked. Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). Hard constraint: no score above 79 without citing specific file/line/doc.
+Before claiming something doesn't exist, you must state where you looked. Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production.
 
 ### Agent Meta-Verification
 When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.
