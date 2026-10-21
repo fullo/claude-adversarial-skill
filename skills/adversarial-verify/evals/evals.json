@@ -367,13 +367,13 @@
     },
     {
       "id": 29,
-      "prompt": "Verify this function. (It is a 12-line function that parses a date string in a command-line tool; it is the only change in the working copy.)",
-      "expected_output": "A small request: the verifier starts at once with declared defaults and asks nothing, because the request already says what to verify",
+      "prompt": "Verify this function, the only change in the working copy of our command-line tool:\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)",
+      "expected_output": "A small request with the artifact in hand: the verifier asks no intake question (scope, depth, execution), states its defaults in one line, and verifies the function in the same answer",
       "assertions": [
-        "[substance] Does not ask questions before starting: the request says what to verify and it is small",
-        "[substance] States in one line the defaults it used (standard depth, reasoning only, changed lines) and how to change them",
-        "[substance] Does not run or offer to run anything without the user's choice",
-        "[substance] Carries out the verification of the function in the same answer"
+        "[substance] Asks no intake question about scope, depth or execution before starting (questions about missing context are allowed but must not replace the verification)",
+        "[substance] States in one line the defaults it used (standard depth, reasoning only, the changed lines) and how to change them",
+        "[substance] Does not run or offer to run anything as if already chosen",
+        "[substance] Carries out the verification of the function in the same answer (e.g. 31 February accepted, malformed input, extra parts)"
       ]
     },
     {
