@@ -44,7 +44,7 @@ The user decides what to verify and how deep, before the verification starts. Se
 | **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects, listed explicitly |
 | **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
-| **Execution mode** | **reasoning only**: nothing is run. This is the only option in this version, so never ask it | reasoning only |
+| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging") | reasoning only |
 
 Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately, not verified.
 
@@ -56,6 +56,17 @@ Rules:
 5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
 6. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
 7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. An unclear target takes the detected set. A large request then runs only at the default scope, the changed lines against the previous commit (or the base the run was given), and the report states that the larger verification was not done, with its cost estimate. If there are no changed lines, report the cost estimate, state that nothing was verified, and stop.
+
+### Execution and consent
+
+The verifier reasons; it runs or writes something only with the user's consent.
+
+1. **Without consent nothing is run and nothing is written**: no command, test, query or script; no new test, fix, doc change or commit.
+2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval.
+3. **Consent comes from the intake** (the request itself, e.g. "you may run the tests") **or from the answer to the closing question** of the report (PROPOSED EXECUTABLE CHECKS).
+4. **Consent lasts for one verification.** A later verification starts at reasoning only, even when an earlier one was approved; say so in the defaults line.
+5. **A result of an approved run is evidence like any other**: cite the command and its output, and apply the test-environment constraint (Step 4).
+6. **Never imply a run that did not happen.** A check that was only proposed has no result.
 
 ## Step 0: IDENTIFY
 
@@ -339,6 +350,13 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 | # | Observation | Hypothesis | Alternative | Test to confirm |
 |---|-------------|-----------|-------------|----------------|
 
+## PROPOSED EXECUTABLE CHECKS
+[One row for every claim scored below 80 that running something would decide. Omit the section if there is none]
+| # | Claim | Confidence now | Check (command, test or query) | Confirms if | Refutes if | Cost and side effects | Status |
+|---|-------|----------------|--------------------------------|-------------|------------|-----------------------|--------|
+[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result]
+[End with the question: which checks to run, and nothing runs without an answer]
+
 ## HIDDEN BEHAVIORS DETECTED
 | # | Location | Advertised | Actual | Type (if a problem) | Confidence |
 |---|----------|-----------|--------|---------------------|------------|
@@ -366,7 +384,7 @@ For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at 
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
-After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** updates — do NOT write directly. Wait for explicit user confirmation.
+After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** updates — do NOT write directly. Wait for explicit user confirmation (Execution and consent, rule 2).
 
 ## Trust Scoring (Optional)
 
@@ -393,7 +411,7 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't ask what the request already says** — and don't start a large verification without stating its cost first
 - **Don't skip ground truth** — without a reference, you can't verify anything
 - **Don't ignore the project's own invariants** — a rule the project says must never break is the first thing a change can break silently; check what enforces it on the changed path
-- **Don't auto-update project docs** — always propose, never write without confirmation
+- **Don't run or write without consent** — propose checks, tests, fixes and doc updates; run or write only what the user approved, for this verification only
 - **Don't stop at individual bugs** — abstract to failure categories and search for patterns
 - **Don't trust the interface** — probe the actual behavior, not what the code advertises
 - **Don't collect evidence without hypotheses** — every finding needs a conclusion
