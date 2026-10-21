@@ -6,4 +6,6 @@
 root="$(git rev-parse --show-toplevel)" || exit 1
 py=python3
 command -v "$py" >/dev/null 2>&1 || py=python
-exec "$py" -I "$root/scripts/check.py" --strict --staged --root "$root"
+"$py" -I "$root/scripts/check.py" --strict --staged --root "$root" || exit 1
+# The facts are checked on the working tree: run them before staging an eval change.
+out="$("$py" "$root/scripts/check_facts.py")" || { printf "%s\n" "$out"; exit 1; }

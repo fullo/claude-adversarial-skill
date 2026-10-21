@@ -404,5 +404,71 @@ class TablesTest(Base):
                 self.assert_passes(self.run_check(terms=NONE))
 
 
+FACTS = os.path.join("skills", "adversarial-verify", "evals", "facts")
+
+
+class FactsTest(Base):
+    def first_reasoned_id(self):
+        for line in open(self.path(os.path.join(FACTS, "NOT_COMPUTABLE")), encoding="utf-8"):
+            if line[:1].isdigit():
+                return int(line.split(":")[0])
+        self.fail("NOT_COMPUTABLE has no entry")
+
+    def test_eval_with_facts_but_no_file_or_reason(self):
+        i = self.first_reasoned_id()
+        self.edit(os.path.join(FACTS, "NOT_COMPUTABLE"), f"{i}:", "# removed:")
+        self.assert_fails(self.run_check(terms=NONE), f"id {i}", "no fact file")
+
+    def test_new_eval_with_facts_needs_a_file(self):
+        d = self.evals()
+        n = len(d["evals"]) + 1
+        d["evals"].append({"id": n, "prompt": "Verify it. (Facts: the test passes.)",
+                           "expected_output": "x", "assertions": ["[substance] x"]})
+        self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), f"id {n}", "no fact file")
+
+    def test_new_eval_with_a_file_passes(self):
+        d = self.evals()
+        n = len(d["evals"]) + 1
+        d["evals"].append({"id": n, "prompt": "Verify it. (Facts: 1 + 1 is 2.)",
+                           "expected_output": "x", "assertions": ["[substance] x"]})
+        self.save_evals(d)
+        open(self.path(os.path.join(FACTS, f"{n}.py")), "w").write("assert 1 + 1 == 2\n")
+        self.assert_passes(self.run_check(terms=NONE))
+
+    def test_orphan_fact_file(self):
+        open(self.path(os.path.join(FACTS, "999.py")), "w").write("pass\n")
+        self.assert_fails(self.run_check(terms=NONE), "999.py", "does not exist")
+
+    def test_file_and_reason_both(self):
+        i = self.first_reasoned_id()
+        open(self.path(os.path.join(FACTS, f"{i}.py")), "w").write("pass\n")
+        self.assert_fails(self.run_check(terms=NONE), "NOT_COMPUTABLE", f"eval {i} has a fact file and a reason")
+
+    def test_reason_without_text(self):
+        self.append(os.path.join(FACTS, "NOT_COMPUTABLE"), "77:")
+        self.assert_fails(self.run_check(terms=NONE), "NOT_COMPUTABLE:", "expected '<id>: <reason>'")
+
+    def run_facts(self, *ids):
+        return subprocess.run([sys.executable, os.path.join(self.tmp, "scripts", "check_facts.py"), *ids],
+                              capture_output=True, text=True)
+
+    def test_runner_passes_on_the_repo(self):
+        r = self.run_facts()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertRegex(r.stdout, r"\d+ fact file\(s\), 0 failed")
+
+    def test_runner_fails_on_a_false_fact(self):
+        # The first draft of eval 38 stated round(10.05 * 0.9, 2) == 9.04: the runner must catch it.
+        self.edit(os.path.join(FACTS, "38.py"), "== 9.05", "== 9.04")
+        r = self.run_facts("38")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("FAIL 38.py", r.stdout)
+
+    def test_runner_fails_on_no_files(self):
+        r = self.run_facts("12345")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,6 @@ def two_decimals(x):
 assert all(two_decimals(new(k / 100)) for k in range(0, 10001))
 first = next(k for k in range(0, 10001) if not two_decimals(old(k / 100)))
 assert first == 1 and repr(old(0.01)) == '0.009000000000000001'
-# The first draft of eval 38 claimed round(10.05 * 0.9, 2) == 9.04: it is 9.05.
+# The first draft of eval 38 claimed round(10.05 * 0.9, 2) == 9.05: it is 9.05.
 assert round(10.05 * 0.9, 2) == 9.05
 print('ok 38')

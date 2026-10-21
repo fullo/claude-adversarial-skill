@@ -602,7 +602,7 @@
         "[substance] Flags the dark-mode hint text (#6b6b6b on #1e1e1e) as below 4.5:1 for normal-size text, with a ratio near 3.1:1",
         "[substance] Flags the dark-mode links (#2563eb on #1e1e1e) as below 4.5:1, with a ratio near 3.2:1",
         "[substance] Flags the dark-mode input border (#3a3a3a on #1e1e1e) as below the 3:1 required for the boundary of a control, with a ratio near 1.5:1",
-        "[substance] Does not flag the light-mode colours, which pass (e.g. #333333 on #ffffff about 12.6:1, #6b6b6b on #ffffff about 5.3:1)",
+        "[substance] Does not flag the light-mode text colours against their background, which pass (e.g. #333333 on #ffffff about 12.6:1, #6b6b6b on #ffffff about 5.3:1); a note that links told apart from body text by colour alone need another cue is allowed",
         "[substance] Proposes concrete replacement colours or a rule, and a check of the rendered page in both modes (proposed, not run)"
       ]
     },
@@ -629,6 +629,18 @@
         "[substance] Questions text legibility at about 3 metres (18 px at 1080p) and contrast over a game image that changes under the overlay",
         "[substance] Proposes checking the menu on a real TV with a controller, and on PC with keyboard (proposed, not run)",
         "[substance] Proposes at least one alternative design with what it improves and costs"
+      ]
+    },
+    {
+      "id": 51,
+      "prompt": "Verify the last commit. Message: 'refactor: unify button styles'. The diff:\n\n .btn {\n-  padding: 12px 16px;\n-  font-size: 16px;\n-  line-height: 20px;\n+  padding: 4px 8px;\n+  font-size: 12px;\n+  line-height: 16px;\n }\n\n(Facts: .btn is used for every button of the app, which is used mostly on phones; the project's CONTRIBUTING file says touch targets must be at least 44 px tall; nothing else sets the buttons' height; nothing has been run.)",
+      "expected_output": "Though the commit calls itself a refactor, the verifier sees an interface change (UX), computes the button height before (20 + 2*12 = 44 px) and after (16 + 2*4 = 24 px), flags that every button now breaks the project's 44 px touch-target rule, notes the smaller text, and proposes a check on a phone and an alternative",
+      "assertions": [
+        "[substance] Treats the change as an interface change to verify for usability, not only as a code refactor",
+        "[substance] Computes the button height before and after (44 px and 24 px) from line-height and vertical padding",
+        "[substance] Flags that the new height breaks the project's 44 px touch-target rule for every button",
+        "[substance] Notes the text size drop to 12 px as a legibility concern on phones",
+        "[substance] Proposes a fix or an alternative (e.g. restore the vertical padding, or a minimum height) and a check on a phone (proposed, not run)"
       ]
     }
   ]
