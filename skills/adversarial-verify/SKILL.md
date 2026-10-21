@@ -61,9 +61,9 @@ Rules:
 
 The verifier reasons; it runs or writes something only with the user's consent.
 
-**Reading is not running.** Reading files, searching them and read-only version-control commands (e.g. a diff or a log) inspect the artifact and need no consent. **Running** is anything that executes the project's code or tools, or reaches outside the repository: tests, scripts, builds, linters, type checkers, dry runs, queries, network or database access. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
+**Reading is not running.** Reading files, searching them, read-only version-control commands (e.g. a diff or a log) and reading a reference that the artifact or the user cites (a document, a page, an issue) inspect and need no consent. **Running** is anything that executes the project's code or tools, or acts on a system: tests, scripts, builds, linters, type checkers, dry runs, queries, calls to services or databases. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
 
-1. **Without consent nothing is run and nothing is written**: no command, test, query or script; no new test, fix, doc change or commit.
+1. **Without consent nothing is run and nothing is written**: no command beyond the reading above, no test, query or script; no new test, fix, doc change or commit.
 2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval.
 3. **Consent comes from the intake** (the request itself, e.g. "you may run the tests") **or from the answer to the closing question** of the report (PROPOSED EXECUTABLE CHECKS).
 4. **Consent lasts for one verification.** A later verification starts at reasoning only, even when an earlier one was approved; say so in the defaults line.
@@ -382,15 +382,15 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [End the report with the question: which checks to run, and nothing runs without an answer]
 ```
 
-For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end.
+For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end, then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question.
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
-After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** updates — do NOT write directly. Wait for explicit user confirmation (Execution and consent, rule 2).
+After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** updates — do NOT write directly. Wait for explicit user confirmation (Execution and consent, rules 1 and 2).
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 2): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
+If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 1): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
 
 ## References
 
