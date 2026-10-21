@@ -218,7 +218,8 @@ def term_patterns(terms, rep=None, substring=False):
                 rep.error("private terms", f"term #{k} has no letters or digits and cannot be checked")
             continue
         if rep is not None and sum(len(p) for p in parts) < 4:
-            rep.warning("private terms", f"term #{k} is shorter than 4 characters: expect false positives (prefix it with = to match whole words only)")
+            hint = "" if whole_word else " (prefix it with = to match whole words only)"
+            rep.warning("private terms", f"term #{k} is shorter than 4 characters: expect false positives{hint}")
         body = SEP.join(re.escape(p) for p in parts)
         pats.append(re.compile(rf"(?<![^\W_]){body}(?![^\W_])" if whole_word else body))
     return pats

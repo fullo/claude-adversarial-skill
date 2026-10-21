@@ -220,6 +220,12 @@ class PrivateTest(Base):
         self.assert_passes(r)
         self.assertIn("shorter than 4 characters", r.stdout)
 
+    def test_short_whole_word_term_gets_no_redundant_hint(self):
+        r = self.run_check(terms="=" + "zq" + "v")
+        self.assert_passes(r)
+        self.assertIn("shorter than 4 characters", r.stdout)
+        self.assertNotIn("prefix it with =", r.stdout)
+
     def test_term_without_letters_is_an_error(self):
         self.assert_fails(self.run_check(terms="--"), "no letters or digits")
 
