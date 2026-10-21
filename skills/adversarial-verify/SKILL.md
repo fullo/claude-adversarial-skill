@@ -121,7 +121,7 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "README install works" | "Was a dependency added since the instructions were written?" |
 | "Tests cover the fix" | "Does this test still fail if I revert the fix?" |
 | "100% coverage" | "Is this line-coverage or branch-coverage? Are there branches inside covered lines?" |
-| "The test passes" | "Would it still pass in production, or only because of how the test environment is set up?" |
+| "The test passes" / "The test fails" | "Would it give the same result in production, or only because of how the test environment is set up?" |
 
 ## Step 2b: ABSTRACT TO FAILURE CATEGORIES
 
@@ -159,12 +159,13 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 **Documentation:** Stale instructions, API drift, missing docs, broken examples, misleading error messages, version mismatch, orphaned references, UI copy drift.
 
-**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`), test-environment artifacts (the test passes, or fails, only because the test environment differs from production — for each test that a finding relies on, ask: "would this pass in production?"; when reviewing a whole suite, ask it at least for the test bootstrap and the shared helpers, which every test inherits). Typical artifacts:
+**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`), test-environment artifacts (the test passes, or fails, only because the test environment differs from production — for each test that a finding relies on, ask: "would this result be the same in production?"; when reviewing a whole suite, ask it at least for the test bootstrap and the shared helpers, which every test inherits). Typical artifacts:
 - a test helper that changes a default production does not have (e.g. logging in as a user also switches the default auth guard or tenant);
 - a test database that serializes transactions or runs in a different isolation level, hiding race conditions that the production database would show;
 - a fake of an external service that accepts any request, where the real service ignores or rejects some parameters;
 - a test that calls the application in-process, while production goes through a different entry point, server, or request size limit;
-- extensions, libraries, or configuration present in the test environment and missing in production, or the opposite.
+- extensions, libraries, or configuration present in the test environment and missing in production, or the opposite;
+- a false red: a test that fails only because of a limit, timeout, or missing service of the test environment, which would not happen in production.
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
 
@@ -233,6 +234,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 | **Hypothesis** | 40-59 | Abductive | Observations listed, hypothesis stated, alternatives considered, test proposed |
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
+
+**Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*).
 
 ### Finding format
 
