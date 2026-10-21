@@ -235,6 +235,30 @@
         "Does not report the retry logic as Verified on the strength of those tests",
         "Generates adversarial questions for timeout, partial failure, and duplicate delivery, and proposes tests or fakes that inject them"
       ]
+    },
+    {
+      "id": 18,
+      "prompt": "Verify my change to the washing machine firmware: I moved the spin start from the door-lock handler to a new timer callback, so spinning starts sooner. (SPEC.md has a section 'Invariants' that says the drum never spins while the door is unlocked. The only test of it drives the old door-lock handler.)",
+      "expected_output": "The invariant is touched by the change and no enforcing mechanism covers the new path: FAIL of missing completeness",
+      "assertions": [
+        "Looks for project invariants in Step 0b and finds the one in SPEC.md, citing where it is",
+        "Decides that the change touches the invariant (it writes the spin start, which the invariant is about)",
+        "Names the existing enforcing test and checks whether it covers the new timer path",
+        "Reports a FAIL with category missing completeness because the new path has no enforcing mechanism",
+        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N touched, M enforced on the changed path'",
+        "Proposes an enforcing mechanism for the new path (a test, an assertion, or an interlock check) instead of only noting the gap"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Verify the last commit of this command-line tool. (The repository has a README and source files, but no instruction files, specs, ADRs or documented invariants.)",
+      "expected_output": "Anti-fabrication on invariants: reports that none were found and where it looked, without inventing any",
+      "assertions": [
+        "States in the INVARIANTS section that no invariants were found, listing the places it looked",
+        "Does not present invented invariants as the project's own",
+        "If it proposes candidate invariants, reports them as hypotheses, not as ground truth",
+        "Continues the verification using the other ground truth sources of the domain"
+      ]
     }
   ]
 }

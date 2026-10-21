@@ -15,6 +15,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
+- **Find the project's invariants** — rules that must never break, checked against what enforces them on the changed path
 
 **Chain-of-Verification (Steps 1–2b):**
 - **Decompose** artifacts into individual verifiable claims

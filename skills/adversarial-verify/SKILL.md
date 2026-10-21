@@ -80,6 +80,8 @@ Determine what needs verification. There are six domains:
 
 In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
 
+**Project invariants.** Look for rules the project says must never break, and use them as standing ground truth in every domain. Typical places: agent or contributor instruction files (e.g. `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`), specs, design docs and ADRs, sections called invariants, guarantees, or "never/always" rules, and contracts in the code (assertions, invariant annotations). Record where you looked. If you find none, say so and where you looked; never invent invariants on the project's behalf (you may propose some as hypotheses).
+
 ## Step 1: DECOMPOSE
 
 Break every artifact into **individual verifiable claims**. Each claim should be a single, testable assertion.
@@ -150,6 +152,15 @@ For each claim, **read the actual artifact** and trace execution or logic:
 4. Verify consistency across related artifacts
 5. Check what happens on first use vs subsequent uses
 6. Verify cleanup / rollback / error paths
+
+### Invariants touched
+
+For each project invariant found in Step 0b, decide whether the artifact touches it: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For each one it touches:
+1. Name the mechanism that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule.
+2. Check that the mechanism still covers the changed path, not only the old one (a test of the old entry point does not cover a new one).
+3. Touched with no enforcing mechanism, or with one that misses the changed path → FAIL, category *missing completeness*.
+
+A prose rule with nothing that enforces it is a hypothesis about the system, not ground truth that was checked: say so.
 
 ### Verification targets by domain
 
@@ -258,6 +269,11 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 ## GROUND TRUTH
 [Sources used for verification]
 
+## INVARIANTS
+[Where you looked; "none found" is a valid answer]
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Covers changed path? |
+|---|-----------|--------|------------|-------------------------------------|----------------------|
+
 ## DECOMPOSED CLAIMS
 1. [Claim text] — Mode: [Deductive/Inductive/Abductive]
 ...
@@ -298,6 +314,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 - Claims: X verified, Y failed
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
+- Invariants: N touched, M enforced on the changed path
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Critical issues: N
@@ -333,6 +350,7 @@ If the project uses `.claude/agent-trust.json`: bug found → author -1, false p
 - **Don't trust comments** — comments lie, code doesn't
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches
 - **Don't skip ground truth** — without a reference, you can't verify anything
+- **Don't ignore the project's own invariants** — a rule the project says must never break is the first thing a change can break silently; check what enforces it on the changed path
 - **Don't auto-update project docs** — always propose, never write without confirmation
 - **Don't stop at individual bugs** — abstract to failure categories and search for patterns
 - **Don't trust the interface** — probe the actual behavior, not what the code advertises
