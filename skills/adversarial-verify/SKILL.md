@@ -9,14 +9,16 @@ description: >-
   Asks what to verify and how deep before large verifications, runs nothing
   without consent, and with approval turns suspicions into tests and probes them
   with mutation.
+  Before code it classifies a plan's assumptions and suggests spikes and mock-ups;
+  it verifies spike reports and the usability of interfaces.
   Use when the user says "verify", "adversarial check", "CoV review",
-  "/adversarial-verify", "review my changes", or "stress test".
+  "/adversarial-verify", "review my changes", "verify this plan", or "stress test".
 license: MIT
 compatibility: Requires a version control system (e.g. git) for diff analysis
 metadata:
   author: fullo
-  version: "4.0"
-  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
+  version: "4.1"
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, verify this plan, verify this spike, check the UX, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
     - "Abstractive Red-Teaming: Anthropic 2026 — alignment.anthropic.com/2026/abstractive-red-teaming"
@@ -96,8 +98,8 @@ Determine what needs verification. There are seven domains:
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
-- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**
-- The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan (Step 1c)
+- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**. A change made only of interface code (styles, templates, layout, menus, copy), with no logic, is **UX**, not Code: one domain, so the target is clear (Intake rule 4)
+- The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan: **Architecture**, with Step 1c
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain; for interface text, what it says is Documentation, whether it fits, reads and can be reached is UX
 
@@ -163,7 +165,7 @@ A plan, a spec, an ADR or an analysis that recommends work can be verified befor
 
 | Class | Meaning | What to suggest |
 |-------|---------|-----------------|
-| **Evidenced** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite (a result someone only reports counts once you have read the result itself: the output, the log, the measurement) | nothing; cite it |
+| **Evidenced** | the evidence already exists: code, tests, a recorded response, a measurement, recorded user evidence (research notes, test sessions) or an already approved mock-up, that you can cite. A result someone only reports counts once you have read the result itself (the output, the log, the measurement); a spike's result counts once it passes the spike checklist (Step 3, Analysis) | nothing; cite it |
 | **Technical assumption** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
 | **User-expectation assumption** | it depends on what the users want, expect or will understand | a **mock-up** before the code (below) |
 
@@ -177,7 +179,7 @@ The class feeds the confidence: an assumption of either kind is a claim only a r
 
 Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
 
-Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (a read-only call, a recorded response) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
+Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (e.g. a read-only call with test credentials) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
 
 **A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
 1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
@@ -232,7 +234,7 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 ### Invariants touched
 
-For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
+For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, analyses and mock-ups: the artifact proposes, describes, shows or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
 3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
@@ -277,14 +279,14 @@ A spike report that recommends work ("build it") is also checked by Step 1c: the
 - **Targets**: the size of what is touched or clicked, against the project's threshold or WCAG 2.5.8.
 - **Keyboard, controller and focus**: everything reachable with each supported input, the focus visible from the viewing distance, the order logical.
 - **Real content**: long names, translations longer than the original, empty values, many items.
-- **States**: empty, loading, error, success; error messages understandable and placed next to what caused them.
+- **States**: empty, loading, error, success; error messages shown where they are seen, next to what caused them (their wording is Documentation).
 - **Basic accessibility**: labels on fields, text alternatives for images, an accessible name for icon-only buttons.
 - **Motion and perceived speed**: reduced-motion preferences respected; time to the first useful content on a slow network or device.
 - **Sensitive data**: no secrets or personal data visible on screen, in screenshots or recordings.
 
 **UX check round.** Suggest a check of the main screens in the project's target formats, using its interface tests if it has any. It is a run, so it is proposed under Execution and consent, with the screens, formats and inputs it covers. A measured fact (a width, a colour pair) can be computed by reasoning; how the screen really renders cannot.
 
-**Alternative interfaces.** For each weak point found, suggest one or two alternatives with a short comparison: what each improves, what it makes worse, and its cost. The verifier describes the alternatives; a mock-up of them follows Step 1c.
+**Alternative interfaces.** For each weak point found, suggest one or two alternatives with a short comparison: what each improves, what it makes worse, and its cost. The verifier describes the alternatives in the Fix of the FAIL row; when a choice between them is open, it suggests a mock-up as in Step 1c, listed in the same Fix.
 
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 
@@ -431,8 +433,8 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 
 ## PRE-CODE VALIDATION (artifacts that propose work not yet done; omit otherwise)
 [With many claims, list evidenced ones by number only]
-| # | Claim | Class | Evidence; or spike (question, measurement, decision rule); or mock-up (question, form, alternatives, approver) |
-|---|-------|-------|--------------------------------------------------------------|
+| # | Claim | Class | Confidence | Evidence; or spike (question, measurement, decision rule); or mock-up (question, form, alternatives, approver) |
+|---|-------|-------|------------|--------------------------------------------------------------|
 
 ## FAILURE CATEGORIES IDENTIFIED
 | Category | Instances | Files affected |
@@ -493,6 +495,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
+- Pre-code: N evidenced, M technical assumptions (spikes suggested), K user-expectation assumptions (mock-ups suggested)
 - Executed: N tests run (red, green, on which versions); mutation score and survivors, if the probe ran, with what it excludes
 - Proposed: N checks and M writes awaiting an answer
 - Recommendation: [trust adjustment or approval]

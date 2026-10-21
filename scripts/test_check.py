@@ -486,6 +486,20 @@ class FactsTest(Base):
         self.assertNotEqual(r.returncode, 0, r.stdout)
         self.assertIn("no assertion", r.stdout)
 
+    def test_runner_ignores_assertions_in_comments(self):
+        # A comment or a string that mentions assert does not count as an assertion.
+        path = self.path(os.path.join(FACTS, "51.py"))
+        first = open(path).read().splitlines()[0]
+        open(path, "w").write(first + "\n# this file should assert the heights\nx = 'assert'\nprint('ok 51')\n")
+        r = self.run_facts("51")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("no assertion", r.stdout)
+
+    def test_runner_accepts_root_after_ids(self):
+        r = self.run_facts("49", "--root", self.tmp)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("1 fact file(s), 0 failed", r.stdout)
+
     def test_runner_fails_without_the_ok_line(self):
         self.edit(os.path.join(FACTS, "40.py"), "print('ok 40')", "print('done')")
         r = self.run_facts("40")

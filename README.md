@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v4.0-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v4.1-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -31,7 +31,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 **Deep Verification (Steps 3–3e):**
 - **Independently verify** each claim by tracing actual paths
 - **UX check round** — render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; one or two alternative interfaces with what each improves and costs
-- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning, numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
+- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning (when anything was tuned), numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
 - **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
@@ -191,6 +191,17 @@ Or ask naturally:
 - **Logical leaps** — conclusion doesn't follow from evidence
 - **One-sided evidence** — only supporting data, contradicting findings omitted
 
+### Plans, specs and spike reports
+- **Unproven assumptions** — a plan that takes an external API, a library, performance or a format for granted: suggest a throwaway spike with a decision rule
+- **Untested expectations** — a new screen or flow nobody has seen: suggest a mock-up, today next to proposed, approved before development
+- **Spikes that tune on their own test data** — a result measured on the data it was tuned on, no held-out set, a threshold chosen after the result
+
+### UX
+- **Contrast** — computed from the actual colours in every theme, including dark mode
+- **Real content** — translations and long names that break a narrow layout
+- **Input and focus** — entries a controller or keyboard cannot reach, focus too small to see
+- **Targets and legibility** — controls below the project's size, text too small for the viewing distance
+
 ### Agent Meta-Verification
 - **Sycophantic deference** — agrees without challenging assumptions
 - **Hidden agenda** — favors one approach without justification
@@ -201,14 +212,14 @@ Or ask naturally:
 
 ## Repository checks
 
-`scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else:
+`scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else. Running the eval facts (`scripts/check_facts.py`, the unit tests of the checks, and the pre-commit hook when a commit touches the evals) also needs `rustc` and `node` 22.6 or later:
 
 - **evals.json**: valid, the same four keys in every case, integer ids 1..n in file order, no empty prompt or assertion, and `[substance]`/`[format]` tags followed by text on every assertion from eval 21 on.
 - **Version**: SKILL.md's frontmatter and every skill badge in the README agree.
 - **Private names**: none of the configured terms appears in any tracked file's content or name. Matching ignores case, accents and how the parts of a term are joined (space, hyphen, underscore, line break, or nothing), and also covers JSON escapes and files that are not UTF-8. A term matches anywhere, also inside other words (`name` finds `NameLabs`, `name2026`, `names`). Prefix a term with `=` to match it only as a whole word, for common words that would otherwise cause false positives. Terms shorter than 4 characters give a warning. Put the list in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated). The list is never committed, and any output line containing a term is masked. Not caught: a one-word term written as two words (a space or line break in the middle), UTF-16 files without a byte-order mark, and, for `=` terms, forms glued to other letters or digits.
 - **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
 - **Tables**: every Markdown table row, with or without outer pipes, has as many cells as its header.
-- **Eval facts**: every eval from 29 on that states facts in its prompt has a file in `skills/adversarial-verify/evals/facts/` that reproduces them, or a reason in `facts/NOT_COMPUTABLE`; each fact file carries the sha256 of its eval's prompt, so editing the prompt fails until the facts are checked again. `scripts/check_facts.py` runs the files and fails if a stated fact is false, if a file asserts nothing, or if a needed toolchain (`rustc`, `node` 22.6 or later) is missing; TypeScript files run with their types stripped, not type-checked. The pre-commit hook runs them only when the staged change touches the evals, on the staged files. Fact files are code: review them before committing.
+- **Eval facts**: every eval from 29 on whose prompt carries a `(Facts: …)` block has a file in `skills/adversarial-verify/evals/facts/` that reproduces those facts, or a reason in `facts/NOT_COMPUTABLE`; each fact file carries the sha256 of the prompt of every eval it covers, so editing such a prompt fails until the facts are checked again. `scripts/check_facts.py` runs the files and fails if a stated fact is false, if a file has no assertion outside comments, or if a needed toolchain (`rustc`, `node` 22.6 or later) is missing; TypeScript files run with their types stripped, not type-checked. Fact files are code: review them before committing.
 
 ```bash
 python3 scripts/check.py                    # working tree; says so if no private terms are set

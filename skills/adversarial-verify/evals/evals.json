@@ -552,7 +552,7 @@
         "[substance] Flags that the spike writes to a real system (a real order and payment on the live shop) and breaks the throwaway constraint",
         "[substance] Names concrete side effects (e.g. charges and refunds, emails to staff or customers, stock, reports, other webhooks)",
         "[substance] Proposes a way to answer the same question without writing to the live system (e.g. the shop's test mode or sandbox, recorded webhook payloads, the vendor's documentation checked against a read-only call)",
-        "[substance] Notes the spike has no decision rule (what result means build, don't build, or postpone) and asks for one"
+        "[substance] Notes the spike has no decision rule (what result means build, don't build, or postpone) and asks for one or proposes one"
       ]
     },
     {
@@ -627,7 +627,7 @@
         "[substance] Flags that Settings and Controls cannot be reached with the D-pad, so navigation is not consistent for a controller",
         "[substance] Flags the 8 px arrow as a focus indicator likely too small to see at TV distance, and asks for a clearer one",
         "[substance] Questions text legibility at about 3 metres (18 px at 1080p) and contrast over a game image that changes under the overlay",
-        "[substance] Proposes checking the menu on a real TV with a controller, and on PC with keyboard (proposed, not run)",
+        "[substance] Proposes checking the menu on a real TV with a controller, and on PC with the supported inputs (proposed, not run)",
         "[substance] Proposes at least one alternative design with what it improves and costs"
       ]
     },

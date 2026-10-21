@@ -8,15 +8,18 @@ are compiled with rustc; .ts files run with node --experimental-strip-types.
 A missing toolchain is an error, never a silent skip. TypeScript files are run
 with their types stripped, not type-checked.
 
-A fact file must contain at least one assertion (assert, assert_eq!, assert_ne!,
-throw) and its last line of output must be "ok <id>": a file that asserts nothing
-or stops early fails.
+A fact file must contain at least one assertion outside comments and strings
+(Python: an assert or raise statement; Rust: assert!, assert_eq!, assert_ne!,
+panic!; TypeScript: throw), and its last line of output must be "ok <id>": a file
+that asserts nothing or stops early fails.
 
   python3 scripts/check_facts.py                 # all files
   python3 scripts/check_facts.py 38 49           # only these eval ids
   python3 scripts/check_facts.py --root DIR      # the files under another checkout
 """
 
+import argparse
+import ast
 import os
 import shutil
 import subprocess
@@ -28,7 +31,20 @@ import re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FACTS_REL = os.path.join("skills", "adversarial-verify", "evals", "facts")
 EXTS = (".py", ".rs", ".ts")
-ASSERTS = re.compile(r"\bassert\b|assert_eq!|assert_ne!|\bthrow\b")
+ASSERTS = {".rs": re.compile(r"\b(assert|assert_eq|assert_ne|panic)!"), ".ts": re.compile(r"\bthrow\b")}
+STRIP = re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`', re.S)
+
+
+def has_assertion(path):
+    text = open(path, encoding="utf-8").read()
+    ext = os.path.splitext(path)[1]
+    if ext == ".py":
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:
+            return True  # let the run report the syntax error
+        return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))
+    return bool(ASSERTS[ext].search(STRIP.sub(" ", text)))
 
 
 def command(path, tmp):
@@ -54,10 +70,11 @@ def tail(text, n=5):
 
 
 def main(argv):
-    root = ROOT
-    if argv[:1] == ["--root"]:
-        root, argv = argv[1], argv[2:]
-    ids = argv
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("ids", nargs="*", help="eval ids to run (default: all)")
+    ap.add_argument("--root", default=ROOT, help="checkout whose fact files to run")
+    args = ap.parse_args(argv)
+    root, ids = args.root, args.ids
     FACTS = os.path.join(root, FACTS_REL)
     files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith("_"))
     if ids:
@@ -72,8 +89,8 @@ def main(argv):
                 failed += 1
                 continue
             stem = os.path.splitext(name)[0]
-            if not ASSERTS.search(open(path, encoding="utf-8").read()):
-                print(f"FAIL {name}: no assertion in the file")
+            if not has_assertion(path):
+                print(f"FAIL {name}: no assertion outside comments and strings")
                 failed += 1
                 continue
             for step in steps:

@@ -2,7 +2,7 @@
 DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 
-def parse_day_v1(text):  # eval 37 (and 29, 35)
+def parse_day_v1(text):  # evals 29, 35 and 37
     parts = text.split('-')
     year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
     if month < 1 or month > 12:

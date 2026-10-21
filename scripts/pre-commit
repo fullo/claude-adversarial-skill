@@ -12,7 +12,7 @@ command -v "$py" >/dev/null 2>&1 || py=python
 if git diff --cached --name-only | grep -q '^skills/adversarial-verify/evals/'; then
   tmp="$(mktemp -d)" || exit 1
   git checkout-index -a --prefix="$tmp/" || { rm -rf "$tmp"; exit 1; }
-  out="$("$py" "$root/scripts/check_facts.py" --root "$tmp")"; rc=$?
+  out="$("$py" -I "$root/scripts/check_facts.py" --root "$tmp")"; rc=$?
   rm -rf "$tmp"
   [ $rc -eq 0 ] || { printf "%s\n" "$out"; exit 1; }
 fi
