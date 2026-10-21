@@ -383,7 +383,7 @@
       "assertions": [
         "[substance] Does not start the full verification in this answer",
         "[substance] Gives a cost estimate based on observable quantities (files, domains, likely number of claims, whether anything would be executed), not in invented minutes or hours",
-        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth, scope and execution mode",
+        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth, scope and execution mode, the execution options being named checks (e.g. the test suite), not a bare yes or no",
         "[substance] Proposes a default (e.g. reasoning only) for the questions it asks",
         "[format] Presents the questions as a short list of choices"
       ]

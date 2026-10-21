@@ -44,7 +44,7 @@ The user decides what to verify and how deep, before the verification starts. Se
 | **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects, listed explicitly |
 | **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
-| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging") | reasoning only |
+| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging"). When asked, offer named checks, never a bare yes or no | reasoning only |
 
 Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately, not verified.
 
@@ -61,7 +61,7 @@ Rules:
 
 The verifier reasons; it runs or writes something only with the user's consent.
 
-**Reading is not running.** Reading files, searching them, read-only version-control commands (e.g. a diff or a log) and reading a reference that the artifact or the user cites (a document, a page, an issue) inspect and need no consent. **Running** is anything that executes the project's code or tools, or acts on a system: tests, scripts, builds, linters, type checkers, dry runs, queries, calls to services or databases. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
+**Reading is not running.** Reading files, searching them, read-only version-control commands (e.g. a diff, a log, or fetching the base to compare against) and reading a reference that the artifact or the user cites (a document, a page, an issue) inspect and need no consent. **Running** is anything that executes the project's code or tools, or acts on a system: tests, scripts, builds, linters, type checkers, dry runs, queries, calls to services or databases. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
 
 1. **Without consent nothing is run and nothing is written**: no command beyond the reading above, no test, query or script; no new test, fix, doc change or commit.
 2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval.
