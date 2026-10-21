@@ -34,7 +34,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
 - **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
-- **Mutation probe** — on request, mutates the changed lines (with the language's tool, or 3-5 hand mutations on the riskiest lines), restores the code, and types every survivor as a missing test, superfluous code or an equivalent mutant; a perfect score is suspicious until you see why the mutants died
+- **Mutation probe** — on request (proposed otherwise, with scope and cost), mutates the changed lines (with the language's tool, or 3-5 hand mutations on the riskiest lines), restores the code, and types every survivor as a missing test, superfluous code or an equivalent mutant; a perfect score is suspicious until you see why the mutants died
 
 **Reporting (Steps 4–5):**
 - **Report findings** with reasoning-aware confidence scoring and anti-fabrication discipline
