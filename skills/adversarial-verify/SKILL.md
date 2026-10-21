@@ -99,7 +99,7 @@ Determine what needs verification. There are seven domains:
 - Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**
 - The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan (Step 1c)
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
-- When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
+- When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain; for interface text, what it says is Documentation, whether it fits, reads and can be reached is UX
 
 ## Step 0a: GATHER ARTIFACTS
 
@@ -121,7 +121,7 @@ Determine what needs verification. There are seven domains:
 | **Documentation** | Actual codebase, current API or interface, the running software, version history |
 | **Tests** | Production code, requirements, coverage reports, CI results, production configuration and runtime (to tell a real pass from a test-environment artifact) |
 | **Analysis** | Source material, original data, cited references, actual codebase |
-| **UX** | The approved mock-up, the design system and the project's own guidelines, the platform's guidelines, and WCAG 2.2 where it applies |
+| **UX** | The approved mock-up (for a mock-up under review: the request it answers), the design system and the project's own guidelines, the platform's guidelines, and WCAG 2.2 where it applies |
 
 In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
 
@@ -272,7 +272,7 @@ A spike report that recommends work ("build it") is also checked by Step 1c: the
 
 **UX:** adapt each point to the kind of interface (web, native app, game, command-line or terminal); WCAG 2.2 is the reference where it applies. Check, in every target format (sizes, input methods, themes):
 - **Render**: the layout holds in each format; nothing is cut off or off screen; navigation stays reachable.
-- **Contrast**: text at least 4.5:1 (3:1 for large text), graphics and the boundaries of controls at least 3:1, in every theme including dark mode. Compute the ratio from the actual colours; do not estimate it.
+- **Contrast**: text at least 4.5:1 (3:1 for large text), graphics and the boundaries of controls at least 3:1, in every theme including dark mode. Compute the ratio from the actual colours; do not estimate it. A computed failure is a demonstrated defect when the artifact shows those values apply (no later rule, theme or fallback overrides them); otherwise it is a preventive measure until the rendered check.
 - **Legibility**: text size for the viewing distance, line length, heading hierarchy; zoom to 200% and reflow at 320 px wide without loss of content, where the platform has them.
 - **Targets**: the size of what is touched or clicked, against the project's threshold or WCAG 2.5.8.
 - **Keyboard, controller and focus**: everything reachable with each supported input, the focus visible from the viewing distance, the order logical.
@@ -384,7 +384,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
 
-**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up; a report that users want it does not lift the cap.
+**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. How an interface really renders (Step 3, UX) is also run-only. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up; a report that users want it does not lift the cap.
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
