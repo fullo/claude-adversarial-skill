@@ -1,0 +1,13 @@
+# Evals from 29 on whose facts cannot be executed here, with the reason.
+# Format: <id>: <reason>. scripts/check.py requires every eval from 29 on that
+# states facts in its prompt to have a facts/<id>.py|.rs|.ts file or a line here.
+30: repository size and contents, no code
+32: description of a working copy, no code
+33: repository size and the last commit, no code
+34: query plan of a database that does not exist here
+35: same function as eval 37 (checked there); the test run is stated, not reproducible
+36: a one-line change described in words; the suite is not given
+41: a tool's log and configuration described in words
+43: a plan; the stated test output belongs to code that is not given
+45: a spec and an endpoint described in words
+50: a console game menu described in words

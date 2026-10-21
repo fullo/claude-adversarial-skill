@@ -232,11 +232,11 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 ### Invariants touched
 
-For each project invariant found in Step 0b, decide whether the artifact touches it. For code and data: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
+For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
 3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
-4. **Plans, specs, docs, and analyses** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
+4. **Plans, specs, docs, analyses and mock-ups** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
 
@@ -266,7 +266,7 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 - **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
 - **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
 - **The decision is written** and follows the rule fixed before the spike, if there was one: do, don't, or postpone. A postponement names the conditions that would reopen it.
-- **The throwaway constraint held**: no spike code went into production unreviewed, and the spike did not write to a real system. If it used personal data, say where that data is now and whether it should be deleted.
+- **The throwaway constraint held**: no spike code went into production, and the spike did not write to a real system. Code that should survive is rewritten for production, not promoted. If it used personal data, say where that data is now and whether it should be deleted.
 
 A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
 
@@ -422,7 +422,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 
 ## INVARIANTS
 [Where you looked; how many found; "none found" is a valid answer. List only the touched ones]
-| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data) / Respected? (plans, specs, docs, analyses) |
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data, UX) / Respected? (plans, specs, docs, analyses, mock-ups) |
 |---|-----------|--------|------------|-------------------------------------|------------------------|
 
 ## DECOMPOSED CLAIMS
@@ -488,7 +488,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Claims: X verified, Y in FAIL (defects and preventive measures), Z falsified
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
-- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)
+- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data, UX) or respected (plans, specs, docs, analyses, mock-ups)
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)

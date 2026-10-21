@@ -613,7 +613,7 @@
       "assertions": [
         "[substance] Computes the usable label width at 375 px (93.75 - 16 = 77.75 px) and finds 'Bestellungen' (79 px) and 'Einstellungen' (82 px) clipped",
         "[substance] Checks the narrowest supported width (320 px: 80 px buttons, 64 px usable): 'Bestellungen' and 'Einstellungen' are clipped, 'Startseite' (61 px) and 'Gemerkt' (50 px) fit",
-        "[substance] Says that clipped labels lose meaning and that this is a defect shown by the measured widths, not only a risk",
+        "[substance] Says that clipped labels lose meaning and treats the clipping as shown by the reported widths (possibly pending a check of the rendered bar), not only as a vague risk",
         "[substance] Proposes one or two alternative designs (e.g. shorter labels, two-line labels, icons with a smaller font, fewer items with a 'More' menu) and compares what each improves and what it costs",
         "[substance] Proposes checking the rendered bar at the narrowest and widest target widths (proposed, not run)"
       ]

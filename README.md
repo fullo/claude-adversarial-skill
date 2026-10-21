@@ -5,7 +5,7 @@
 
 # Claude Adversarial Verification Skill
 
-A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, tests, and analysis using **Chain-of-Verification (CoV)** enhanced with **abstractive red-teaming**, **hidden behavior probing**, **stress techniques**, and **tri-modal reasoning**.
+A Claude Code skill that performs rigorous adversarial verification across code, architecture, data, documentation, tests, analysis and UX using **Chain-of-Verification (CoV)** enhanced with **abstractive red-teaming**, **hidden behavior probing**, **stress techniques**, and **tri-modal reasoning**.
 
 ## What it does
 
