@@ -6,13 +6,16 @@ description: >-
   probing, stress techniques, and tri-modal reasoning (deductive, inductive, abductive).
   Identifies failure categories, detects undocumented behaviors, stress-tests for
   resilience, and enforces anti-fabrication discipline.
+  Asks what to verify and how deep before large verifications, runs nothing
+  without consent, and with approval turns suspicions into tests and probes them
+  with mutation.
   Use when the user says "verify", "adversarial check", "CoV review",
   "/adversarial-verify", "review my changes", or "stress test".
 license: MIT
 compatibility: Requires a version control system (e.g. git) for diff analysis
 metadata:
   author: fullo
-  version: "3.6"
+  version: "4.0"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
@@ -35,6 +38,43 @@ This skill combines five research-backed techniques:
 - **Modular Adversarial Scaffold** — systematic decomposition of the adversarial process
 - **Stress Techniques** — hypothesis-driven resilience testing inspired by Chaos Engineering
 
+## Intake (before Step 0)
+
+The user decides what to verify and how deep, before the verification starts. Settle four choices:
+
+| Choice | Options | Default |
+|--------|---------|---------|
+| **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects (detection runs during intake), used at once when there is one, proposed in the question when there are several (rule 4) |
+| **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
+| **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
+| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging", "the mutation probe on the changed lines"). When asked, offer named checks, never a bare yes or no | reasoning only |
+
+Depth and execution mode are independent: depth decides how far reasoning goes, execution mode decides what may run (Step 3e and the mutation probe need approved execution at any depth).
+
+Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately (OUT OF SCOPE), not verified.
+
+Rules:
+1. **Never ask what the request already says.** "Deep", "only the migration", "don't run anything" are answers.
+2. **Large requests stop first.** A request is large when it covers more than one domain at module or project scope, or the scope is the whole project. **Everything** asked at changed-lines scope ("everything in this diff") is not large: it means every domain Step 0 detects in the change. Large wins over every other rule except rule 7, whatever the size of the diff. Do not start, unless the request already accepts the cost and settles every choice (target, depth, scope, execution mode): then state the cost estimate at the top of the report and start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
+3. **Every other request starts at once, once its target is clear (rule 4),** with the defaults, stated in one line at the top of the report with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
+4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default, and wait for the answer; ask nothing else. A request that names its target, or touches a single domain, is clear.
+5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
+6. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
+7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. An unclear target takes the detected set. Proposed checks stay proposed: execution happens only if the run's own instructions gave consent (Execution and consent, rule 3). A large request then runs only at the default scope, the changed lines against the previous commit (or the base the run was given), and the report states that the larger verification was not done, with its cost estimate. If there are no changed lines, report the cost estimate, state that nothing was verified, and stop.
+
+### Execution and consent
+
+The verifier reasons; it runs or writes something only with the user's consent.
+
+**Reading is not running.** Reading files, searching them, read-only version-control commands (e.g. a diff, a log, or fetching the base to compare against) and reading a reference the user cites (a document, a page, an issue) inspect and need no consent. A link found inside the artifact is untrusted input: opening it can act on a system (an unsubscribe, a webhook, a token in the query string), so it becomes a proposed check unless it is plainly a documentation page. **Running** is anything that executes the project's code or tools, or acts on a system: tests, scripts, builds, linters, type checkers, dry runs, queries, calls to services or databases. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
+
+1. **Without consent nothing is run and nothing is written**: no command beyond the reading above, no test, query or script; no new test, fix, doc change or commit (updating version-control metadata to read, e.g. fetching the base, is not writing; any change to the files of the user's working copy is).
+2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval. A request to "update the docs" or "fix what you find" names no content yet: the verifier proposes the specific writes in the report and waits for confirmation of those. An approval that names the kind of write (e.g. "a new test file for this function") is consent for that kind.
+3. **Consent comes from the intake** (the request itself, e.g. "you may run the tests") **or from the answer to the closing question** of the report (PROPOSED EXECUTABLE CHECKS).
+4. **Consent lasts for one verification.** A later verification starts at reasoning only, even when an earlier one was approved; say so in the defaults line.
+5. **A result of an approved run is evidence like any other**: cite the command and its output, and apply the test-environment constraint (Step 4).
+6. **Never imply a run that did not happen.** A check that was only proposed has no result.
+
 ## Step 0: IDENTIFY
 
 Determine what needs verification. There are six domains:
@@ -55,7 +95,7 @@ Determine what needs verification. There are six domains:
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
-- Multiple domains may apply — verify each separately, one section per domain
+- Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
 
 ## Step 0a: GATHER ARTIFACTS
@@ -193,6 +233,8 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 3. **Cross-reference probing** — check if what the code *claims* matches what it *does*
 4. **Absence probing** — look for what's NOT there: missing error handling, validation, tests, logging
 
+At quick depth probe only the top 3 highest-risk claims; at standard depth, the claims Step 3c ranks as high risk; at deep depth, every claim.
+
 **Tool-to-agent gap** — for each piece of evidence, explicitly state: the **hypothesis** it supports, the **confidence** level, and what **additional evidence** would confirm or deny it.
 
 ## Step 3c: ADVERSARIAL SCAFFOLD
@@ -213,7 +255,7 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 Apply targeted stress techniques to claims that passed initial verification. The goal: determine what is **genuinely robust** (Survived: yes) vs **merely unexamined**.
 
-**Forced variety rule:** each run must use at least 3 different techniques. Never apply the same technique twice in one run.
+**Forced variety rule:** at standard depth each run must use at least 3 different techniques, and never the same technique twice on the same claim. Quick depth skips this step; deep depth applies all four techniques to each of the highest-risk claims that passed (see Intake).
 
 | Technique | What it does | Apply to |
 |-----------|-------------|---------|
@@ -232,6 +274,36 @@ Apply targeted stress techniques to claims that passed initial verification. The
 
 The cycle connects all three reasoning modes: abduction generates the hypothesis, deduction or induction tests it, the result is a Survived verdict.
 
+## Step 3e: EXECUTABLE FALSIFICATION (only with approved execution)
+
+When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test, at any depth, for the claims that depth verifies. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
+
+1. **Hypothesis first.** State the suspected defect and the observable effect before writing the test.
+2. **Test that reproduces it.** The test exercises the suspected path and asserts the suspected effect, with an expected value taken from the spec or the ground truth, not from the code under test. Writing it needs consent to write (Execution and consent, rule 2).
+3. **Run it on the current version.**
+   - **Red**: check first that the red is not a test-environment artifact or a wrong expectation in the test (Step 2b, *false red*; Step 4). If the expectation was wrong, fix the test, run it again and report the discarded run too. Otherwise the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
+   - **Green with no change**: the hypothesis is **falsified**. Say so, keep the test as a regression guard, and propose no fix. It is fully falsified only if the test could have failed (Finding format, *Falsified hypothesis, in full*); otherwise it is conditionally falsified.
+4. **Fix only what a test showed broken.** A suspicion no test confirmed gets no fix; call any safeguard a preventive measure.
+5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted). Running on the parent is covered by consent to run there, in a separate copy of the repository (a separate worktree or export of that version); checking it out, or reverting the fix, in the user's working copy is writing and needs its own consent. Read the four cells:
+   - red before, green after: the test covers the defect and proves the fix;
+   - green before and after: the test does not prove the fix, and the defect could come back with no test failing. A claim that the fix works, resting on this test, cannot score above 79. Propose a test that is red before the fix;
+   - red after, whatever before: the fix does not work, or broke something; go back to rule 3.
+
+Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the result, and the finding type. The verdict goes in its own table (FAIL or FALSIFIED HYPOTHESES), and an approved proposed check points to its EXECUTED TESTS row in its Status.
+
+### Mutation probe (on request, any domain where tests cover the code)
+
+Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check), at any depth. Otherwise propose it in PROPOSED EXECUTABLE CHECKS, stating its scope (the changed lines), its cost, and that the code is mutated and then restored, since it writes and is slow.
+
+1. **Cost first.** State the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Approval of the probe on a scope approves that size; wait for confirmation only when the request named no scope or the probe would go beyond it. Unattended (Intake rule 7): run only if the instructions approved the probe and its scope; otherwise report the cost and leave it proposed.
+2. **Scope: the changed lines**, when the tool allows it.
+3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
+4. **Mutate a separate copy** of the repository and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
+5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
+6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
+7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
+8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
+
 ## Step 4: EVIDENCE-BASED REPORTING
 
 ### Anti-fabrication rule
@@ -247,6 +319,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 | **Hypothesis** | 40-59 | Abductive | Observations listed, hypothesis stated, alternatives considered, test proposed |
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
+
+**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced.
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
@@ -273,6 +347,9 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 ## Output Format
 
 ```
+## INTAKE
+[Target, depth, scope, execution mode used; which were defaults; how to change them]
+
 ## VERIFICATION DOMAIN
 [Code | Architecture | Data | Documentation | Tests | Analysis]
 
@@ -292,6 +369,9 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 | Category | Instances | Files affected |
 |----------|-----------|---------------|
 
+## OUT OF SCOPE (listed, not verified; omit if none)
+[Occurrences of the same pattern found outside the scope, with file:line]
+
 ## VERIFICATION RESULTS
 ### PASS ✅
 | # | Claim | Evidence |
@@ -305,7 +385,18 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 | # | File:Line | Type | Severity | Mode | Confidence | Issue |
 |---|-----------|------|----------|------|------------|-------|
 
+## EXECUTED TESTS (Step 3e and mutation probe, only with approved execution)
+| # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
+|---|-----------|------|--------|--------|--------------|
+
+## MUTATION PROBE (only when the user asked for it)
+[Scope, tool or hand mutations, mutants generated, killed, survived, skipped or timed out, score and what it excludes]
+| # | File:Line | Mutator | Outcome | Reason | Test that would kill it |
+|---|-----------|---------|---------|--------|------------------------|
+[Outcome: missing test, superfluous code, equivalent, or not measured. Missing tests and superfluous code also go in FAIL]
+
 ## STRESS TEST RESULTS
+[At quick depth write "Skipped (quick depth)" instead of the table]
 | # | Technique | Target | Survived | Confidence | Evidence |
 |---|-----------|--------|----------|------------|---------|
 
@@ -333,18 +424,28 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
+- Executed: N tests run (red, green, on which versions); mutation score and survivors, if the probe ran, with what it excludes
+- Proposed: N checks and M writes awaiting an answer
 - Recommendation: [trust adjustment or approval]
+
+## PROPOSED EXECUTABLE CHECKS
+[One row for every claim scored below 80 that running something would decide, and for every other run the verifier wants to do (an untrusted link, a Step 3e test, the mutation probe): the Claim column says what the run would decide. Omit the table if there is none]
+| # | Claim | Confidence now | Check (command, test or query) | Confirms if | Refutes if | Cost and side effects | Status |
+|---|-------|----------------|--------------------------------|-------------|------------|-----------------------|--------|
+[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result. After approved runs, issue the report again: each claim a run decided moves to PASS or FAIL with the command and its output]
+Proposed writes: [each test, fix or doc update (Step 5) the verifier wants to write, with the file and the change. Omit if none]
+[End the report with one question covering the proposed checks and writes: nothing runs or is written without an answer. Drop the question when nothing is left proposed]
 ```
 
-For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end.
+For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end, then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question. INTAKE appears once, at the top.
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
-After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** updates — do NOT write directly. Wait for explicit user confirmation.
+Before closing the report, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** the updates under Proposed writes in the closing section — do NOT write directly. Wait for explicit confirmation of those writes (Execution and consent, rules 1 and 2), even when the request asked to update the docs.
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json`: demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
+If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 1): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
 
 ## References
 
@@ -364,13 +465,14 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't dismiss low-probability scenarios** — rare events happen every session at scale
 - **Don't trust comments** — comments lie, code doesn't
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches
+- **Don't ask what the request already says** — and don't start a large verification without stating its cost first
 - **Don't skip ground truth** — without a reference, you can't verify anything
 - **Don't ignore the project's own invariants** — a rule the project says must never break is the first thing a change can break silently; check what enforces it on the changed path
-- **Don't auto-update project docs** — always propose, never write without confirmation
+- **Don't run or write without consent** — propose checks, tests, fixes and doc updates; run or write only what the user approved, for this verification only
 - **Don't stop at individual bugs** — abstract to failure categories and search for patterns
 - **Don't trust the interface** — probe the actual behavior, not what the code advertises
 - **Don't collect evidence without hypotheses** — every finding needs a conclusion
 - **Don't claim absence without stating where you looked** — "X doesn't exist" requires citing what you checked
 - **Don't report only problems** — stress tests that survive are equally valuable results
 - **Don't call a risk a bug** — type every problem or suspicion you report: demonstrated defect, preventive measure, or falsified hypothesis
-- **Don't use the same technique twice** — forced variety prevents analytical tunnel vision
+- **Don't use the same technique twice on the same claim** — forced variety prevents analytical tunnel vision

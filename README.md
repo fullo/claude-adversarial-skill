@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v3.6-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v4.0-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -10,6 +10,10 @@ A Claude Code skill that performs rigorous adversarial verification across code,
 ## What it does
 
 When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
+
+**Intake:**
+- **Intake** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
+- **Execution with consent** — reading and searching the code is not running; by default nothing is run: the report ends with proposed executable checks (what would confirm, what would refute, cost) and asks; only approved checks run, for that verification only, and writing a test or a fix needs its own approval
 
 **Pre-verification (Steps 0–0b):**
 - **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
@@ -23,12 +27,14 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Generate adversarial questions** for each claim ("what would make this fail?")
 - **Abstract to failure categories** — find patterns, not just individual bugs
 
-**Deep Verification (Steps 3–3d):**
+**Deep Verification (Steps 3–3e):**
 - **Independently verify** each claim by tracing actual paths
 - **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
+- **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
+- **Mutation probe** — on request (proposed otherwise, with scope and cost), mutates the changed lines (with the language's tool, or 3-5 hand mutations on the riskiest lines), restores the code, and types every survivor as a missing test, superfluous code or an equivalent mutant; a perfect score is suspicious until you see why the mutants died
 
 **Reporting (Steps 4–5):**
 - **Report findings** with reasoning-aware confidence scoring and anti-fabrication discipline
@@ -59,13 +65,13 @@ Detects behaviors the code doesn't advertise using four probing strategies: indi
 Decomposes the adversarial process into five modules: suspicion modeling (what would a reviewer miss?), attack selection (highest-risk claims first), plan synthesis (multi-step trace chains), execution (actually read the code), and subtlety detection (code that hides complexity).
 
 ### Stress Techniques
-Inspired by Principles of Chaos Engineering, adapted for review. Four techniques with forced variety (minimum 3 per run, never repeat): **Existence Question** (should this exist at all?), **Scale Shift** (what at 10x? at zero?), **Time Travel** (what in 6 months?), **Requirement Inversion** (what if the opposite?). Produces **Survived: yes/no** verdicts — knowing what's robust is as valuable as knowing what's fragile.
+Inspired by Principles of Chaos Engineering, adapted for review. Four techniques with forced variety (at standard depth minimum 3 per run, never twice on the same claim; none at quick depth, all four on the top 3 risks at deep depth): **Existence Question** (should this exist at all?), **Scale Shift** (what at 10x? at zero?), **Time Travel** (what in 6 months?), **Requirement Inversion** (what if the opposite?). Produces **Survived: yes/no** verdicts — knowing what's robust is as valuable as knowing what's fragile.
 
 ### Tri-Modal Reasoning
 Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.
 
 ### Anti-Fabrication Discipline
-Before claiming something doesn't exist, you must state where you looked. Every finding is typed as a demonstrated defect, a preventive measure, or a falsified hypothesis (said plainly, only if the check could have failed — otherwise conditionally falsified — kept as a regression check, limited to the paths it covered). Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). No invariants found is reported as such, with where you looked, never filled with invented ones. Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production.
+Before claiming something doesn't exist, you must state where you looked. Every finding is typed as a demonstrated defect, a preventive measure, or a falsified hypothesis (said plainly, only if the check could have failed — otherwise conditionally falsified — kept as a regression check, limited to the paths it covered). Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). No invariants found is reported as such, with where you looked, never filled with invented ones. Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production. Run-only constraint: no score above 79 for a claim only a run can decide (a query plan, a measured performance) until it is run or its result is supplied. Occurrences outside the scope are listed, not verified; proposed checks and writes close the report with one question.
 
 ### Agent Meta-Verification
 When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.

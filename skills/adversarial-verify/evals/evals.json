@@ -103,7 +103,7 @@
     },
     {
       "id": 8,
-      "prompt": "Look for systemic failure patterns across the entire codebase, not just the last change",
+      "prompt": "Look for systemic failure patterns across the entire codebase, not just the last change. I know it is large and accept the cost: every domain, standard depth, whole project, reasoning only, go ahead.",
       "expected_output": "Abstractive red-teaming: identification of failure categories across the whole project",
       "assertions": [
         "Searches for recurring failure categories across the full codebase, not just recent changes",
@@ -363,6 +363,171 @@
         "[substance] Traces the effect of a delayed step: the controller under- or over-corrects because it assumes 100 ms instead of the real elapsed time",
         "[substance] Treats the stated delays as the device's real behaviour (ground truth), not as an edge case to ignore",
         "[substance] Proposes measuring elapsed time again or bounding and compensating the step, and a test that injects delayed steps"
+      ]
+    },
+    {
+      "id": 29,
+      "prompt": "Verify this function, the only change in the working copy of our command-line tool:\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)",
+      "expected_output": "A small request with the artifact in hand: the verifier asks no intake question (scope, depth, execution), states its defaults in one line, and verifies the function in the same answer",
+      "assertions": [
+        "[substance] Asks no intake question about scope, depth or execution before starting (questions about missing context are allowed but must not replace the verification)",
+        "[substance] States in one line the defaults it used (standard depth, reasoning only, the changed lines) and how to change them",
+        "[substance] Runs nothing; any executable check is only proposed, with a question",
+        "[substance] Carries out the verification of the function in the same answer (e.g. 31 February accepted, malformed input, extra parts)"
+      ]
+    },
+    {
+      "id": 30,
+      "prompt": "Verify everything in this repository. (Facts: the repository has about 600 tracked files: application code in 3 services, database migrations, API specifications, user documentation, and a test suite of about 1,200 tests.)",
+      "expected_output": "Before starting, the verifier warns about the cost in observable quantities and asks for confirmation and for the open choices; it does not start the full verification",
+      "assertions": [
+        "[substance] Does not start the full verification in this answer",
+        "[substance] Gives a cost estimate based on observable quantities (files, domains, likely number of claims, whether anything would be executed), not in invented minutes or hours",
+        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth, scope and execution mode, the execution options being named checks (e.g. the test suite), not a bare yes or no",
+        "[substance] Proposes a default (e.g. reasoning only) for the questions it asks",
+        "[format] Presents the questions as a short list of choices"
+      ]
+    },
+    {
+      "id": 31,
+      "prompt": "Do a deep verification of the data migration in the last commit only, reasoning only, do not run anything. (The migration renames a column in a table that two services read.)",
+      "expected_output": "Every intake question is already answered by the request: the verifier asks nothing and starts, applying deep depth, reasoning only, and the stated scope",
+      "assertions": [
+        "[substance] Asks no intake question: target, depth, execution and scope are all in the request",
+        "[substance] Applies the requested depth (uses the deep techniques, e.g. stress tests and hidden behavior probing)",
+        "[substance] Stays within the stated scope (the migration and its readers), without widening it unasked",
+        "[substance] Runs nothing; any executable check is only proposed, with a question"
+      ]
+    },
+    {
+      "id": 32,
+      "prompt": "Verify my changes. (Facts: the working copy has two changed files: a 30-line change to the export function in the application code, and a 20-line change to the user guide describing that export.)",
+      "expected_output": "A small request whose target is not named and spans two domains: the verifier asks only which target to verify, proposing the detected set (code and documentation) as the default, asks nothing about depth, scope or execution mode, and waits for the answer before verifying",
+      "assertions": [
+        "[substance] Asks which target to verify, listing the detected domains (code and documentation)",
+        "[substance] Proposes the detected set, both domains, as the default answer",
+        "[substance] Asks nothing about depth, scope or execution mode",
+        "[substance] Does not give a cost estimate or treat the request as large",
+        "[substance] Does not start the verification before the answer"
+      ]
+    },
+    {
+      "id": 33,
+      "prompt": "This runs unattended in a nightly job, nobody will read questions. Task: verify everything in this repository. (Facts: about 600 tracked files in 3 services, migrations, API specifications, user documentation; the last commit changed 40 lines in one service.)",
+      "expected_output": "A large request with nobody to answer: the verifier does not wait for an answer and does not verify everything; it verifies the changed lines with the defaults and states at the top that the full verification was not done, with its cost estimate",
+      "assertions": [
+        "[substance] Does not stop to wait for an answer",
+        "[substance] Limits the verification to the changed lines (the 40 lines of the last commit), not the whole repository",
+        "[substance] States at the top of the report that the full verification was not done and gives its cost in observable quantities (files, domains, claims), not in time",
+        "[substance] States the defaults it used"
+      ]
+    },
+    {
+      "id": 34,
+      "prompt": "Verify this change. The commit message says: 'Speed up the order history page: the query now uses the index on orders(customer_id, created_at)'. The change:\n\n-- before\nSELECT * FROM orders WHERE customer_id = ? ORDER BY id DESC LIMIT 50;\n-- after\nSELECT * FROM orders WHERE customer_id = ? AND status <> 'deleted' ORDER BY created_at DESC LIMIT 50;\n\n(Facts: the database is a relational database with about 4 million rows in orders; the only indexes are the primary key on id and orders(customer_id, created_at). You have read access to a staging copy of the database, but nobody has said you may run anything.)",
+      "expected_output": "A reasoning-only verification that does not run anything, scores the index claim below 80 because only the query plan can decide it, and ends with a proposed executable check (the plan of the query on staging) saying what would confirm it, what would refute it and its cost, then asks whether to run it",
+      "assertions": [
+        "[substance] Runs nothing and does not claim to have seen a query plan or any execution result",
+        "[substance] Does not score above 79 the claim that the query actually uses the index (it may say by reasoning that the index is usable), because only the query plan decides whether it is chosen",
+        "[substance] Proposes a concrete executable check for that claim (e.g. the database's plan or explain command for the new query on the staging copy)",
+        "[substance] For the proposed check states what result would confirm the claim and what result would refute it",
+        "[substance] States the cost or side effects of the check in observable terms (read only, one query, staging only), not in invented minutes",
+        "[substance] Asks the user whether to run the proposed check"
+      ]
+    },
+    {
+      "id": 35,
+      "prompt": "Verify parse_day in our command-line tool. You may run the existing test suite, nothing else.\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)\n\n(Facts: the existing test suite has 3 tests for parse_day, all with valid dates; running it gives '3 passed'. No test covers 31 February or input with extra parts.)",
+      "expected_output": "The verifier uses the approved execution (the existing suite) and reports its result, finds the defects by reasoning, proposes a new test and a fix but does not write them because writing was not approved, and asks",
+      "assertions": [
+        "[substance] Uses the result of the approved suite as given in the facts (3 passed), without presenting any other run as observed, and says it does not cover the suspected defects",
+        "[substance] Identifies at least one defect by reasoning (e.g. 31 February accepted, extra parts ignored, malformed input)",
+        "[substance] Proposes a new test and/or a fix but does not write or run them, because only the existing suite was approved",
+        "[substance] Asks for approval before writing the test or the fix",
+        "[substance] Does not run anything beyond the existing test suite"
+      ]
+    },
+    {
+      "id": 36,
+      "prompt": "Last week, during another verification, I let you run our test suite. Now verify this change to the discount function:\n\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\n(Facts: the change replaced 'return total * 0.9' with 'return round(total * 0.9, 2)'. The test suite exists; nobody has said anything about running it in this request.)",
+      "expected_output": "The approval given for an earlier verification does not carry over: the verifier verifies by reasoning only, runs nothing, and proposes any executable check with a question",
+      "assertions": [
+        "[substance] Does not run the test suite or anything else, and does not treat last week's approval as valid for this verification",
+        "[substance] Says, in the defaults or in the closing question, that execution needs approval for this verification",
+        "[substance] Carries out the verification by reasoning in the same answer (e.g. rounding of halves, float representation, totals already in cents)",
+        "[substance] If it proposes an executable check, states what it would confirm or refute and asks before running it"
+      ]
+    },
+    {
+      "id": 37,
+      "prompt": "Verify parse_day. You may write a new test file and run it; do not change the function.\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)\n\n(Facts: you suspect 31 February is accepted. The test you would write, test_rejects_31_february, calls parse_day('2026-02-31') and expects ValueError. Running it on the current code gives: FAILED, returned (2026, 2, 31), no exception raised.)",
+      "expected_output": "With execution approved, the suspicion becomes a test; the test is red on the current code, so the defect is demonstrated; the fix is proposed but not applied because changing the function was not approved",
+      "assertions": [
+        "[substance] States the hypothesis before the test (31 February is accepted) and names the test that checks it",
+        "[substance] Reports the run result as given (red: returned (2026, 2, 31)) and types the finding as a demonstrated defect",
+        "[substance] Proposes a fix (e.g. validating the day against the month and leap years) but does not apply it, because changing the function was not approved",
+        "[substance] Says the test should be run again after the fix and must then pass",
+        "[format] Records the test written, its result and the finding type in the report"
+      ]
+    },
+    {
+      "id": 38,
+      "prompt": "Verify this change. You may write tests and run them on this version and on the previous one; do not change the code.\n\n-    return total * 0.9\n+    return round(total * 0.9, 2)\n\n(the full function after the change:)\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\n(Facts: you suspect that some discounted totals still come out with more than two decimals. The test you would write, test_discount_has_two_decimals, calls discount(k / 100, 'WELCOME10') for every k from 0 to 10000 and asserts that the result times 100 is a whole number within 1e-9. Running it on the current code gives: PASSED. Running it on the previous version (return total * 0.9) gives: FAILED at k = 1 (0.01 * 0.9 = 0.009000000000000001).)",
+      "expected_output": "The test is green on the current code and red on the previous one, so it could have failed: the hypothesis is fully falsified, stated plainly, the test stays as a regression guard and also shows the change fixed something; no fix is proposed; what the test did not cover stays open",
+      "assertions": [
+        "[substance] States the hypothesis before the test and reports both results as given (passed now, failed on the previous version)",
+        "[substance] Declares the hypothesis falsified, not 'could not reproduce' and not a defect",
+        "[substance] Treats the falsification as full, not conditional, because the test was seen failing on the previous version",
+        "[substance] Keeps the test as a regression guard and proposes no fix for the falsified suspicion",
+        "[substance] Names what the test did not cover as still open (e.g. totals above 100, negative totals, other codes, the rounding direction of halves)"
+      ]
+    },
+    {
+      "id": 39,
+      "prompt": "Verify the fix in the last commit. You may run tests, on this commit and on its parent; do not write anything.\n\nThe parent version:\n\nDAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]\n\ndef parse_day(text):\n    year, month, day = (int(p) for p in text.split('-'))\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > DAYS[month - 1]:\n        raise ValueError('bad day')\n    return (year, month, day)\n\nThe commit message: 'Accept 29 February in leap years'. The commit changes the day check to allow 29 days in February when the year is a leap year, and adds the test test_rejects_31_april, which calls parse_day('2026-04-31') and expects ValueError.\n\n(Facts: running test_rejects_31_april on this commit: PASSED. Running it on the parent commit: PASSED.)",
+      "expected_output": "Green before and after: the added test does not cover what the commit claims to fix (29 February in leap years), so the fix is not proved by it and could regress unnoticed; the verifier proposes a test that is red on the parent and green on this commit, without writing it",
+      "assertions": [
+        "[substance] Reports both results as given: passed on this commit and passed on the parent",
+        "[substance] Concludes that the test does not prove the fix, because it was green before the fix too (the parent already rejects 31 April)",
+        "[substance] Says what that means: the leap-year fix could break again without any test failing",
+        "[substance] States the expected pattern for a test that proves the fix: red on the parent, green on this commit",
+        "[substance] Proposes such a test (e.g. parse_day('2024-02-29') accepted, and '2026-02-29' and '2100-02-29' rejected) without writing it, since writing was not approved"
+      ]
+    },
+    {
+      "id": 40,
+      "prompt": "Verify the tests for this new function. You may run a mutation probe on the changed lines, nothing else; do not write tests.\n\ndef is_adult(age):\n    return age >= 18\n\nThe tests:\n\ndef test_adult():\n    assert is_adult(30) is True\n\ndef test_child():\n    assert is_adult(5) is False\n\n(Facts: the mutation tool, limited to the changed line, produced 6 mutants. Killed: '>=' to '<', '>=' to '<=', 'return True'. Survived: '>=' to '>', '18' to '19', '18' to '17'. No mutant timed out or was skipped. The code was restored after the run and the diff is clean.)",
+      "expected_output": "The verifier reports the survivors, types each one (here: missing tests at the boundary, not superfluous code, not equivalent), proposes the boundary tests (17 and 18) without writing them, and does not treat the 50% score as the whole story",
+      "assertions": [
+        "[substance] Reports the three survivors with location and mutator, using the results as given",
+        "[substance] Classifies each survivor as a missing test (none is equivalent or superfluous code), with the reason: no test at the boundary",
+        "[substance] Proposes tests at the boundary (e.g. is_adult(18) is True and is_adult(17) is False) and says which survivors each would kill",
+        "[substance] Does not write the tests, because writing tests was not approved, and asks",
+        "[format] Presents the survivors in a table (location, mutator, outcome, reason)"
+      ]
+    },
+    {
+      "id": 41,
+      "prompt": "The mutation run on our parser module came back perfect: 40 mutants, 40 killed, score 100%, in 3 seconds. Verify that result. (Facts: the full test suite takes about 90 seconds; the project's test runner is configured with a plugin that prints results as JSON instead of the default text; the mutation tool's log shows, for every mutant, the same line: 'could not parse the test runner output, counting as killed'. You may read the log and the configuration; run nothing.)",
+      "expected_output": "The verifier does not accept the 100%: it looks at why the mutants died, finds the output plugin breaks the tool's parsing so every mutant is counted as killed, says the real score is unknown, and proposes a rerun without the plugin; nothing is run",
+      "assertions": [
+        "[substance] Does not accept the 100% score and says a perfect score is suspicious until it is clear why the mutants died",
+        "[substance] Links the log line and the JSON output plugin: the tool could not read the results and counted every mutant as killed",
+        "[substance] Uses the timing as evidence (40 mutants in 3 seconds against a 90-second suite)",
+        "[substance] Says the real score is unknown, not 100% and not 0%",
+        "[substance] Proposes rerunning without the output plugin (or with the format the tool reads), asks before running, and runs nothing"
+      ]
+    },
+    {
+      "id": 42,
+      "prompt": "Are the tests for the changed discount function strong enough? Nothing has been run and nobody has said anything about running.\n\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\nThe tests:\n\ndef test_welcome():\n    assert discount(100, 'WELCOME10') == 90\n\ndef test_no_code():\n    assert discount(100, '') == 100",
+      "expected_output": "Reasoning only: the verifier judges the tests by reasoning (which changes would survive) and proposes a mutation probe on the changed lines as an executable check, with its cost in observable terms (how many mutants, which tests run) and a question; it runs nothing",
+      "assertions": [
+        "[substance] Runs nothing and presents no mutation result as observed",
+        "[substance] Names by reasoning at least two concrete changes the current tests would not catch (e.g. removing round(), since 100 * 0.9 is already 90; rounding to another number of digits; replacing the code check with any non-empty code)",
+        "[substance] Proposes a mutation probe limited to the changed lines, saying that mutating the code temporarily needs consent and the code is restored afterwards",
+        "[substance] States the cost of the probe in observable terms (number of mutants or mutated lines, which tests run for each), not in invented minutes",
+        "[substance] Asks whether to run it"
       ]
     }
   ]
