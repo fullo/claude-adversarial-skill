@@ -43,7 +43,7 @@ Determine what needs verification. There are six domains:
 |--------|-------|---------|
 | **Code** | Source changes, logic, behavior | git diff, staged files, specific modules |
 | **Architecture** | Design decisions, structure | PLAN.md, SPEC.md, ADRs, dependency choices |
-| **Data** | Data integrity, schemas, contracts | migrations, DB schemas, API specs, configs |
+| **Data** | Data integrity, schemas, contracts | database schemas and migrations, file and message formats, event schemas, save files, API specs, configs |
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
 | **Tests** | Test suite integrity and honesty | test files, coverage reports, CI configs |
 | **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
@@ -51,18 +51,18 @@ Determine what needs verification. There are six domains:
 **Auto-detect from context:**
 - `git diff` has changes → **Code**
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
-- Schema, migration, or API spec files involved → **Data**
+- Schemas, migrations, file or message formats, event contracts, or API specs involved → **Data**
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
 - Multiple domains may apply — verify each separately, one section per domain
-- When domains overlap (e.g., ORM model change = Code + Data), assign each claim to its primary domain
+- When domains overlap (e.g., a change to a class that defines stored data = Code + Data), assign each claim to its primary domain
 
 ## Step 0a: GATHER ARTIFACTS
 
 - **Code**: read every changed file completely (`git diff --name-only HEAD~1` or `git diff --cached --name-only` for staged changes)
 - **Architecture**: read PLAN.md, SPEC.md, ADRs, and any referenced design docs
-- **Data**: read schema files, migration scripts, API specs, config files
+- **Data**: read schemas and migrations, file, message and event format definitions, API specs, config files
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
 - **Tests**: read test files, then read the production code they claim to verify, then the test bootstrap and shared helpers and the production configuration they should reproduce
 - **Analysis**: read the full agent output, report, or document under review
@@ -88,7 +88,7 @@ Break every artifact into **individual verifiable claims**. Each claim should be
 
 **Code:** "The timer resets to COOLDOWN after firing" / "The list is never modified during iteration"
 **Architecture:** "The PLAN.md addresses all requirements from SPEC.md" / "The API contract is backward compatible"
-**Data:** "The migration adds NOT NULL with a safe default" / "The rollback reverses all changes"
+**Data:** "The migration adds a required field with a safe default for existing records" / "Version 2 of the message format can still be read by version 1 consumers" / "The rollback reverses all changes"
 **Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual endpoints"
 **Tests:** "This test fails when the bug it covers is reintroduced" / "The coverage report reflects actual branch execution"
 **Analysis:** "The cited function exists at the referenced path" / "The recommendation follows from the evidence"
@@ -121,7 +121,7 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "List not modified during iteration" | "Does any nested call add to this list?" |
 | "All fields reset" | "Was field X added after reset() was written?" |
 | "PLAN addresses all requirements" | "Which SPEC requirements have no matching PLAN step?" |
-| "Migration is safe" | "What happens on a table with 10M rows?" |
+| "Migration is safe" | "What happens with 10M existing records, or with records written by an older version?" |
 | "README install works" | "Was a dependency added since the instructions were written?" |
 | "Tests cover the fix" | "Does this test still fail if I revert the fix?" |
 | "100% coverage" | "Is this line-coverage or branch-coverage? Are there branches inside covered lines?" |
@@ -163,15 +163,15 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 ### Verification targets by domain
 
-**Code:** Silent data corruption, initialization order, concurrent modification, state leaks, frame-rate dependence, off-by-one/boundaries, resource exhaustion, missing null checks, physics direction, tolerance windows.
+**Code:** Silent data corruption, initialization order, concurrent modification, state leaks, timing dependence (frame rate, call rate, clock, latency), off-by-one/boundaries, resource exhaustion, missing null checks, unit and sign errors (direction, currency, coordinates), tolerance windows.
 
 **Architecture:** Spec drift, missing constraints, over-engineering, dependency risk (maintenance, license, CVEs), breaking changes, missing NFRs.
 
-**Data:** Schema inconsistency, data loss risk, constraint gaps (NOT NULL, FK, uniqueness), unsafe defaults, backward compat, migration ordering.
+**Data:** Schema inconsistency, data loss risk, constraint gaps (required fields, references between records, uniqueness — whatever the storage or format enforces, or should), unsafe defaults, backward and forward compatibility (old readers, old records, old files), migration ordering.
 
 **Documentation:** Stale instructions, API drift, missing docs, broken examples, misleading error messages, version mismatch, orphaned references, UI copy drift.
 
-**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`), test-environment artifacts (the test passes, or fails, only because the test environment differs from production — for each test that a finding relies on, ask: "would this result be the same in production?"; when reviewing a whole suite, ask it at least for the test bootstrap and the shared helpers, which every test inherits). Typical artifacts:
+**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (fixed sleeps, automatic retries, tests disabled or skipped), test-environment artifacts (the test passes, or fails, only because the test environment differs from production — for each test that a finding relies on, ask: "would this result be the same in production?"; when reviewing a whole suite, ask it at least for the test bootstrap and the shared helpers, which every test inherits). Typical artifacts:
 - **changed defaults** — a fixture or helper sets something globally that production does not have (a signed-in user, an active tenant or account, a feature flag, a locale, a frozen clock, a fixed random seed);
 - **different storage or concurrency model** — an in-memory or single-writer store, a single-threaded test runner, a fake scheduler or event loop, hiding races and ordering problems that production would show;
 - **permissive fakes** — a fake of an external system (API, device, file system, payment provider, hardware sensor) that accepts input the real one rejects or silently ignores, or that never fails, never times out, and answers instantly;

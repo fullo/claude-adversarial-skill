@@ -42,7 +42,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 |--------|-----------------|--------------|
 | **Code** | Source changes, logic, behavior | Tests, type system, spec |
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
-| **Data** | Schemas, migrations, contracts | Production schema, validation rules |
+| **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules |
 | **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
 | **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
@@ -137,6 +137,7 @@ Or ask naturally:
 - **Initialization order bugs** — field A used before field B is set
 - **Concurrent modification** — adding to a list while iterating it
 - **State leaks** — data persisting across frames/calls when it shouldn't
+- **Timing dependence** — behaviour tied to frame rate, call rate, clock or latency
 - **Boundary conditions** — off-by-one, coordinate system errors
 - **Resource exhaustion** — unbounded lists, missing cleanup
 
@@ -148,10 +149,10 @@ Or ask naturally:
 - **Breaking changes** — API contract violations
 
 ### Data
-- **Schema inconsistency** — migration doesn't match model
-- **Data loss risk** — destructive migration without backup
-- **Constraint gaps** — missing NOT NULL, FK, uniqueness
-- **Backward compat** — old code reading new schema
+- **Schema inconsistency** — a migration or format change doesn't match the code that reads and writes the data
+- **Data loss risk** — a destructive migration or in-place upgrade without a backup or a way back
+- **Constraint gaps** — missing required fields, references or uniqueness, whatever the storage or format enforces
+- **Backward and forward compatibility** — old readers of new data, new readers of old records or files
 
 ### Documentation
 - **Stale instructions** — install/setup steps that no longer work
@@ -170,7 +171,7 @@ Or ask naturally:
 - **Missing negative tests** — only happy path tested
 - **Fragile assertions** — pass by coincidence (order, timing, locale)
 - **Test-code drift** — tests written for a previous code version
-- **Flaky indicators** — `sleep()`, `retry`, `@Ignore`/`skip`
+- **Flaky indicators** — fixed sleeps, automatic retries, tests disabled or skipped
 - **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by fixtures, a different storage or concurrency model, permissive fakes, a different path into the code (emulator, direct call), different resources or dependencies
 
 ### Analysis
