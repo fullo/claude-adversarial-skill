@@ -35,6 +35,25 @@ This skill combines five research-backed techniques:
 - **Modular Adversarial Scaffold** — systematic decomposition of the adversarial process
 - **Stress Techniques** — hypothesis-driven resilience testing inspired by Chaos Engineering
 
+## Intake (before Step 0)
+
+The user decides what to verify and how deep, before the verification starts. Settle four choices:
+
+| Choice | Options | Default |
+|--------|---------|---------|
+| **Target** | one or more domains (Step 0), or **everything** | what the request names, or what Step 0 auto-detects |
+| **Depth** | **quick**: only the highest-risk claims (Step 3c), no stress tests; **standard**: every step; **deep**: every step, stress techniques on every claim that passed, hidden-behavior probing on every claim | standard |
+| **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
+| **Execution** | **reasoning only**: nothing is run. This is the only option in this version | reasoning only |
+
+Rules:
+1. **Never ask what the request already says.** "Deep", "only the migration", "don't run anything" are answers.
+2. **Small requests start at once.** A request is small when its target is one function, one file, or a change of about 200 lines or fewer, and what to verify is clear. Ask no intake question: start, and state the defaults in one line at the top of the report, with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
+3. **Large requests stop first.** When the target is **everything**, more than one domain over a whole module or project, or the scope is the whole project, do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
+4. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
+5. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
+6. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report.
+
 ## Step 0: IDENTIFY
 
 Determine what needs verification. There are six domains:
@@ -273,6 +292,9 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 ## Output Format
 
 ```
+## INTAKE
+[Target, depth, scope, execution used; which were defaults]
+
 ## VERIFICATION DOMAIN
 [Code | Architecture | Data | Documentation | Tests | Analysis]
 
@@ -364,6 +386,7 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't dismiss low-probability scenarios** — rare events happen every session at scale
 - **Don't trust comments** — comments lie, code doesn't
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches
+- **Don't ask what the request already says** — and don't start a large verification without stating its cost first
 - **Don't skip ground truth** — without a reference, you can't verify anything
 - **Don't ignore the project's own invariants** — a rule the project says must never break is the first thing a change can break silently; check what enforces it on the changed path
 - **Don't auto-update project docs** — always propose, never write without confirmation

@@ -11,6 +11,9 @@ A Claude Code skill that performs rigorous adversarial verification across code,
 
 When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
 
+**Intake:**
+- **Ask before starting** — target, depth (quick, standard, deep), scope and execution; small requests start at once with declared defaults, large ones first get a cost estimate in files, domains and claims
+
 **Pre-verification (Steps 0–0b):**
 - **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
 - **Gather artifacts** — the actual outputs to verify
