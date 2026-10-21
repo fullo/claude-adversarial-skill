@@ -153,15 +153,15 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 
 ## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
 
-A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims):
+A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims, ranked as in Step 3c):
 
 | Class | Meaning | What to suggest |
 |-------|---------|-----------------|
-| **Evidenced** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite (a result someone reports but you have not seen counts once you have read it) | nothing; cite it |
+| **Evidenced** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite (a result someone only reports counts once you have read the result itself: the output, the log, the measurement) | nothing; cite it |
 | **Technical assumption** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
 | **User-expectation assumption** | it depends on what the users want, expect or will understand | a **mock-up** before the code (below) |
 
-The class feeds the confidence: an assumption of either kind is a claim only a run or the users can decide, so it scores at most 79 (Run-only constraint, Step 4) until its spike or mock-up is done. An assumption the plan presents as settled fact goes in FAIL as a preventive measure; one the plan already marks as open stays only in PRE-CODE VALIDATION.
+The class feeds the confidence: an assumption of either kind is a claim only a run or the users can decide, so it scores at most 79 (Run-only constraint, Step 4) until its spike or mock-up is done. An assumption the plan presents as settled fact goes in FAIL as a preventive measure, with its open question as the scenario; one the plan already marks as open stays only in PRE-CODE VALIDATION.
 
 **A spike** is a small, throwaway experiment that answers one question. Each suggested spike states:
 1. **The question**, one per spike (e.g. "does the API honour `updated_since`?").
@@ -176,7 +176,7 @@ A spike that could run now (a read-only call, a recorded response) is also a row
 **A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
 1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
 2. **The form** that fits the software: images, a static page, a clickable prototype, screens of a native app or a game, sample output of a command-line tool.
-3. **Today next to Proposed**: the current screen or output beside the new one, so the change is visible.
+3. **Today next to Proposed**: the current screen or output beside the new one, so the change is visible, when a current one exists.
 4. **Alternatives A and B** when the choice is open, with what each one favours.
 5. **Real content and states**: long names, empty lists, many rows, errors, a translation longer than the original.
 6. **Who approves it, and the link**: the mock-up is approved by the users or their representative before development, and the link between the request, the mock-up and the change is written down.
@@ -350,7 +350,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
 
-**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced.
+**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up; a report that users want it does not lift the cap.
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
@@ -397,7 +397,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 
 ## PRE-CODE VALIDATION (artifacts that propose work not yet done; omit otherwise)
 [With many claims, list evidenced ones by number only]
-| # | Claim | Class | Evidence, or spike or mock-up (question, measurement or form, decision rule) |
+| # | Claim | Class | Evidence; or spike (question, measurement, decision rule); or mock-up (question, form, alternatives, approver) |
 |---|-------|-------|--------------------------------------------------------------|
 
 ## FAILURE CATEGORIES IDENTIFIED
