@@ -274,10 +274,10 @@ When the user has approved running (and, where needed, writing) tests, turn each
 1. **Hypothesis first.** State the suspected defect and the observable effect before writing the test.
 2. **Test that reproduces it.** The test exercises the suspected path and asserts the suspected effect, with an expected value taken from the spec or the ground truth, not from the code under test. Writing it needs consent to write (Execution and consent, rule 2).
 3. **Run it on the current version.**
-   - **Red**: check first that the red is not a test-environment artifact or a wrong expectation in the test (Step 2b, *false red*; Step 4). Then the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
+   - **Red**: check first that the red is not a test-environment artifact or a wrong expectation in the test (Step 2b, *false red*; Step 4). If the expectation was wrong, fix the test, run it again and report the discarded run too. Otherwise the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
    - **Green with no change**: the hypothesis is **falsified**. Say so, keep the test as a regression guard, and propose no fix. It is fully falsified only if the test could have failed (Finding format, *Falsified hypothesis, in full*); otherwise it is conditionally falsified.
 4. **Fix only what a test showed broken.** A suspicion no test confirmed gets no fix; call any safeguard a preventive measure.
-5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted). Running on the parent is covered by consent to run there; reverting the fix in the working copy is writing and needs its own consent, so prefer a separate copy. Read the four cells:
+5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted). Running on the parent is covered by consent to run there, and a temporary checkout of it for that run is not writing; reverting the fix in the working copy is writing and needs its own consent, so prefer a separate copy. Read the four cells:
    - red before, green after: the test covers the defect and proves the fix;
    - green before and after: the test does not prove the fix, and the defect could come back with no test failing. A claim that the fix works, resting on this test, cannot score above 79. Propose a test that is red before the fix;
    - red after, whatever before: the fix does not work, or broke something; go back to rule 3.
@@ -361,7 +361,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 |---|-----------|------|----------|------|------------|-------|
 
 ## EXECUTED TESTS (Step 3e, only with approved execution)
-| # | Hypothesis | Test | Ran on | Result | Finding type |
+| # | Hypothesis | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 
 ## STRESS TEST RESULTS
