@@ -95,7 +95,7 @@ Determine what needs verification. There are six domains:
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
-- A spike, prototype or experiment report → **Analysis** (with the spike checklist, Step 3)
+- The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan (Step 1c)
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
 
@@ -253,14 +253,14 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
 
-**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point and report the ones that fail:
+**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point that applies (a held-out set and sample limits only when something was sampled or tuned), and report the ones that fail, typed as in the Finding format (tuning on the evaluation data is a demonstrated defect of the report; a missing seed is a preventive measure):
 - **The question** is explicit, one per spike, and the result answers that question, not a neighbouring one.
 - **The deciding measurement and the decision rule were fixed before the result** (Step 1c): which number answers yes or no, and what means do, don't or postpone. A threshold chosen after seeing the result is not a test.
 - **The bench is reproducible**: data, seed, versions of tools and libraries, machine, and the exact command or steps.
 - **The sample's limits are declared**: how much data, from where and when, confounding variables, synthetic or hand-picked data.
 - **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
 - **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
-- **The decision is written**: do, don't, or postpone. A postponement names the conditions that would reopen it.
+- **The decision is written** and follows the rule fixed before the spike, if there was one: do, don't, or postpone. A postponement names the conditions that would reopen it.
 - **The throwaway constraint held**: no spike code went into production unreviewed, and the spike did not write to a real system. If it used personal data, say where that data is now and whether it should be deleted.
 
 A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
