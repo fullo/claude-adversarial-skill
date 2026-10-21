@@ -16,7 +16,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Execution with consent** — reading and searching the code is not running; by default nothing is run: the report ends with proposed executable checks (what would confirm, what would refute, cost) and asks; only approved checks run, for that verification only, and writing a test or a fix needs its own approval
 
 **Pre-verification (Steps 0–0b):**
-- **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
+- **Identify** what needs verification — code, architecture, data, documentation, tests, analysis, or UX
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
 - **Find the project's invariants** — rules that must never break, or say where you looked if there are none
@@ -30,6 +30,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 
 **Deep Verification (Steps 3–3e):**
 - **Independently verify** each claim by tracing actual paths
+- **UX check round** — render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; one or two alternative interfaces with what each improves and costs
 - **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning, numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
 - **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
@@ -53,7 +54,8 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules, data already in the field |
 | **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API or interface, version history |
 | **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
-| **Analysis** | Agent outputs, reports, docs | Source material, cited references |
+| **Analysis** | Agent outputs, reports, spike reports | Source material, cited references |
+| **UX** | Usability of any interface: web, app, game, command line | Approved mock-up, design system, platform guidelines, WCAG 2.2 |
 
 ## Techniques
 

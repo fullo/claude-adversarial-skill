@@ -1,7 +1,7 @@
 ---
 name: adversarial-verify
 description: >-
-  Adversarial verification of code, architecture, data, documentation, tests, or analysis
+  Adversarial verification of code, architecture, data, documentation, tests, analysis or UX
   using Chain-of-Verification (CoV) with abstractive red-teaming, hidden behavior
   probing, stress techniques, and tri-modal reasoning (deductive, inductive, abductive).
   Identifies failure categories, detects undocumented behaviors, stress-tests for
@@ -77,7 +77,7 @@ The verifier reasons; it runs or writes something only with the user's consent.
 
 ## Step 0: IDENTIFY
 
-Determine what needs verification. There are six domains:
+Determine what needs verification. There are seven domains:
 
 | Domain | Scope | Examples |
 |--------|-------|---------|
@@ -87,6 +87,7 @@ Determine what needs verification. There are six domains:
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
 | **Tests** | Test suite integrity and honesty | test files, coverage reports, CI configs |
 | **Analysis** | Agent outputs, reports, docs, spike and prototype reports | summaries, recommendations, generated content, experiment results |
+| **UX** | Usability of an interface, for its users | web pages, native mobile or desktop apps, games, command-line and terminal interfaces, mock-ups |
 
 **Auto-detect from context:**
 - The version control diff (e.g. `git diff`) has changes → **Code**
@@ -95,6 +96,7 @@ Determine what needs verification. There are six domains:
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
+- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**
 - The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan (Step 1c)
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
@@ -107,6 +109,7 @@ Determine what needs verification. There are six domains:
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
 - **Tests**: read test files, then read the production code they claim to verify, then the test bootstrap and shared helpers and the production configuration they should reproduce
 - **Analysis**: read the full agent output, report, or document under review
+- **UX**: read the screens, templates, styles and theme tokens involved, the texts and their translations, and any screenshots, recordings or interface tests the project has; list the target formats (sizes, input methods: touch, mouse, keyboard, controller; light and dark themes)
 
 ## Step 0b: ESTABLISH GROUND TRUTH
 
@@ -118,6 +121,7 @@ Determine what needs verification. There are six domains:
 | **Documentation** | Actual codebase, current API or interface, the running software, version history |
 | **Tests** | Production code, requirements, coverage reports, CI results, production configuration and runtime (to tell a real pass from a test-environment artifact) |
 | **Analysis** | Source material, original data, cited references, actual codebase |
+| **UX** | The approved mock-up, the design system and the project's own guidelines, the platform's guidelines, and WCAG 2.2 where it applies |
 
 In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
 
@@ -133,6 +137,7 @@ Break every artifact into **individual verifiable claims**. Each claim should be
 **Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual interface (functions, commands, endpoints, messages)"
 **Tests:** "This test fails when the bug it covers is reintroduced" / "The coverage report reflects actual branch execution"
 **Analysis:** "The cited function exists at the referenced path" / "The recommendation follows from the evidence"
+**UX:** "The hint text is readable in dark mode" / "Every menu entry can be reached with the controller" / "The German labels fit at the narrowest supported width"
 
 ## Step 1b: CLASSIFY REASONING MODE
 
@@ -265,6 +270,22 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
 
+**UX:** adapt each point to the kind of interface (web, native app, game, command-line or terminal); WCAG 2.2 is the reference where it applies. Check, in every target format (sizes, input methods, themes):
+- **Render**: the layout holds in each format; nothing is cut off or off screen; navigation stays reachable.
+- **Contrast**: text at least 4.5:1 (3:1 for large text), graphics and the boundaries of controls at least 3:1, in every theme including dark mode. Compute the ratio from the actual colours; do not estimate it.
+- **Legibility**: text size for the viewing distance, line length, heading hierarchy; zoom to 200% and reflow at 320 px wide without loss of content, where the platform has them.
+- **Targets**: the size of what is touched or clicked, against the project's threshold or WCAG 2.5.8.
+- **Keyboard, controller and focus**: everything reachable with each supported input, the focus visible from the viewing distance, the order logical.
+- **Real content**: long names, translations longer than the original, empty values, many items.
+- **States**: empty, loading, error, success; error messages understandable and placed next to what caused them.
+- **Basic accessibility**: labels on fields, text alternatives for images, an accessible name for icon-only buttons.
+- **Motion and perceived speed**: reduced-motion preferences respected; time to the first useful content on a slow network or device.
+- **Sensitive data**: no secrets or personal data visible on screen, in screenshots or recordings.
+
+**UX check round.** Suggest a check of the main screens in the project's target formats, using its interface tests if it has any. It is a run, so it is proposed under Execution and consent, with the screens, formats and inputs it covers. A measured fact (a width, a colour pair) can be computed by reasoning; how the screen really renders cannot.
+
+**Alternative interfaces.** For each weak point found, suggest one or two alternatives with a short comparison: what each improves, what it makes worse, and its cost. The verifier describes the alternatives; a mock-up of them follows Step 1c.
+
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 
 ## Step 3b: HIDDEN BEHAVIOR PROBING
@@ -394,7 +415,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [Target, depth, scope, execution mode used; which were defaults; how to change them]
 
 ## VERIFICATION DOMAIN
-[Code | Architecture | Data | Documentation | Tests | Analysis]
+[Code | Architecture | Data | Documentation | Tests | Analysis | UX]
 
 ## GROUND TRUTH
 [Sources used for verification]
@@ -463,7 +484,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Subtlety flags: [code hiding complexity]
 
 ### SUMMARY
-- Domain: [Code/Architecture/Data/Documentation/Tests/Analysis]
+- Domain: [Code/Architecture/Data/Documentation/Tests/Analysis/UX]
 - Claims: X verified, Y in FAIL (defects and preventive measures), Z falsified
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
