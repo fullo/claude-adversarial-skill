@@ -493,6 +493,42 @@
         "[substance] States the expected pattern for a test that proves the fix: red on the parent, green on this commit",
         "[substance] Proposes such a test (e.g. parse_day('2024-02-29') accepted, and '2026-02-29' and '2100-02-29' rejected) without writing it, since writing was not approved"
       ]
+    },
+    {
+      "id": 40,
+      "prompt": "Verify the tests for this new function. You may run a mutation probe on the changed lines, nothing else; do not write tests.\n\ndef is_adult(age):\n    return age >= 18\n\nThe tests:\n\ndef test_adult():\n    assert is_adult(30) is True\n\ndef test_child():\n    assert is_adult(5) is False\n\n(Facts: the mutation tool, limited to the changed line, produced 6 mutants. Killed: '>=' to '<', '>=' to '<=', 'return True'. Survived: '>=' to '>', '18' to '19', '18' to '17'. No mutant timed out or was skipped. The code was restored after the run and the diff is clean.)",
+      "expected_output": "The verifier reports the survivors, types each one (here: missing tests at the boundary, not superfluous code, not equivalent), proposes the boundary tests (17 and 18) without writing them, and does not treat the 50% score as the whole story",
+      "assertions": [
+        "[substance] Reports the three survivors with location and mutator, using the results as given",
+        "[substance] Classifies each survivor as a missing test (none is equivalent or superfluous code), with the reason: no test at the boundary",
+        "[substance] Proposes tests at the boundary (e.g. is_adult(18) is True and is_adult(17) is False) and says which survivors each would kill",
+        "[substance] Does not write the tests, because writing tests was not approved, and asks",
+        "[format] Presents the survivors in a table (location, mutator, outcome, reason)"
+      ]
+    },
+    {
+      "id": 41,
+      "prompt": "The mutation run on our parser module came back perfect: 40 mutants, 40 killed, score 100%, in 3 seconds. Verify that result. (Facts: the full test suite takes about 90 seconds; the project's test runner is configured with a plugin that prints results as JSON instead of the default text; the mutation tool's log shows, for every mutant, the same line: 'could not parse the test runner output, counting as killed'. You may read the log and the configuration; run nothing.)",
+      "expected_output": "The verifier does not accept the 100%: it looks at why the mutants died, finds the output plugin breaks the tool's parsing so every mutant is counted as killed, says the real score is unknown, and proposes a rerun without the plugin; nothing is run",
+      "assertions": [
+        "[substance] Does not accept the 100% score and says a perfect score is suspicious until it is clear why the mutants died",
+        "[substance] Links the log line and the JSON output plugin: the tool could not read the results and counted every mutant as killed",
+        "[substance] Uses the timing as evidence (40 mutants in 3 seconds against a 90-second suite)",
+        "[substance] Says the real score is unknown, not 100% and not 0%",
+        "[substance] Proposes rerunning without the output plugin (or with the format the tool reads), asks before running, and runs nothing"
+      ]
+    },
+    {
+      "id": 42,
+      "prompt": "Are the tests for the changed discount function strong enough? Nothing has been run and nobody has said anything about running.\n\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\nThe tests:\n\ndef test_welcome():\n    assert discount(100, 'WELCOME10') == 90\n\ndef test_no_code():\n    assert discount(100, '') == 100",
+      "expected_output": "Reasoning only: the verifier judges the tests by reasoning (which changes would survive) and proposes a mutation probe on the changed lines as an executable check, with its cost in observable terms (how many mutants, which tests run) and a question; it runs nothing",
+      "assertions": [
+        "[substance] Runs nothing and presents no mutation result as observed",
+        "[substance] Names by reasoning at least two concrete changes the current tests would not catch (e.g. removing round(), since 100 * 0.9 is already 90; rounding to another number of digits; replacing the code check with any non-empty code)",
+        "[substance] Proposes a mutation probe limited to the changed lines, saying that mutating the code temporarily needs consent and the code is restored afterwards",
+        "[substance] States the cost of the probe in observable terms (number of mutants or mutated lines, which tests run for each), not in invented minutes",
+        "[substance] Asks whether to run it"
+      ]
     }
   ]
 }

@@ -284,6 +284,18 @@ When the user has approved running (and, where needed, writing) tests, turn each
 
 Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the result, and the finding type. The verdict goes in its own table (FAIL or FALSIFIED HYPOTHESES), and an approved proposed check points to its EXECUTED TESTS row in its Status.
 
+### Mutation probe (Tests domain, only when the user asked for it)
+
+Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check); otherwise propose it in PROPOSED EXECUTABLE CHECKS, since it mutates the code and is slow.
+
+1. **Cost first.** Before starting, state the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Wait for confirmation if the user did not already approve that size.
+2. **Scope: the changed lines**, when the tool allows it.
+3. **Tool or hand mutations.** Use the project's mutation tool for its language if one is available. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
+4. **Restore the code** after every mutant, prefer a separate copy, and confirm the working copy is clean at the end (Execution and consent: mutating is writing, covered only by the approval of the probe).
+5. **Read every survivor.** Each one is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
+6. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
+7. **Declare what was not measured.** Mutants skipped or timed out are excluded from the score: say how many, and that the score covers only the rest.
+
 ## Step 4: EVIDENCE-BASED REPORTING
 
 ### Anti-fabrication rule
@@ -363,6 +375,12 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 ## EXECUTED TESTS (Step 3e, only with approved execution)
 | # | Hypothesis | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
+
+## MUTATION PROBE (only when the user asked for it)
+[Scope, tool or hand mutations, mutants generated, killed, survived, skipped or timed out, score and what it excludes]
+| # | File:Line | Mutator | Outcome | Reason | Test that would kill it |
+|---|-----------|---------|---------|--------|------------------------|
+[Outcome: missing test, superfluous code, or equivalent]
 
 ## STRESS TEST RESULTS
 [At quick depth write "Skipped (quick depth)" instead of the table]
