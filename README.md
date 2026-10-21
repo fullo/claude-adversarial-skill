@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v3.6-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v4.0-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)

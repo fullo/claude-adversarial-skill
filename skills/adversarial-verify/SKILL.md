@@ -15,7 +15,7 @@ license: MIT
 compatibility: Requires a version control system (e.g. git) for diff analysis
 metadata:
   author: fullo
-  version: "3.6"
+  version: "4.0"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
