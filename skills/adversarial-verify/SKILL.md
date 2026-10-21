@@ -158,7 +158,7 @@ For each claim, **read the actual artifact** and trace execution or logic:
 For each project invariant found in Step 0b, decide whether the artifact touches it. For code and data: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
-3. **Touched with nothing that bites** → FAIL, category *missing completeness*. If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
+3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
 4. **Plans, specs, docs, and analyses** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
@@ -253,17 +253,19 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 1. **Location** — file:line or section reference
 2. **Quote** — the problematic code, spec text, schema, or claim
-3. **Scenario** — concrete example of how it fails
-4. **Reasoning mode** — Deductive / Inductive / Abductive
-5. **Confidence** — per the scoring table above
-6. **Survived** — yes (confirmed robust) / no (fragile) / n/a (not stress-tested)
-7. **Fix** — specific change (for no) or "Confirmed robust" (for yes)
-8. **Type** — one of:
+3. **Type** — one of:
    - **Demonstrated defect** — a trace, test, or reproduction shows it happening;
-   - **Preventive measure** — a plausible risk that nothing shows happening; say what would turn it into a defect (an input, a caller, a condition);
-   - **Falsified hypothesis** — a check designed to show the defect did not show it. Say so plainly and keep the check (e.g. a test) as a regression guard. The falsification covers only the paths the check exercised: name the paths it did not cover, which stay open. Propose no fix for a defect that was not shown.
+   - **Preventive measure** — a plausible risk that nothing shows happening;
+   - **Falsified hypothesis** — a check designed to show a suspected defect did not show it.
+4. **Scenario** — for a defect, a concrete example of how it fails; for a preventive measure, what would turn it into a defect (an input, a caller, a condition); for a falsified hypothesis, the check and its result
+5. **Reasoning mode** — Deductive / Inductive / Abductive
+6. **Confidence** — per the scoring table above, for the finding as typed (a preventive measure scores how sure you are that the risk exists, not that it happens)
+7. **Survived** — yes (confirmed robust) / no (fragile) / n/a (not stress-tested)
+8. **Fix** — for a defect, the specific change; for a preventive measure, the safeguard you propose; for a falsified hypothesis, none (the check stays as a regression guard); for a surviving stress test, "Confirmed robust"
 
-Severity and confidence apply to the finding as typed: a preventive measure is not reported as a bug that happens.
+**Falsified hypothesis, in full.** Say it plainly; don't leave it as "could not reproduce". A check falsifies a suspicion only if it **could have failed**: it was seen failing with the suspected defect injected, or you can show that it exercises the suspected path and asserts the suspected effect. It also falls under the test-environment constraint (Step 4). If you cannot show that it could have failed, report it as **conditionally falsified** and name the check that would complete it, for example: "red when the invalidation is removed". The falsification covers only the paths the check exercised. Name the ones it did not cover; they stay open. Propose no fix for a defect that was not shown.
+
+**One finding, one type.** If a problem is demonstrated on one path and only plausible on another, report two findings. Preventive measures and demonstrated defects both go in the FAIL table, and its Type column says which. Falsified hypotheses go in their own table.
 
 ## Output Format
 
@@ -291,6 +293,10 @@ Severity and confidence apply to the finding as typed: a preventive measure is n
 ### PASS ✅
 | # | Claim | Evidence |
 |---|-------|---------|
+
+### FALSIFIED HYPOTHESES
+| # | Suspected defect | Check | Could it have failed? (how shown) | Paths not covered |
+|---|------------------|-------|-----------------------------------|-------------------|
 
 ### FAIL ❌
 | # | File:Line | Type | Severity | Mode | Confidence | Issue |
@@ -335,7 +341,7 @@ After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `AD
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json`: bug found → author -1, false positive → verifier -1, 3 clean reviews → author +1.
+If the project uses `.claude/agent-trust.json`: demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews → author +1.
 
 ## References
 

@@ -309,9 +309,10 @@
     {
       "id": 24,
       "prompt": "Verify the price cache of our shop backend. (I suspected it returns stale prices after an update, so I wrote a test that updates a price and reads it back through the cache: it passes, and I changed no code.)",
-      "expected_output": "The suspicion is falsified by the test: say so explicitly, keep the test as regression, propose no fix for an undemonstrated bug, and still question what the test does not cover",
+      "expected_output": "The suspicion is falsified for the tested path only if the test could have failed; the verifier says so plainly or reports it as conditionally falsified with the check that would complete it, keeps the test, proposes no fix, and names the paths not covered",
       "assertions": [
-        "[substance] States explicitly that the stale-price hypothesis is falsified by the passing test (not 'could not reproduce, maybe flaky')",
+        "[substance] States the status of the stale-price suspicion plainly: falsified for the tested path, or conditionally falsified with the check that would complete it (e.g. the test goes red when the invalidation is removed); not 'could not reproduce, maybe flaky'",
+        "[substance] Asks whether the test could have failed (e.g. it really reads through the cache and would see a stale value) before treating the suspicion as fully falsified",
         "[substance] Recommends keeping the test as a regression test",
         "[substance] Does not propose a code fix for the stale-price bug",
         "[substance] Does not conclude that the cache is correct in general: names at least one path the test does not cover (e.g. concurrent update, expiry, another instance, update through a different entry point)",
