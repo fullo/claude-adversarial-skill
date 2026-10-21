@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v3.5-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v3.6-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -43,7 +43,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Code** | Source changes, logic, behavior | Tests, type system, spec |
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
 | **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules, data already in the field |
-| **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
+| **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API or interface, version history |
 | **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 

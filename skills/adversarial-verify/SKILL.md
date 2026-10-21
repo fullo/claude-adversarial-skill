@@ -9,10 +9,10 @@ description: >-
   Use when the user says "verify", "adversarial check", "CoV review",
   "/adversarial-verify", "review my changes", or "stress test".
 license: MIT
-compatibility: Requires git for diff analysis
+compatibility: Requires a version control system (e.g. git) for diff analysis
 metadata:
   author: fullo
-  version: "3.5"
+  version: "3.6"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
@@ -41,7 +41,7 @@ Determine what needs verification. There are six domains:
 
 | Domain | Scope | Examples |
 |--------|-------|---------|
-| **Code** | Source changes, logic, behavior | git diff, staged files, specific modules |
+| **Code** | Source changes, logic, behavior | the version control diff (e.g. git), staged files, specific modules |
 | **Architecture** | Design decisions, structure | PLAN.md, SPEC.md, ADRs, dependency choices |
 | **Data** | Data integrity, schemas, contracts | database schemas and migrations, file and message formats, event schemas, save files, API specs, configs |
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
@@ -49,7 +49,7 @@ Determine what needs verification. There are six domains:
 | **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
 
 **Auto-detect from context:**
-- `git diff` has changes → **Code**
+- The version control diff (e.g. `git diff`) has changes → **Code**
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schemas, migrations, file or message formats, event contracts, or API specs involved → **Data**
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
@@ -60,7 +60,7 @@ Determine what needs verification. There are six domains:
 
 ## Step 0a: GATHER ARTIFACTS
 
-- **Code**: read every changed file completely (`git diff --name-only HEAD~1` or `git diff --cached --name-only` for staged changes)
+- **Code**: read every changed file completely (from the version control system, e.g. with git: `git diff --name-only HEAD~1`, or `git diff --cached --name-only` for staged changes)
 - **Architecture**: read PLAN.md, SPEC.md, ADRs, and any referenced design docs
 - **Data**: read schemas and migrations, file, message and event format definitions, API specs, config files
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
