@@ -159,6 +159,8 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 3. State at least one **alternative hypothesis**
 4. State what **evidence would confirm or refute** each
 
+At quick depth, rank the claims now (Step 3c, attack selection: blast radius × probability), since the later steps take only the top 3.
+
 ## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
 
 A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims, ranked as in Step 3c):
@@ -239,7 +241,7 @@ For each claim, **read the actual artifact** and trace execution or logic:
 For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data, test and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about; a change to the mechanism that enforces it (deleting or weakening its test, assertion or constraint) also touches it. For plans, specs, docs, analyses and mock-ups: the artifact proposes, describes, shows or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
-3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
+3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation, or the change itself removed or weakened the mechanism that bit (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
 4. **Plans, specs, docs, analyses and mock-ups** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
@@ -301,7 +303,7 @@ A spike report that recommends work ("build it") is also checked by Step 1c: the
 3. **Cross-reference probing** — check if what the code *claims* matches what it *does*
 4. **Absence probing** — look for what's NOT there: missing error handling, validation, tests, logging
 
-At quick depth probe only the top 3 highest-risk claims; at standard depth, at least the top 3 plus every claim with a critical blast radius; at deep depth, every claim.
+At quick depth probe only the top 3 highest-risk claims; at standard depth, at least the top 3 plus every claim whose failure would be of critical severity (Finding format, item 4); at deep depth, every claim.
 
 **Tool-to-agent gap** — for each piece of evidence, explicitly state: the **hypothesis** it supports, the **confidence** level, and what **additional evidence** would confirm or deny it.
 
@@ -368,7 +370,7 @@ Measures whether the tests protect the changed code, not only whether they execu
 3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
 4. **Mutate a separate copy** of the repository and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
 5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
-6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, in the section of the domain under verification (the Tests domain is not added to the target for it), each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
+6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, in the section of the domain whose code the mutated lines belong to (the Tests domain is not added to the target for it), each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
 7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
 8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
 
@@ -511,7 +513,7 @@ Proposed writes: [each test, fix or doc update (Step 5) the verifier wants to wr
 [End the report with one question covering the proposed checks and writes: nothing runs or is written without an answer. Drop the question when nothing is left proposed]
 ```
 
-For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end (the SUMMARY bullets summed across domains, plus the claims that span domains), then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question. INTAKE appears once, at the top.
+For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end (the SUMMARY bullets summed across domains, plus the changes that touch several domains, each claim counted once in its primary domain), then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question. INTAKE appears once, at the top.
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
