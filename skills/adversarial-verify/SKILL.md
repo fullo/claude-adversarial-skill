@@ -252,7 +252,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ### Finding format
 
-Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type, except that a hidden behavior is typed when you report it as a problem.
+Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type. A stress test that does not survive, or a hidden behavior that is a problem, is also reported as a finding in FAIL, with a reference to its row.
 
 1. **Location** — file:line or section reference
 2. **Quote** — the problematic code, spec text, schema, or claim (for a falsified hypothesis: the check)
@@ -260,7 +260,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
    - **Demonstrated defect** — a trace, test, or reproduction shows it happening;
    - **Preventive measure** — a plausible risk that nothing shows happening;
    - **Falsified hypothesis** — a check designed to show a suspected defect did not show it.
-4. **Severity** — the impact if the finding is real; for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario
+4. **Severity** — the impact if the finding is real; for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario; not applicable to a falsified hypothesis
 5. **Scenario** — for a defect, a concrete example of how it fails; for a preventive measure, what would turn it into a defect (an input, a caller, a condition); for a falsified hypothesis, the check and its result
 6. **Reasoning mode** — Deductive / Inductive / Abductive
 7. **Confidence** — per the scoring table above, for the finding as typed (a preventive measure scores how sure you are that the risk exists, not that it happens)
@@ -371,6 +371,6 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't trust the interface** — probe the actual behavior, not what the code advertises
 - **Don't collect evidence without hypotheses** — every finding needs a conclusion
 - **Don't claim absence without stating where you looked** — "X doesn't exist" requires citing what you checked
-- **Don't report only problems** — stress tests that survive are equally valuable findings
+- **Don't report only problems** — stress tests that survive are equally valuable results
 - **Don't call a risk a bug** — type every problem or suspicion you report: demonstrated defect, preventive measure, or falsified hypothesis
 - **Don't use the same technique twice** — forced variety prevents analytical tunnel vision

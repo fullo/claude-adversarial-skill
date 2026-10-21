@@ -246,7 +246,7 @@
         "Looks for non-test mechanisms too (assertions, types, interlocks) before concluding that nothing enforces the invariant on the new path",
         "Names the existing enforcing test and checks whether it covers the new timer path",
         "Reports a FAIL with category missing completeness because the new path has no enforcing mechanism",
-        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path'",
+        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'",
         "Proposes an enforcing mechanism for the new path (a test, an assertion, or an interlock check) instead of only noting the gap"
       ]
     },
