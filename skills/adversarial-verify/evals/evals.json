@@ -529,6 +529,31 @@
         "[substance] States the cost of the probe in observable terms (number of mutants or mutated lines, which tests run for each), not in invented minutes",
         "[substance] Asks whether to run it"
       ]
+    },
+    {
+      "id": 43,
+      "prompt": "Verify this plan before we start coding.\n\nPLAN: order sync\n1. Every 10 minutes the job calls the shop's API, GET /orders?updated_since=<last run>&per_page=500, and stores every order returned.\n2. Our CSV importer already handles the shop's export format (see importer/csv.py, covered by tests/test_csv.py: 14 tests, green in CI last week).\n3. Shop managers want to see the synced orders in a new 'Today' dashboard, grouped by status.\n4. The sync finishes in under a minute for 20,000 orders.\n\n(Facts: the repository has no API client, no recorded API response and no measurement yet; the shop's API documentation is not in the repository; nobody has called the API.)",
+      "expected_output": "Before code, the verifier classifies each claim: 2 is demonstrated by evidence already in the repository, 1 and 4 are technical hypotheses that need a spike, 3 is a hypothesis about what users expect (a mock, not a spike). Each spike has a question, a deciding measurement, a decision rule and a throwaway constraint",
+      "assertions": [
+        "[substance] Classifies claim 2 as demonstrated (it cites the importer and its tests) and suggests no spike for it",
+        "[substance] Classifies claims 1 and 4 as technical hypotheses and suggests a spike for them before any production code",
+        "[substance] Gives each suggested spike a question, the measurement that decides it, and a decision rule that includes do, don't, and postpone with the conditions to reopen",
+        "[substance] States the throwaway constraint for the spikes: no production code, no writes to real systems (e.g. read-only calls with test credentials)",
+        "[substance] Raises at least two adversarial questions about the external API (e.g. updated_since silently ignored, per_page capped below 500 so pagination is needed, documentation differing from real responses)",
+        "[substance] Classifies claim 3 as a hypothesis about what users expect, not a technical one, and does not propose a spike for it",
+        "[format] Reports the result in a pre-code validation section listing each claim with its class and the proposed spike"
+      ]
+    },
+    {
+      "id": 44,
+      "prompt": "Verify this spike plan. Spike: to find out whether the shop sends the 'order.updated' webhook when an order is cancelled, we will create a test order on the live shop with a real card, cancel it, and watch our endpoint for an hour. Then we decide whether to build the webhook receiver.",
+      "expected_output": "The verifier flags that the spike breaks the throwaway constraint (it writes to a real system with real money and side effects), and proposes ways to answer the same question without touching the live shop; it keeps the question and asks for a decision rule",
+      "assertions": [
+        "[substance] Flags that the spike writes to a real system (a real order and payment on the live shop) and breaks the throwaway constraint",
+        "[substance] Names concrete side effects (e.g. charges and refunds, emails to staff or customers, stock, reports, other webhooks)",
+        "[substance] Proposes a way to answer the same question without writing to the live system (e.g. the shop's test mode or sandbox, recorded webhook payloads, the vendor's documentation checked against a read-only call)",
+        "[substance] Notes the spike has no decision rule (what result means build, don't build, or postpone) and asks for one"
+      ]
     }
   ]
 }

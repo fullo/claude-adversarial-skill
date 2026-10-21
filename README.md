@@ -22,6 +22,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Find the project's invariants** — rules that must never break, or say where you looked if there are none
 
 **Chain-of-Verification (Steps 1–2b):**
+- **Pre-code validation** — for plans and specs, every claim is demonstrated, a technical hypothesis (suggest a throwaway spike: question, deciding measurement, decision rule, no writes to real systems) or a user-expectation hypothesis (suggest a mock)
 - **Decompose** artifacts into individual verifiable claims
 - **Classify reasoning mode** — deductive, inductive, or abductive per claim
 - **Generate adversarial questions** for each claim ("what would make this fail?")

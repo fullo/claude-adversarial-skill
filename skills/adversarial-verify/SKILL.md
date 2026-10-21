@@ -151,6 +151,26 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 3. State at least one **alternative hypothesis**
 4. State what **evidence would confirm or refute** each
 
+## Step 1c: PRE-CODE VALIDATION (plans and specs, before the code exists)
+
+A plan or a spec can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of the plan by the evidence behind it:
+
+| Class | Meaning | What to suggest |
+|-------|---------|-----------------|
+| **Demonstrated** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite | nothing; cite it |
+| **Technical hypothesis** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
+| **User-expectation hypothesis** | it depends on what the users want or will understand | a **mock** before the code, for the users to see and approve |
+
+**A spike** is a small, throwaway experiment that answers one question. Each suggested spike states:
+1. **The question**, one per spike (e.g. "does the API honour `updated_since`?").
+2. **The measurement that decides it**: what will be run or read, and which result answers yes or no.
+3. **The decision rule**: do, don't, or postpone. A postponement names the conditions that would reopen it.
+4. **The throwaway constraint**: no production code, and no writes to real systems (no real orders, payments, messages or records). A spike that needs a real system uses read-only calls, test credentials, a sandbox or recorded responses. A proposed spike that writes to a real system is a finding, not a plan.
+
+Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
+
+The verifier suggests spikes; it does not run them. Running one is a run and writing it is a write (Execution and consent).
+
 ## Step 2: ADVERSARIAL QUESTIONS
 
 For each claim, generate **adversarial counter-questions** — scenarios designed to break the claim:
@@ -364,6 +384,10 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 ## DECOMPOSED CLAIMS
 1. [Claim text] — Mode: [Deductive/Inductive/Abductive]
 ...
+
+## PRE-CODE VALIDATION (plans and specs only; omit otherwise)
+| # | Claim | Class | Evidence or spike/mock (question, measurement, decision rule) |
+|---|-------|-------|--------------------------------------------------------------|
 
 ## FAILURE CATEGORIES IDENTIFIED
 | Category | Instances | Files affected |
