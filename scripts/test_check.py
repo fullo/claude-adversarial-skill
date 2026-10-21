@@ -196,15 +196,24 @@ class PrivateTest(Base):
     def test_underscore(self):
         self.assert_fails(self.leak(f"{T1}_labs"), "private term #1")
 
-    def test_glued_word_needs_star(self):
+    def test_glued_forms_caught_by_default(self):
+        for form in (f"{T1.capitalize()}Labs", f"{T1}2026", f"{T1}s", f"my{T1}"):
+            with self.subTest(form=form.lower().replace(T1, "T")):
+                self.tearDown(); self.setUp()
+                self.append(SKILL, form)
+                self.assert_fails(self.run_check(terms=T1), "private term #1")
+
+    def test_whole_word_opt_in(self):
+        self.append(SKILL, f"{T1.capitalize()}Labs and {T1}-x")
+        self.assert_fails(self.run_check(terms="=" + T1), "private term #1")  # the hyphenated form
+        self.tearDown(); self.setUp()
         self.append(SKILL, f"{T1.capitalize()}Labs")
-        self.assert_passes(self.run_check(terms=T1))  # whole word by default
-        self.assert_fails(self.run_check(terms=T1 + "*"), "private term #1")
+        self.assert_passes(self.run_check(terms="=" + T1))  # glued form: not a whole word
 
     def test_whole_word_avoids_false_positives(self):
         prefix = "adver" + "saria"  # a prefix of a word used all over the repo, built at run time
-        self.assert_passes(self.run_check(terms=prefix))
-        self.assert_fails(self.run_check(terms=prefix + "*"), "private term #1")
+        self.assert_fails(self.run_check(terms=prefix), "private term #1")
+        self.assert_passes(self.run_check(terms="=" + prefix))
 
     def test_short_term_warns(self):
         r = self.run_check(terms="zq" + "v")
@@ -240,6 +249,13 @@ class PrivateTest(Base):
         open(self.path("notes16.txt"), "wb").write(f"{T1}\n".encode("utf-16"))
         self.assert_fails(self.run_check(terms=T1), "notes16.txt")
 
+    def test_json_escaped_key(self):
+        escaped = "".join(f"\\u{ord(c):04x}" for c in T1)
+        p = self.path(os.path.join(".claude-plugin", "plugin.json"))
+        d = open(p, encoding="utf-8").read().replace('"name":', f'"{escaped}": 1, "name":', 1)
+        open(p, "w", encoding="utf-8").write(d)
+        self.assert_fails(self.run_check(terms=T1), "after decoding JSON escapes")
+
     def test_json_escape(self):
         escaped = "".join(f"\\u{ord(c):04x}" for c in T1)
         p = self.path(os.path.join(".claude-plugin", "plugin.json"))
@@ -269,6 +285,11 @@ class PrivateTest(Base):
         # whole-word detection does not flag "<term>labs", but the evals check prints the key name
         d = self.evals(); d["evals"][-1][f"{T1}labs"] = "x"; self.save_evals(d)
         self.assert_fails(self.run_check(terms=T1), "message hidden")
+
+    def test_whole_word_term_glued_in_output_is_still_masked(self):
+        # "=" terms are detected as whole words only, but output masking must stay substring
+        d = self.evals(); d["evals"][-1][f"{T1}labs"] = "x"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms="=" + T1), "message hidden")
 
     def test_assertion_text_is_never_printed(self):
         d = self.evals(); d["evals"][-1]["assertions"][0] = f"Mentions {T1} internals"; self.save_evals(d)

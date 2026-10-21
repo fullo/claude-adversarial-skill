@@ -13,14 +13,15 @@ Errors make the exit code non-zero; warnings are printed but do not block.
      (one per line, # for comments). Matching ignores case, accents and Unicode
      forms; the parts of a term may be joined by anything that is not a letter or
      digit (spaces, hyphens, underscores, line breaks) or by nothing. A term matches
-     as a whole word (not preceded or followed by a letter or digit); a term ending
-     with * also matches inside other words. Terms shorter than 4 characters give a
-     warning; a term with no letters or digits is an error. JSON strings are also
+     anywhere, also inside other words; a term starting with = matches only as a
+     whole word (for common words that would cause false positives). Terms shorter
+     than 4 characters give a warning; a term with no letters or digits is an error. JSON strings are also
      scanned after decoding escapes. A file that is not UTF-8 is still scanned
      (UTF-16 if it has a BOM, otherwise Latin-1). Terms are never printed: any
      output line containing one is masked. Without terms the check says so; with
-     --strict it fails. Not caught: one word split across two lines, UTF-16 files
-     without a BOM.
+     --strict it fails. Not caught: a one-word term written as two words (space or
+     line break in the middle), UTF-16 files without a BOM; with =, also forms
+     glued to other letters or digits.
   4. Neutral wording: technology-bound terms in SKILL.md and README.md are warnings
      (they may appear in a list of varied examples). evals.json is excluded.
   5. Markdown tables in SKILL.md and README.md, with or without outer pipes: every
@@ -205,19 +206,19 @@ def load_terms(root):
 
 
 def term_patterns(terms, rep=None, substring=False):
-    """One pattern per term. By default a whole word: not preceded or followed by a
-    letter or digit (hyphens, underscores, dots and slashes are boundaries). A term
-    ending with * also matches inside other words."""
+    """One pattern per term. By default a term matches anywhere, also inside other
+    words (the safe default for private names). A term starting with = matches only
+    as a whole word: not preceded or followed by a letter or digit."""
     pats = []
     for k, t in enumerate(terms, 1):
-        whole_word = not (substring or t.endswith("*"))
-        parts = re.findall(r"[^\W_]+", normalize(t.rstrip("*")))
+        whole_word = t.startswith("=") and not substring
+        parts = re.findall(r"[^\W_]+", normalize(t.lstrip("=")))
         if not parts:
             if rep is not None:
                 rep.error("private terms", f"term #{k} has no letters or digits and cannot be checked")
             continue
         if rep is not None and sum(len(p) for p in parts) < 4:
-            rep.warning("private terms", f"term #{k} is shorter than 4 characters: expect false positives")
+            rep.warning("private terms", f"term #{k} is shorter than 4 characters: expect false positives (prefix it with = to match whole words only)")
         body = SEP.join(re.escape(p) for p in parts)
         pats.append(re.compile(rf"(?<![^\W_]){body}(?![^\W_])" if whole_word else body))
     return pats
