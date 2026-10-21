@@ -342,6 +342,28 @@
         "[substance] Does not file the issues; asks for explicit confirmation",
         "[format] Gives suggested labels or equivalent categories for each proposed issue"
       ]
+    },
+    {
+      "id": 27,
+      "prompt": "Verify the change to the save-file format of our mobile game. (Facts: version 3 of the save file adds a 'pets' array, and the loader now reads it as a required field. Players keep save files from versions 1 and 2 on their phones, and the app updates them in place on first load.)",
+      "expected_output": "A Data-domain verification on a non-relational format: old saves lack the new required field, so loading or the in-place upgrade can fail or lose data",
+      "assertions": [
+        "[substance] Identifies the Data domain (a file format is a data contract) without needing a database",
+        "[substance] Finds that saves from versions 1 and 2 lack 'pets' and that a required field breaks loading or the in-place upgrade",
+        "[substance] Raises the risk of data loss when the upgrade rewrites the file in place, and asks what happens if it fails halfway",
+        "[substance] Proposes a safe default or an explicit upgrade step for old versions, plus a test with real version 1 and 2 files"
+      ]
+    },
+    {
+      "id": 28,
+      "prompt": "Verify the change in our thermostat firmware. (Facts: the control loop used to compute each step from the measured time since the last step; now it assumes a fixed 100 ms step. On the device the loop is woken by a timer, but a slow sensor read or a radio burst can delay it by up to 400 ms.)",
+      "expected_output": "A Code-domain verification on embedded software: the control loop now depends on its call rate, which varies on the device",
+      "assertions": [
+        "[substance] Identifies the dependence on the call rate (timing dependence) as the core risk",
+        "[substance] Traces the effect of a delayed step: the controller under- or over-corrects because it assumes 100 ms instead of the real elapsed time",
+        "[substance] Treats the stated delays as the device's real behaviour (ground truth), not as an edge case to ignore",
+        "[substance] Proposes measuring elapsed time again or bounding and compensating the step, and a test that injects delayed steps"
+      ]
     }
   ]
 }
