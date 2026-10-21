@@ -42,7 +42,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 |--------|-----------------|--------------|
 | **Code** | Source changes, logic, behavior | Tests, type system, spec |
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
-| **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules |
+| **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules, data already in the field |
 | **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
 | **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
@@ -136,9 +136,10 @@ Or ask naturally:
 - **Logic flaws** — code that passes simple tests but fails edge cases
 - **Initialization order bugs** — field A used before field B is set
 - **Concurrent modification** — adding to a list while iterating it
-- **State leaks** — data persisting across frames/calls when it shouldn't
+- **State leaks** — data persisting across calls, requests or frames when it shouldn't
 - **Timing dependence** — behaviour tied to frame rate, call rate, clock or latency
-- **Boundary conditions** — off-by-one, coordinate system errors
+- **Boundary conditions** — off-by-one, tolerance windows
+- **Unit and sign errors** — wrong direction, currency, unit or coordinate system
 - **Resource exhaustion** — unbounded lists, missing cleanup
 
 ### Architecture
@@ -156,7 +157,7 @@ Or ask naturally:
 
 ### Documentation
 - **Stale instructions** — install/setup steps that no longer work
-- **API drift** — documented endpoints don't match implementation
+- **API drift** — the documented interface (functions, commands, endpoints, messages) doesn't match the implementation
 - **Missing docs** — new features with no documentation
 - **Broken examples** — code samples that don't compile or run
 - **Misleading error messages** — error text doesn't match error condition

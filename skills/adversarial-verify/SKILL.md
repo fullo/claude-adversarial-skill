@@ -56,7 +56,7 @@ Determine what needs verification. There are six domains:
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
 - Multiple domains may apply — verify each separately, one section per domain
-- When domains overlap (e.g., a change to a class that defines stored data = Code + Data), assign each claim to its primary domain
+- When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
 
 ## Step 0a: GATHER ARTIFACTS
 
@@ -73,8 +73,8 @@ Determine what needs verification. There are six domains:
 |--------|---------------------|
 | **Code** | Tests, type system, runtime traces, spec requirements |
 | **Architecture** | Requirements docs, existing patterns, constraints, NFRs |
-| **Data** | Production schema, existing data contracts, validation rules |
-| **Documentation** | Actual codebase, current API, running application, git history |
+| **Data** | Production schema, existing data contracts, validation rules, data already in the field (old records, files, messages written by earlier versions) |
+| **Documentation** | Actual codebase, current API or interface, the running software, version history |
 | **Tests** | Production code, requirements, coverage reports, CI results, production configuration and runtime (to tell a real pass from a test-environment artifact) |
 | **Analysis** | Source material, original data, cited references, actual codebase |
 
@@ -86,10 +86,10 @@ In this skill, **production** means wherever the software really runs: a deploye
 
 Break every artifact into **individual verifiable claims**. Each claim should be a single, testable assertion.
 
-**Code:** "The timer resets to COOLDOWN after firing" / "The list is never modified during iteration"
+**Code:** "The timer resets to its cooldown after firing" / "The list is never modified during iteration" / "A retried payment is charged at most once"
 **Architecture:** "The PLAN.md addresses all requirements from SPEC.md" / "The API contract is backward compatible"
 **Data:** "The migration adds a required field with a safe default for existing records" / "Version 2 of the message format can still be read by version 1 consumers" / "The rollback reverses all changes"
-**Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual endpoints"
+**Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual interface (functions, commands, endpoints, messages)"
 **Tests:** "This test fails when the bug it covers is reintroduced" / "The coverage report reflects actual branch execution"
 **Analysis:** "The cited function exists at the referenced path" / "The recommendation follows from the evidence"
 
@@ -117,7 +117,8 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 
 | Claim | Adversarial Question |
 |-------|---------------------|
-| "Timer resets after firing" | "What if fire is called twice in one frame?" |
+| "Timer resets after firing" | "What if fire is called twice in one tick or one call?" |
+| "Charged at most once" | "What if the retry arrives while the first attempt is still in flight?" |
 | "List not modified during iteration" | "Does any nested call add to this list?" |
 | "All fields reset" | "Was field X added after reset() was written?" |
 | "PLAN addresses all requirements" | "Which SPEC requirements have no matching PLAN step?" |
@@ -138,8 +139,8 @@ Group adversarial questions into **general failure patterns**, then search the c
 | **Frequency assumptions** | Function assumed to be called exactly once per cycle | Event handlers, callbacks, update loops |
 | **Implicit ordering** | A assumed to run before B without enforcement | Init sequences, lifecycle methods, async chains |
 | **Stale state** | State that was valid earlier but may have changed | Cached values, shared references, cross-module state |
-| **Missing completeness** | New item added to one list but not all related ones | Enums, switch/when, serializers, tests, factory methods |
-| **Silent fallthrough** | Error or edge case handled by doing nothing | catch blocks, default cases, empty else branches |
+| **Missing completeness** | New item added to one list but not all related ones | Enumerations and every place that branches on them, serializers, tests, factory methods |
+| **Silent fallthrough** | Error or edge case handled by doing nothing | Error handlers that swallow errors, ignored error returns, default cases, empty else branches |
 | **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
 | **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing. Unlike *mock leakage*, the assertion does check the code, but in an environment (often a fake) that behaves better than the real one | Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
 
@@ -163,7 +164,7 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 ### Verification targets by domain
 
-**Code:** Silent data corruption, initialization order, concurrent modification, state leaks, timing dependence (frame rate, call rate, clock, latency), off-by-one/boundaries, resource exhaustion, missing null checks, unit and sign errors (direction, currency, coordinates), tolerance windows.
+**Code:** Silent data corruption, initialization order, concurrent modification, state leaks, timing dependence (frame rate, call rate, clock, latency), off-by-one/boundaries, resource exhaustion, missing checks for absent values, unit and sign errors (direction, currency, coordinates), tolerance windows.
 
 **Architecture:** Spec drift, missing constraints, over-engineering, dependency risk (maintenance, license, CVEs), breaking changes, missing NFRs.
 
