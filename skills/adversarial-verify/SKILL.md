@@ -159,7 +159,7 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
 3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
-4. **Plans, specs, docs, and analyses** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
+4. **Plans, specs, docs, and analyses** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
 
@@ -265,6 +265,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Falsified hypothesis, in full.** Say it plainly; don't leave it as "could not reproduce". A check falsifies a suspicion only if it **could have failed**: it was seen failing with the suspected defect injected, or you can show that it exercises the suspected path and asserts the suspected effect. It also falls under the test-environment constraint (Step 4). If you cannot show that it could have failed, report it as **conditionally falsified** and name the check that would complete it, for example: "red when the invalidation is removed". The falsification covers only the paths the check exercised. Name the ones it did not cover; they stay open. Propose no fix for a defect that was not shown.
 
+**Severity** is the impact if the finding is real: for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario.
+
 **One finding, one type.** If a problem is demonstrated on one path and only plausible on another, report two findings. Preventive measures and demonstrated defects both go in the FAIL table, and its Type column says which. Falsified hypotheses go in their own table.
 
 ## Output Format
@@ -295,8 +297,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 |---|-------|---------|
 
 ### FALSIFIED HYPOTHESES
-| # | Suspected defect | Check | Could it have failed? (how shown) | Paths not covered |
-|---|------------------|-------|-----------------------------------|-------------------|
+| # | Location | Suspected defect | Check | Status (falsified / conditionally) | Could it have failed? (how shown, or the check that would complete it) | Paths not covered | Mode | Confidence |
+|---|----------|------------------|-------|------------------------------------|------------------------------------------------------------------------|-------------------|------|------------|
 
 ### FAIL ❌
 | # | File:Line | Type | Severity | Mode | Confidence | Issue |
@@ -328,7 +330,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 - Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
-- Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses
+- Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N
 - Recommendation: [trust adjustment or approval]
 ```
