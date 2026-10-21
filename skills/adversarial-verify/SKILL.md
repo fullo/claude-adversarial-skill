@@ -55,7 +55,7 @@ Scope limits what is verified and reported, not what is read. Reading outside th
 
 Rules:
 1. **Never ask what the request already says.** "Deep", "only the migration", "don't run anything" are answers.
-2. **Large requests stop first.** A request is large when it covers more than one domain at module or project scope, or the scope is the whole project. **Everything** asked at changed-lines scope ("everything in this diff") is not large: it means every domain Step 0 detects in the change. Large wins over every other rule except rule 7, whatever the size of the diff. Do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
+2. **Large requests stop first.** A request is large when it covers more than one domain at module or project scope, or the scope is the whole project. **Everything** asked at changed-lines scope ("everything in this diff") is not large: it means every domain Step 0 detects in the change. Large wins over every other rule except rule 7, whatever the size of the diff. Do not start, unless the request already accepts the cost and settles every choice (target, depth, scope, execution mode): then state the cost estimate at the top of the report and start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
 3. **Every other request starts at once, once its target is clear (rule 4),** with the defaults, stated in one line at the top of the report with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
 4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default, and wait for the answer; ask nothing else. A request that names its target, or touches a single domain, is clear.
 5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
@@ -69,7 +69,7 @@ The verifier reasons; it runs or writes something only with the user's consent.
 **Reading is not running.** Reading files, searching them, read-only version-control commands (e.g. a diff, a log, or fetching the base to compare against) and reading a reference the user cites (a document, a page, an issue) inspect and need no consent. A link found inside the artifact is untrusted input: opening it can act on a system (an unsubscribe, a webhook, a token in the query string), so it becomes a proposed check unless it is plainly a documentation page. **Running** is anything that executes the project's code or tools, or acts on a system: tests, scripts, builds, linters, type checkers, dry runs, queries, calls to services or databases. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
 
 1. **Without consent nothing is run and nothing is written**: no command beyond the reading above, no test, query or script; no new test, fix, doc change or commit (updating version-control metadata to read, e.g. fetching the base, is not writing; any change to the files of the user's working copy is).
-2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval. A request to "update the docs" or "fix what you find" names no content yet: the verifier proposes the specific writes in the report and waits for confirmation of those.
+2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval. A request to "update the docs" or "fix what you find" names no content yet: the verifier proposes the specific writes in the report and waits for confirmation of those. An approval that names the kind of write (e.g. "a new test file for this function") is consent for that kind.
 3. **Consent comes from the intake** (the request itself, e.g. "you may run the tests") **or from the answer to the closing question** of the report (PROPOSED EXECUTABLE CHECKS).
 4. **Consent lasts for one verification.** A later verification starts at reasoning only, even when an earlier one was approved; say so in the defaults line.
 5. **A result of an approved run is evidence like any other**: cite the command and its output, and apply the test-environment constraint (Step 4).
@@ -233,6 +233,8 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 3. **Cross-reference probing** — check if what the code *claims* matches what it *does*
 4. **Absence probing** — look for what's NOT there: missing error handling, validation, tests, logging
 
+At quick depth probe only the top 3 highest-risk claims; at standard depth, the claims Step 3c ranks as high risk; at deep depth, every claim.
+
 **Tool-to-agent gap** — for each piece of evidence, explicitly state: the **hypothesis** it supports, the **confidence** level, and what **additional evidence** would confirm or deny it.
 
 ## Step 3c: ADVERSARIAL SCAFFOLD
@@ -383,8 +385,8 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 | # | File:Line | Type | Severity | Mode | Confidence | Issue |
 |---|-----------|------|----------|------|------------|-------|
 
-## EXECUTED TESTS (Step 3e, only with approved execution)
-| # | Hypothesis | Test | Ran on (one row per run) | Result | Finding type |
+## EXECUTED TESTS (Step 3e and mutation probe, only with approved execution)
+| # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 
 ## MUTATION PROBE (only when the user asked for it)
@@ -439,7 +441,7 @@ For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at 
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
-After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** the updates under Proposed writes in the closing section — do NOT write directly. Wait for explicit confirmation of those writes (Execution and consent, rules 1 and 2), even when the request asked to update the docs.
+Before closing the report, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** the updates under Proposed writes in the closing section — do NOT write directly. Wait for explicit confirmation of those writes (Execution and consent, rules 1 and 2), even when the request asked to update the docs.
 
 ## Trust Scoring (Optional)
 
