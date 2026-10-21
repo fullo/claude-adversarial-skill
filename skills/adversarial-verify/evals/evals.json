@@ -457,6 +457,42 @@
         "[substance] Carries out the verification by reasoning in the same answer (e.g. rounding of halves, float representation, totals already in cents)",
         "[substance] If it proposes an executable check, states what it would confirm or refute and asks before running it"
       ]
+    },
+    {
+      "id": 37,
+      "prompt": "Verify parse_day. You may write a new test file and run it; do not change the function.\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)\n\n(Facts: you suspect 31 February is accepted. The test you would write, test_rejects_31_february, calls parse_day('2026-02-31') and expects ValueError. Running it on the current code gives: FAILED, returned (2026, 2, 31), no exception raised.)",
+      "expected_output": "With execution approved, the suspicion becomes a test; the test is red on the current code, so the defect is demonstrated; the fix is proposed but not applied because changing the function was not approved",
+      "assertions": [
+        "[substance] States the hypothesis before the test (31 February is accepted) and names the test that checks it",
+        "[substance] Reports the run result as given (red: returned (2026, 2, 31)) and types the finding as a demonstrated defect",
+        "[substance] Proposes a fix (e.g. validating the day against the month and leap years) but does not apply it, because changing the function was not approved",
+        "[substance] Says the test should be run again after the fix and must then pass",
+        "[format] Records the test written, its result and the finding type in the report"
+      ]
+    },
+    {
+      "id": 38,
+      "prompt": "Verify this change. You may write and run tests; do not change the code.\n\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\n(Facts: you suspect that totals ending in .x5 after the discount are rounded the wrong way. The test you would write, test_discount_half_rounding, checks discount(10.05, 'WELCOME10') == 9.04 and discount(0.05, 'WELCOME10') == 0.04. Running it on the current code gives: PASSED. Nobody has run it against a version with the rounding changed.)",
+      "expected_output": "The test is green without any change, so the hypothesis is falsified, stated plainly; since the test was never seen failing, the falsification is conditional and names the check that would complete it; the test stays as a regression guard; no fix is proposed",
+      "assertions": [
+        "[substance] States the hypothesis before the test and reports the run result as given (passed)",
+        "[substance] Declares the hypothesis falsified, not 'could not reproduce' and not a defect",
+        "[substance] Marks the falsification as conditional because the test was never seen failing, and names the check that would complete it (e.g. red with a different rounding)",
+        "[substance] Keeps the test as a regression guard and proposes no fix for the falsified suspicion",
+        "[substance] Names what the test did not cover (e.g. other values, other codes) as still open"
+      ]
+    },
+    {
+      "id": 39,
+      "prompt": "Verify the fix in the last commit. You may run tests, on this commit and on its parent; do not write anything.\n\n(Facts: the commit changes parse_day to reject days beyond the length of the month, and adds the test test_rejects_31_april, which calls parse_day('2026-04-31') and expects ValueError. Running that test on this commit: PASSED. Running the same test on the parent commit, before the fix: PASSED.)",
+      "expected_output": "The verifier reads both outcomes: green before and after means the test does not cover the defect the commit claims to fix, so the fix is not proved by it and the defect could slip back unnoticed; it proposes a test that would be red on the parent",
+      "assertions": [
+        "[substance] Reports both results as given: passed on this commit and passed on the parent",
+        "[substance] Concludes that the test does not prove the fix, because it was green before the fix too",
+        "[substance] Says what that means: the defect could come back without any test failing",
+        "[substance] Explains what the expected outcome would have been (red on the parent, green on this commit)",
+        "[substance] Proposes a stronger test or a reason to check (e.g. why 31 April already failed before), without writing it, since writing was not approved"
+      ]
     }
   ]
 }
