@@ -42,13 +42,13 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
 | **Data** | Schemas, migrations, contracts | Production schema, validation rules |
 | **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
-| **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports |
+| **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 
 ## Techniques
 
 ### Abstractive Red-Teaming
-Instead of finding individual bugs, identifies **failure categories** — general patterns that produce bugs repeatedly. Searches the entire codebase for instances of the same pattern (frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment).
+Instead of finding individual bugs, identifies **failure categories** — general patterns that produce bugs repeatedly. Searches the entire codebase for instances of the same pattern (frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment, test-environment artifact).
 
 ### Hidden Behavior Probing
 Detects behaviors the code doesn't advertise using four probing strategies: indirect probing (trace actual execution), scaffolded probing (chain findings), cross-reference probing (claims vs reality), and absence probing (what's NOT there).
@@ -169,6 +169,7 @@ Or ask naturally:
 - **Fragile assertions** — pass by coincidence (order, timing, locale)
 - **Test-code drift** — tests written for a previous code version
 - **Flaky indicators** — `sleep()`, `retry`, `@Ignore`/`skip`
+- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by test helpers, a database that serializes transactions, permissive fakes, a different entry point or dependencies
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source

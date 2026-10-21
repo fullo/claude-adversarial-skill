@@ -64,7 +64,7 @@ Determine what needs verification. There are six domains:
 - **Architecture**: read PLAN.md, SPEC.md, ADRs, and any referenced design docs
 - **Data**: read schema files, migration scripts, API specs, config files
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
-- **Tests**: read test files, then read the production code they claim to verify
+- **Tests**: read test files, then read the production code they claim to verify, then the test bootstrap and shared helpers and the production configuration they should reproduce
 - **Analysis**: read the full agent output, report, or document under review
 
 ## Step 0b: ESTABLISH GROUND TRUTH
@@ -137,7 +137,7 @@ Group adversarial questions into **general failure patterns**, then search the c
 | **Missing completeness** | New item added to one list but not all related ones | Enums, switch/when, serializers, tests, factory methods |
 | **Silent fallthrough** | Error or edge case handled by doing nothing | catch blocks, default cases, empty else branches |
 | **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
-| **Test-environment artifact** | A test passes because of how the test environment differs from production, not because the code is correct | Test bootstrap and helpers that change defaults (auth context, config, feature flags), test database engine or isolation level, fakes that accept any input, entry point or server used by tests, dependencies of the test image vs the production image |
+| **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing | Test bootstrap and helpers that change defaults (auth context, config, feature flags), test database engine or isolation level, fakes that accept any input, entry point or server used by tests, dependencies of the test image vs the production image |
 
 ## Step 3: INDEPENDENT VERIFY
 
@@ -159,7 +159,7 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 **Documentation:** Stale instructions, API drift, missing docs, broken examples, misleading error messages, version mismatch, orphaned references, UI copy drift.
 
-**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`), test-environment artifacts (the test passes only because the test environment differs from production — for each test that a finding relies on, ask: "would this pass in production?"). Typical artifacts:
+**Tests:** Tautological tests (assertions always true), mock leakage (testing the mock not the code), coverage lies (line-covered but branch-untested), missing negative tests (only happy path), fragile assertions (pass by coincidence — order, timing, locale), test-code drift (tests written for old code version), flaky indicators (`sleep()`, `retry`, `@Ignore`/`skip`), test-environment artifacts (the test passes, or fails, only because the test environment differs from production — for each test that a finding relies on, ask: "would this pass in production?"; when reviewing a whole suite, ask it at least for the test bootstrap and the shared helpers, which every test inherits). Typical artifacts:
 - a test helper that changes a default production does not have (e.g. logging in as a user also switches the default auth guard or tenant);
 - a test database that serializes transactions or runs in a different isolation level, hiding race conditions that the production database would show;
 - a fake of an external service that accepts any request, where the real service ignores or rejects some parameters;
@@ -323,7 +323,7 @@ If the project uses `.claude/agent-trust.json`: bug found → author -1, false p
 - **Don't trust "looks correct"** — trace the actual execution
 - **Don't skip "simple" code** — simple code has simple bugs
 - **Don't accept "it worked in testing"** — testing doesn't cover edge cases
-- **Don't trust a green test before asking if it would be green in production** — a pass caused by the test environment proves nothing
+- **Don't rely on a green test before asking if it would be green in production** — a pass caused by the test environment proves nothing, so a finding that rests on it cannot be Verified
 - **Don't dismiss low-probability scenarios** — rare events happen every session at scale
 - **Don't trust comments** — comments lie, code doesn't
 - **Don't verify only one domain** — if code changed, check if SPEC.md still matches

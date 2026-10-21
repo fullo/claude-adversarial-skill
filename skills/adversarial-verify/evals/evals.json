@@ -212,15 +212,14 @@
     },
     {
       "id": 16,
-      "prompt": "Verify the fix for the double booking of the last seat — the new concurrency test is green, so we're good, right?",
-      "context": "The test suite runs on SQLite, which serializes write transactions; production runs on PostgreSQL with READ COMMITTED. The fix adds no row lock.",
-      "expected_output": "Detection of a test-environment artifact: the concurrency test cannot fail on a database that serializes transactions",
+      "prompt": "Verify the fix for the double booking of the last seat — the new concurrency test is green, so we're good, right? (The test suite runs on SQLite, which lets only one write transaction at a time; production runs on PostgreSQL with READ COMMITTED. The fix adds no row lock.)",
+      "expected_output": "Detection of a test-environment artifact: on a database that runs one write transaction at a time, the concurrency test cannot show the double booking that PostgreSQL would allow",
       "assertions": [
         "Identifies the verification domain as Tests (and Code for the fix)",
         "Uses the production database and its isolation level as ground truth, not only the test configuration",
         "Asks whether the test would still pass in production",
         "Classifies the green test as a Test-environment artifact failure category",
-        "Does not score the fix above 79 on the strength of that test alone",
+        "Does not report the fix as Verified on the strength of that test (per the anti-pattern on green tests)",
         "Proposes a way to reproduce production (e.g. run the test against the production database engine) instead of declaring the bug fixed"
       ]
     }
