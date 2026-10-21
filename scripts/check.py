@@ -30,7 +30,8 @@ Errors make the exit code non-zero; warnings are printed but do not block.
   6. Eval facts: every eval from FACTS_FROM on whose prompt states facts ("(Facts")
      has a file facts/<id>.py|.rs|.ts (run by scripts/check_facts.py) or a line
      "<id>: <reason>" in facts/NOT_COMPUTABLE, not both; every fact file belongs to
-     an existing eval.
+     an existing eval and carries the sha256 of that eval's prompt, so a prompt
+     edited after its facts were checked fails until they are checked again.
 
 Files checked: the files tracked by git (all files outside .git if git is not
 available). With --staged, exactly the content staged for the next commit.
@@ -40,6 +41,7 @@ Requires Python 3.8 or later. On Windows use `py -3 scripts/check.py`.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -426,6 +428,15 @@ def check_facts(root, rep):
                 rep.error(f"{FACTS_DIR}/{name}", "fact file for an eval that does not exist")
             else:
                 with_file[int(stem)] = name
+    prompts = {e.get("id"): str(e.get("prompt", "")) for e in evals if isinstance(e, dict)}
+    for i, name in with_file.items():
+        head = read_text(root, f"{FACTS_DIR}/{name}")[:2000]
+        m = re.search(r"prompt-sha256:\s*([0-9a-f]{64})", head)
+        want = hashlib.sha256(prompts[i].encode("utf-8")).hexdigest()
+        if not m:
+            rep.error(f"{FACTS_DIR}/{name}", f"no 'prompt-sha256:' line binding it to eval {i}'s prompt")
+        elif m.group(1) != want:
+            rep.error(f"{FACTS_DIR}/{name}", f"eval {i}'s prompt changed since its facts were checked: re-check the facts, then set prompt-sha256: {want}")
     reasons = {}
     nc = os.path.join(fdir, "NOT_COMPUTABLE")
     if os.path.isfile(nc):

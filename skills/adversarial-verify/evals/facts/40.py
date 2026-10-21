@@ -1,3 +1,4 @@
+# prompt-sha256: f430c6173ed9b8b41fa4d0c93c3d8b721fa3e566637225238db56547000962ab
 """Eval 40: which of the six mutants of `age >= 18` the two tests kill."""
 tests = [(30, True), (5, False)]
 mutants = {

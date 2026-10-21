@@ -1,3 +1,4 @@
+# prompt-sha256: 8f13e06f91870c12f8da44b02ffc1cf4c86e58a23a02089c0a7f56b4c8ad6971
 """Eval 48: WCAG contrast ratios of the stylesheet's colour pairs."""
 
 

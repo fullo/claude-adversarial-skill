@@ -1,3 +1,4 @@
+# prompt-sha256: 8bdb6523a9f3cc12fe895034287ddc5ea236c5964d56a81fe4dde966b1ee2a99
 """Eval 39: test_rejects_31_april passes on the parent and on the commit; 29 Feb 2024 separates them."""
 from _parse_day import parse_day_parent, parse_day_fixed, raises
 

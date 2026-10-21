@@ -1,3 +1,4 @@
+// prompt-sha256: 8bd1806145649493a8301ab5dc02c59a2fb13ceb153a15424bb28028a628a105
 // Eval 52: the test asserting 29 days in February 2024 fails on the function as shown.
 fn days_in_month(year: u32, month: u32) -> u32 {
     let _ = year;

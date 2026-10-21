@@ -1,3 +1,4 @@
+# prompt-sha256: 1e640d4da3f17794796b649ee6cceae0733c96b7a695c25967a59f4f2a024d83
 """Eval 49: usable label width per button and which German labels fit."""
 labels = {'Startseite': 61, 'Bestellungen': 79, 'Gemerkt': 50, 'Einstellungen': 82}
 padding = 2 * 8

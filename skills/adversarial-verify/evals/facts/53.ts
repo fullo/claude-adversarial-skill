@@ -1,3 +1,4 @@
+// prompt-sha256: f740892f883d0493fe00fa06e14b6d8c779cf56e110ba574827302c2a4183e91
 // Eval 53: which mutants of isWeekend the two tests kill.
 type F = (day: number) => boolean;
 const original: F = (day) => day === 0 || day === 6;

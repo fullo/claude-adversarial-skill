@@ -6,7 +6,7 @@
 33: repository size and the last commit, no code
 34: query plan of a database that does not exist here
 35: same function as eval 37 (checked there); the test run is stated, not reproducible
-36: a one-line change described in words; the suite is not given
+36: the function is shown, but no result is stated and the suite is not given
 41: a tool's log and configuration described in words
 43: a plan; the stated test output belongs to code that is not given
 45: a spec and an endpoint described in words

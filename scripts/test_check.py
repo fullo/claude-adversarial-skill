@@ -433,8 +433,21 @@ class FactsTest(Base):
         d["evals"].append({"id": n, "prompt": "Verify it. (Facts: 1 + 1 is 2.)",
                            "expected_output": "x", "assertions": ["[substance] x"]})
         self.save_evals(d)
-        open(self.path(os.path.join(FACTS, f"{n}.py")), "w").write("assert 1 + 1 == 2\n")
+        import hashlib
+        h = hashlib.sha256(d["evals"][-1]["prompt"].encode("utf-8")).hexdigest()
+        open(self.path(os.path.join(FACTS, f"{n}.py")), "w").write(f"# prompt-sha256: {h}\nassert 1 + 1 == 2\n")
         self.assert_passes(self.run_check(terms=NONE))
+
+    def test_prompt_changed_after_its_facts(self):
+        # A prompt edited to contradict its fact file must fail until the facts are checked again.
+        d = self.evals()
+        d["evals"][36]["prompt"] = d["evals"][36]["prompt"].replace("day > 31", "day > 28")
+        self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "37.py", "prompt changed since its facts were checked")
+
+    def test_fact_file_without_hash(self):
+        self.edit(os.path.join(FACTS, "40.py"), "# prompt-sha256:", "# no hash:")
+        self.assert_fails(self.run_check(terms=NONE), "40.py", "no 'prompt-sha256:' line")
 
     def test_orphan_fact_file(self):
         open(self.path(os.path.join(FACTS, "999.py")), "w").write("pass\n")
@@ -460,10 +473,24 @@ class FactsTest(Base):
 
     def test_runner_fails_on_a_false_fact(self):
         # The first draft of eval 38 stated round(10.05 * 0.9, 2) == 9.04: the runner must catch it.
-        self.edit(os.path.join(FACTS, "38.py"), "== 9.05", "== 9.04")
+        self.edit(os.path.join(FACTS, "38.py"), "assert round(10.05 * 0.9, 2) == 9.05", "assert round(10.05 * 0.9, 2) == 9.04")
         r = self.run_facts("38")
         self.assertNotEqual(r.returncode, 0, r.stdout)
         self.assertIn("FAIL 38.py", r.stdout)
+
+    def test_runner_fails_on_a_file_that_asserts_nothing(self):
+        self.edit(os.path.join(FACTS, "49.py"), "assert clipped(375)", "x = clipped(375)")
+        self.edit(os.path.join(FACTS, "49.py"), "assert clipped(320)", "x = clipped(320)")
+        self.edit(os.path.join(FACTS, "49.py"), "assert clipped(430)", "x = clipped(430)")
+        r = self.run_facts("49")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("no assertion", r.stdout)
+
+    def test_runner_fails_without_the_ok_line(self):
+        self.edit(os.path.join(FACTS, "40.py"), "print('ok 40')", "print('done')")
+        r = self.run_facts("40")
+        self.assertNotEqual(r.returncode, 0, r.stdout)
+        self.assertIn("not 'ok 40'", r.stdout)
 
     def test_runner_fails_on_no_files(self):
         r = self.run_facts("12345")

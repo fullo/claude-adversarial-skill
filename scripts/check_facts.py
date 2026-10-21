@@ -5,10 +5,16 @@ Each file reproduces what an eval's prompt states as fact (a run's result, a
 computed value, which mutants a test kills) and exits non-zero if the fact is
 false. Python files run with the interpreter that runs this script; .rs files
 are compiled with rustc; .ts files run with node --experimental-strip-types.
-A missing toolchain is an error, never a silent skip.
+A missing toolchain is an error, never a silent skip. TypeScript files are run
+with their types stripped, not type-checked.
 
-  python3 scripts/check_facts.py            # all files
-  python3 scripts/check_facts.py 38 49      # only these eval ids
+A fact file must contain at least one assertion (assert, assert_eq!, assert_ne!,
+throw) and its last line of output must be "ok <id>": a file that asserts nothing
+or stops early fails.
+
+  python3 scripts/check_facts.py                 # all files
+  python3 scripts/check_facts.py 38 49           # only these eval ids
+  python3 scripts/check_facts.py --root DIR      # the files under another checkout
 """
 
 import os
@@ -17,9 +23,12 @@ import subprocess
 import sys
 import tempfile
 
+import re
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FACTS = os.path.join(ROOT, "skills", "adversarial-verify", "evals", "facts")
+FACTS_REL = os.path.join("skills", "adversarial-verify", "evals", "facts")
 EXTS = (".py", ".rs", ".ts")
+ASSERTS = re.compile(r"\bassert\b|assert_eq!|assert_ne!|\bthrow\b")
 
 
 def command(path, tmp):
@@ -38,7 +47,18 @@ def command(path, tmp):
     return [[node, "--experimental-strip-types", "--no-warnings", path]]
 
 
-def main(ids):
+def tail(text, n=5):
+    lines = [l for l in text.strip().splitlines() if l.strip()]
+    errs = [l for l in lines if l.startswith("error")]
+    return " | ".join((errs or lines)[-n:])
+
+
+def main(argv):
+    root = ROOT
+    if argv[:1] == ["--root"]:
+        root, argv = argv[1], argv[2:]
+    ids = argv
+    FACTS = os.path.join(root, FACTS_REL)
     files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith("_"))
     if ids:
         files = [f for f in files if os.path.splitext(f)[0] in ids]
@@ -51,14 +71,24 @@ def main(ids):
                 print(f"FAIL {name}: toolchain not found")
                 failed += 1
                 continue
+            stem = os.path.splitext(name)[0]
+            if not ASSERTS.search(open(path, encoding="utf-8").read()):
+                print(f"FAIL {name}: no assertion in the file")
+                failed += 1
+                continue
             for step in steps:
                 r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)
                 if r.returncode != 0:
-                    print(f"FAIL {name}: {(r.stderr or r.stdout).strip().splitlines()[-1:] }")
+                    print(f"FAIL {name}: {tail(r.stderr or r.stdout)}")
                     failed += 1
                     break
             else:
-                print(f"ok   {name}")
+                out = [l for l in r.stdout.strip().splitlines() if l.strip()]
+                if out[-1:] != [f"ok {stem}"]:
+                    print(f"FAIL {name}: last line of output is not 'ok {stem}'")
+                    failed += 1
+                else:
+                    print(f"ok   {name}")
     print(f"{len(files)} fact file(s), {failed} failed")
     return 1 if failed or not files else 0
 

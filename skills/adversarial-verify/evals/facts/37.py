@@ -1,3 +1,4 @@
+# prompt-sha256: 310a6f66061a8f3515cb5f290d2f1a1e93656ae5b97ebe37542203b0ce2c5640
 """Eval 37: parse_day('2026-02-31') returns (2026, 2, 31), no exception."""
 from _parse_day import parse_day_v1
 

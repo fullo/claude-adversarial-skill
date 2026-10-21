@@ -1,3 +1,4 @@
+# prompt-sha256: d90568749cbdb0a24c7d06745bfc2c91e886778759d8cef4d5e2b518536b3f23
 """Eval 42: changes the two tests would not catch (examples in assertion 2)."""
 
 
