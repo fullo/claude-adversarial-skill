@@ -209,6 +209,20 @@
         "Checks for test-code drift: tests written for a previous version of the code",
         "Checks for flaky indicators: sleep(), retry, @Ignore/skip"
       ]
+    },
+    {
+      "id": 16,
+      "prompt": "Verify the fix for the double booking of the last seat — the new concurrency test is green, so we're good, right?",
+      "context": "The test suite runs on SQLite, which serializes write transactions; production runs on PostgreSQL with READ COMMITTED. The fix adds no row lock.",
+      "expected_output": "Detection of a test-environment artifact: the concurrency test cannot fail on a database that serializes transactions",
+      "assertions": [
+        "Identifies the verification domain as Tests (and Code for the fix)",
+        "Uses the production database and its isolation level as ground truth, not only the test configuration",
+        "Asks whether the test would still pass in production",
+        "Classifies the green test as a Test-environment artifact failure category",
+        "Does not score the fix above 79 on the strength of that test alone",
+        "Proposes a way to reproduce production (e.g. run the test against the production database engine) instead of declaring the bug fixed"
+      ]
     }
   ]
 }
