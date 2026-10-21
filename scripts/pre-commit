@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-commit hook: run the repository invariant checks.
+# Install once: ln -s ../../scripts/pre-commit .git/hooks/pre-commit
+# --strict fails if no private terms are configured (see scripts/check.py).
+exec python3 -I "$(git rev-parse --show-toplevel)/scripts/check.py" --strict

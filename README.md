@@ -189,6 +189,23 @@ Or ask naturally:
 - **Premature convergence** — jumps to one hypothesis
 - **Evidence cherry-picking** — selects only supporting evidence
 
+## Repository checks
+
+`scripts/check.py` enforces the repository's own invariants before a commit:
+
+- **evals.json**: valid, the same four keys in every case, ids unique and consecutive, no empty assertions, and `[substance]`/`[format]` tags on every assertion from eval 21 on.
+- **Version**: SKILL.md's frontmatter and the README badge agree.
+- **Private names**: none of the configured terms appears in any file. The list is never committed or printed. Put it in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated).
+- **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
+- **Tables**: every Markdown table row has as many cells as its header.
+
+```bash
+python3 scripts/check.py            # errors fail, warnings don't; says so if no private terms are set
+python3 scripts/check.py --strict   # also fails when no private terms are configured
+python3 -m unittest scripts/test_check.py
+ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # run --strict before every commit
+```
+
 ## Trust Integration
 
 Optionally integrates with a multi-agent trust scoring system:
