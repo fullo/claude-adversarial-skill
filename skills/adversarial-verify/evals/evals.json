@@ -103,7 +103,7 @@
     },
     {
       "id": 8,
-      "prompt": "Look for systemic failure patterns across the entire codebase, not just the last change",
+      "prompt": "Look for systemic failure patterns across the entire codebase, not just the last change. I know it is large: standard depth, whole project, reasoning only, go ahead.",
       "expected_output": "Abstractive red-teaming: identification of failure categories across the whole project",
       "assertions": [
         "Searches for recurring failure categories across the full codebase, not just recent changes",

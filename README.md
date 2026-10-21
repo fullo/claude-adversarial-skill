@@ -12,7 +12,7 @@ A Claude Code skill that performs rigorous adversarial verification across code,
 When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
 
 **Intake:**
-- **Ask before starting** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
+- **Intake** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
 - **Execution with consent** — reading and searching the code is not running; by default nothing is run: the report ends with proposed executable checks (what would confirm, what would refute, cost) and asks; only approved checks run, for that verification only, and writing a test or a fix needs its own approval
 
 **Pre-verification (Steps 0–0b):**
