@@ -642,6 +642,30 @@
         "[substance] Notes the text size drop to 12 px as a legibility concern on phones",
         "[substance] Proposes a fix or an alternative (e.g. restore the vertical padding, or a minimum height) and a check on a phone (proposed, not run)"
       ]
+    },
+    {
+      "id": 52,
+      "prompt": "Verify days_in_month in our Rust crate. You may write a new test and run it; do not change the function.\n\nfn days_in_month(year: u32, month: u32) -> u32 {\n    let _ = year;\n    match month {\n        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,\n        4 | 6 | 9 | 11 => 30,\n        2 => 28,\n        _ => panic!(\"bad month\"),\n    }\n}\n\n(Facts: you suspect leap years are ignored. The test you would write, february_2024_has_29_days, asserts assert_eq!(days_in_month(2024, 2), 29). Running it with cargo test on the current code gives: FAILED, assertion `left == right` failed, left: 28, right: 29.)",
+      "expected_output": "Same procedure as in other languages: the hypothesis comes before the test, the red result makes the leap-year defect demonstrated, the fix is proposed and not applied, and the test must turn green after the fix",
+      "assertions": [
+        "[substance] States the hypothesis (leap years ignored) before the test and names the test",
+        "[substance] Reports the run result as given (left 28, right 29) and types the finding as a demonstrated defect",
+        "[substance] Proposes a fix (29 in February of leap years: divisible by 4, except centuries not divisible by 400) without applying it, since changing the function was not approved",
+        "[substance] Says the test must pass after the fix and proposes at least one more case (e.g. 1900 or 2100 has 28, 2000 has 29)",
+        "[format] Records the test, its result and the finding type in the report"
+      ]
+    },
+    {
+      "id": 53,
+      "prompt": "Verify the tests of isWeekend in our TypeScript app. You may run a mutation probe on the changed lines, nothing else; do not write tests.\n\nexport function isWeekend(d: Date): boolean {\n  const day = d.getUTCDay();\n  return day === 0 || day === 6;\n}\n\n// tests\nexpect(isWeekend(new Date(Date.UTC(2026, 9, 24)))).toBe(true);  // Saturday\nexpect(isWeekend(new Date(Date.UTC(2026, 9, 21)))).toBe(false); // Wednesday\n\n(Facts: the mutation tool, limited to the return line, produced 4 mutants. Killed: 'day === 6' replaced with false; '||' replaced with '&&'. Survived: 'day === 0' replaced with false; the constant 0 replaced with 1. No mutant timed out or was skipped; the code was restored and the working copy is clean.)",
+      "expected_output": "The verifier reads the two survivors as one missing test (no Sunday case), types them as missing tests, proposes a Sunday test that kills both without writing it, and asks",
+      "assertions": [
+        "[substance] Reports the two survivors with their mutators, using the results as given",
+        "[substance] Explains that both survive because no test uses a Sunday, and classifies them as missing tests, not equivalent and not superfluous code",
+        "[substance] Proposes a test with a Sunday (e.g. 25 October 2026 is true) and says it kills both survivors",
+        "[substance] Does not write the test, because writing tests was not approved, and asks",
+        "[format] Presents the survivors in a table (location, mutator, outcome, reason)"
+      ]
     }
   ]
 }
