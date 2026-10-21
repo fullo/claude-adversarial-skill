@@ -238,14 +238,15 @@
     },
     {
       "id": 18,
-      "prompt": "Verify my change to the washing machine firmware: I moved the spin start from the door-lock handler to a new timer callback, so spinning starts sooner. (SPEC.md has a section 'Invariants' that says the drum never spins while the door is unlocked. The only test of it drives the old door-lock handler.)",
+      "prompt": "Verify my change to the washing machine firmware: I moved the spin start from the door-lock handler to a new timer callback, so spinning starts sooner. (SPEC.md has a section 'Invariants' that says the drum never spins while the door is unlocked. The only test of it drives the old door-lock handler; the firmware has no assertion or hardware interlock on the spin start.)",
       "expected_output": "The invariant is touched by the change and no enforcing mechanism covers the new path: FAIL of missing completeness",
       "assertions": [
         "Looks for project invariants in Step 0b and finds the one in SPEC.md, citing where it is",
         "Decides that the change touches the invariant (it writes the spin start, which the invariant is about)",
+        "Looks for non-test mechanisms too (assertions, types, interlocks) before concluding that nothing enforces the invariant on the new path",
         "Names the existing enforcing test and checks whether it covers the new timer path",
         "Reports a FAIL with category missing completeness because the new path has no enforcing mechanism",
-        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N touched, M enforced on the changed path'",
+        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path'",
         "Proposes an enforcing mechanism for the new path (a test, an assertion, or an interlock check) instead of only noting the gap"
       ]
     },
@@ -258,6 +259,19 @@
         "Does not present invented invariants as the project's own",
         "If it proposes candidate invariants, reports them as hypotheses, not as ground truth",
         "Continues the verification using the other ground truth sources of the domain"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "Verify the new importer of our data pipeline: it loads refunds from a partner file into the payments table. (The design doc lists the invariant 'a stored amount is never negative'. The payments table has a CHECK constraint amount >= 0 in the schema migration that is applied in production; there is no test about negative amounts. Refunds arrive as positive numbers with a type column.)",
+      "expected_output": "The invariant is touched and enforced by a non-test mechanism that bites on the new path: PASS, not a FAIL for the missing test",
+      "assertions": [
+        "Finds the invariant in the design doc and decides that the importer touches it (it writes amounts)",
+        "Accepts the schema constraint as the enforcing mechanism instead of requiring a test",
+        "Checks that the constraint bites on the new path: the importer writes into the constrained table, and the constraint is applied in production",
+        "Reports the invariant as enforced on the changed path (PASS) with the location of the constraint",
+        "Does not report a FAIL only because no test covers the invariant",
+        "May still raise separate claims, such as how a rejected row is handled by the importer"
       ]
     }
   ]

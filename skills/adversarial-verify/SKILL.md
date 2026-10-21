@@ -80,7 +80,7 @@ Determine what needs verification. There are six domains:
 
 In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
 
-**Project invariants.** Look for rules the project says must never break, and use them as standing ground truth in every domain. Typical places: agent or contributor instruction files (e.g. `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`), specs, design docs and ADRs, sections called invariants, guarantees, or "never/always" rules, and contracts in the code (assertions, invariant annotations). Record where you looked. If you find none, say so and where you looked; never invent invariants on the project's behalf (you may propose some as hypotheses).
+**Project invariants.** Look for rules the project says must never break. They are ground truth for what the system *must* do, in every domain; whether the system *does* it is what Step 3 checks. Typical places: agent or contributor instruction files (e.g. `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`), specs, design docs and ADRs, sections called invariants, guarantees, or "never/always" rules, and contracts in the code (assertions, invariant annotations). Record where you looked. If you find none, say so and where you looked; never invent invariants on the project's behalf (you may propose some as hypotheses).
 
 ## Step 1: DECOMPOSE
 
@@ -155,12 +155,11 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 ### Invariants touched
 
-For each project invariant found in Step 0b, decide whether the artifact touches it: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For each one it touches:
-1. Name the mechanism that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule.
-2. Check that the mechanism still covers the changed path, not only the old one (a test of the old entry point does not cover a new one).
-3. Touched with no enforcing mechanism, or with one that misses the changed path → FAIL, category *missing completeness*.
-
-A prose rule with nothing that enforces it is a hypothesis about the system, not ground truth that was checked: say so.
+For each project invariant found in Step 0b, decide whether the artifact touches it. For code and data: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
+1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
+2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
+3. **Touched with nothing that bites** → FAIL, category *missing completeness*. If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
+4. **Plans and specs:** a plan that touches an invariant must not contradict it and should say how it will be enforced; a plan that is silent on it is a FAIL of missing completeness.
 
 ### Verification targets by domain
 
@@ -270,9 +269,9 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 [Sources used for verification]
 
 ## INVARIANTS
-[Where you looked; "none found" is a valid answer]
-| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Covers changed path? |
-|---|-----------|--------|------------|-------------------------------------|----------------------|
+[Where you looked; how many found; "none found" is a valid answer. List only the touched ones]
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? |
+|---|-----------|--------|------------|-------------------------------------|------------------------|
 
 ## DECOMPOSED CLAIMS
 1. [Claim text] — Mode: [Deductive/Inductive/Abductive]
@@ -314,7 +313,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 - Claims: X verified, Y failed
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
-- Invariants: N touched, M enforced on the changed path
+- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Critical issues: N
