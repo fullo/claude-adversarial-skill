@@ -258,6 +258,12 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 5. **Confidence** — per the scoring table above
 6. **Survived** — yes (confirmed robust) / no (fragile) / n/a (not stress-tested)
 7. **Fix** — specific change (for no) or "Confirmed robust" (for yes)
+8. **Type** — one of:
+   - **Demonstrated defect** — a trace, test, or reproduction shows it happening;
+   - **Preventive measure** — a plausible risk that nothing shows happening; say what would turn it into a defect (an input, a caller, a condition);
+   - **Falsified hypothesis** — a check designed to show the defect did not show it. Say so plainly and keep the check (e.g. a test) as a regression guard. The falsification covers only the paths the check exercised: name the paths it did not cover, which stay open. Propose no fix for a defect that was not shown.
+
+Severity and confidence apply to the finding as typed: a preventive measure is not reported as a bug that happens.
 
 ## Output Format
 
@@ -287,8 +293,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 |---|-------|---------|
 
 ### FAIL ❌
-| # | File:Line | Severity | Mode | Confidence | Issue |
-|---|-----------|----------|------|------------|-------|
+| # | File:Line | Type | Severity | Mode | Confidence | Issue |
+|---|-----------|------|----------|------|------------|-------|
 
 ## STRESS TEST RESULTS
 | # | Technique | Target | Survived | Confidence | Evidence |
@@ -316,6 +322,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 - Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
+- Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses
 - Critical issues: N
 - Recommendation: [trust adjustment or approval]
 ```
@@ -356,4 +363,5 @@ If the project uses `.claude/agent-trust.json`: bug found → author -1, false p
 - **Don't collect evidence without hypotheses** — every finding needs a conclusion
 - **Don't claim absence without stating where you looked** — "X doesn't exist" requires citing what you checked
 - **Don't report only problems** — stress tests that survive are equally valuable findings
+- **Don't call a risk a bug** — type every finding: demonstrated defect, preventive measure, or falsified hypothesis
 - **Don't use the same technique twice** — forced variety prevents analytical tunnel vision
