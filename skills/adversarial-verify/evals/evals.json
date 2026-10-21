@@ -273,6 +273,27 @@
         "Does not report a FAIL only because no test covers the invariant",
         "Asks what the importer does when the constraint rejects a row (whole file fails, row skipped, error reported) and reports it as a separate claim"
       ]
+    },
+    {
+      "id": 21,
+      "prompt": "Verify my fix for the jump that sometimes passes through thin platforms in our game: I added the regression test test_jump_does_not_tunnel and it's green. (The fix clamps the vertical step per frame to the platform thickness. Nobody has run the new test on the commit before the fix.)",
+      "expected_output": "The claim 'the test covers the fix' is not Verified until the test has been seen failing on the code before the fix; the verifier proposes that check and says what each outcome means",
+      "assertions": [
+        "[substance] Does not report 'the new test covers the fix' as Verified (80 or more) while the test has never been seen failing on the code before the fix",
+        "[substance] Proposes running the test on the commit before the fix (or with the fix reverted) and states what a pass and a failure there would each mean",
+        "[substance] States that if the test also passes before the fix, it does not prove the fix and the bug may be untested",
+        "[format] Reports the confidence of that claim with the reason for the cap"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "Verify my fix for the jump that sometimes passes through thin platforms in our game: I added the regression test test_jump_does_not_tunnel. (I ran it on the commit before the fix: it failed, the character ended below the platform. With the fix it passes. The fix clamps the vertical step per frame to the platform thickness.)",
+      "expected_output": "Guard case: the test was seen failing before the fix, so the verifier may score 'the test covers the fix' normally, while still checking the fix itself",
+      "assertions": [
+        "[substance] Accepts the red-before / green-after evidence as satisfying the seen-failing requirement, without asking to repeat it",
+        "[substance] Does not cap the claim 'the test covers the fix' below 80 only for lack of a seen-failing run",
+        "[substance] Still verifies the fix itself (e.g. other frame rates, platform thicknesses, fall speeds) rather than stopping at the test"
+      ]
     }
   ]
 }
