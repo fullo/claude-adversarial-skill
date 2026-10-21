@@ -294,6 +294,29 @@
         "[substance] Does not ask for a seen-failing run that the user already reports; if it keeps the claim below 80, the stated reason is that the runs were reported rather than observed, not that a seen-failing run is missing",
         "[substance] Still verifies the fix itself (e.g. other frame rates, platform thicknesses, fall speeds) rather than stopping at the test"
       ]
+    },
+    {
+      "id": 23,
+      "prompt": "Verify the config loader of our command-line tool. (It reads a file path from the environment variable TOOL_CONFIG and opens that file without checking it. The variable is set only by our installer; no command, flag or config lets a user change it, and the tool runs with the user's own permissions.)",
+      "expected_output": "The unchecked path is a plausible risk without a demonstrated failure: reported as a preventive measure, not as a defect",
+      "assertions": [
+        "[substance] Does not present the unchecked path as a demonstrated defect (no FAIL stated as a bug that happens, no 'vulnerability' asserted as fact)",
+        "[substance] Names it as a preventive measure or hypothesis, and says what would turn it into a defect (e.g. a way for another user or input to set the variable)",
+        "[substance] Takes into account that the tool runs with the user's own permissions when weighing the risk",
+        "[format] Marks the finding's type explicitly (e.g. a 'Type' field or an equivalent label)"
+      ]
+    },
+    {
+      "id": 24,
+      "prompt": "Verify the price cache of our shop backend. (I suspected it returns stale prices after an update, so I wrote a test that updates a price and reads it back through the cache: it passes, and I changed no code.)",
+      "expected_output": "The suspicion is falsified by the test: say so explicitly, keep the test as regression, propose no fix for an undemonstrated bug, and still question what the test does not cover",
+      "assertions": [
+        "[substance] States explicitly that the stale-price hypothesis is falsified by the passing test (not 'could not reproduce, maybe flaky')",
+        "[substance] Recommends keeping the test as a regression test",
+        "[substance] Does not propose a code fix for the stale-price bug",
+        "[substance] Does not conclude that the cache is correct in general: names at least one path the test does not cover (e.g. concurrent update, expiry, another instance, update through a different entry point)",
+        "[format] Marks the finding's type explicitly (e.g. 'falsified hypothesis')"
+      ]
     }
   ]
 }
