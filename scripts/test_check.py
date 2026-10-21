@@ -193,8 +193,26 @@ class PrivateTest(Base):
     def test_hyphen_suffix_and_prefix(self):
         self.assert_fails(self.leak(f"See {T1}-labs and my-{T1}."), "private term #1")
 
-    def test_underscore_and_camel(self):
-        self.assert_fails(self.leak(f"{T1}_labs {T1.capitalize()}Labs"), "private term #1")
+    def test_underscore(self):
+        self.assert_fails(self.leak(f"{T1}_labs"), "private term #1")
+
+    def test_glued_word_needs_star(self):
+        self.append(SKILL, f"{T1.capitalize()}Labs")
+        self.assert_passes(self.run_check(terms=T1))  # whole word by default
+        self.assert_fails(self.run_check(terms=T1 + "*"), "private term #1")
+
+    def test_whole_word_avoids_false_positives(self):
+        prefix = "adver" + "saria"  # a prefix of a word used all over the repo, built at run time
+        self.assert_passes(self.run_check(terms=prefix))
+        self.assert_fails(self.run_check(terms=prefix + "*"), "private term #1")
+
+    def test_short_term_warns(self):
+        r = self.run_check(terms="zq" + "v")
+        self.assert_passes(r)
+        self.assertIn("shorter than 4 characters", r.stdout)
+
+    def test_term_without_letters_is_an_error(self):
+        self.assert_fails(self.run_check(terms="--"), "no letters or digits")
 
     def test_inside_url(self):
         self.assert_fails(self.leak(f"https://example.com/{T1}-docs"), "private term #1")
@@ -247,9 +265,18 @@ class PrivateTest(Base):
         d = self.evals(); d["evals"][-1][f"{T1}_notes"] = "x"; self.save_evals(d)
         self.assert_fails(self.run_check(terms=T1), "message hidden")
 
+    def test_glued_term_in_output_is_masked_even_if_not_detected(self):
+        # whole-word detection does not flag "<term>labs", but the evals check prints the key name
+        d = self.evals(); d["evals"][-1][f"{T1}labs"] = "x"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=T1), "message hidden")
+
     def test_assertion_text_is_never_printed(self):
         d = self.evals(); d["evals"][-1]["assertions"][0] = f"Mentions {T1} internals"; self.save_evals(d)
         self.assert_fails(self.run_check(terms=T1), "assertion #1")
+
+    def test_unreadable_file_is_an_error(self):
+        os.symlink(os.path.join(self.tmp, "does-not-exist"), self.path("dangling.md"))
+        self.assert_fails(self.run_check(terms=T1), "unreadable file")
 
     def test_missing_terms_is_said_not_silent(self):
         r = self.run_check()
@@ -286,6 +313,15 @@ class StagedTest(Base):
         self.assert_fails(self.run_check("--staged", terms=T1), "leak.md")
         self.assert_passes(self.run_check(terms=T1))  # the working tree alone looks clean
 
+    def test_staged_outside_git_is_a_clear_error(self):
+        shutil.rmtree(self.path(".git"))
+        before = {d for d in os.listdir(tempfile.gettempdir()) if d.startswith("check-staged-")}
+        r = self.run_check("--staged", terms=T1)
+        self.assert_fails(r, "not a git repository")
+        self.assertNotIn("Traceback", r.stderr)
+        after = {d for d in os.listdir(tempfile.gettempdir()) if d.startswith("check-staged-")}
+        self.assertEqual(after - before, set(), "temporary directory left behind")
+
     def test_untracked_files_are_not_checked(self):
         os.makedirs(self.path(".venv"))
         open(self.path(os.path.join(".venv", "x.txt")), "w").write(f"{T1}\n")
@@ -320,6 +356,14 @@ class TablesTest(Base):
     def test_table_without_outer_pipes(self):
         self.append(SKILL, "\nA | B | C\n--- | --- | ---\n1 | 2\n")
         self.assert_fails(self.run_check(terms=NONE), "table row")
+
+    def test_delimiter_with_wrong_cell_count(self):
+        self.append(SKILL, "\n| A | B | C |\n|---|---|\n| 1 | 2 | 3 |\n")
+        self.assert_fails(self.run_check(terms=NONE), "table delimiter")
+
+    def test_row_without_outer_pipes_in_a_piped_table_is_fine(self):
+        self.append(SKILL, "\n| A | B | C |\n|---|---|---|\n1 | 2 | 3\n")
+        self.assert_passes(self.run_check(terms=NONE))
 
     def test_escaped_pipe_and_code_span_are_not_separators(self):
         self.edit(SKILL, "| **Frequency assumptions** |", "| **Frequency \\| `a|b` assumptions** |")

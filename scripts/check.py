@@ -11,12 +11,16 @@ Errors make the exit code non-zero; warnings are printed but do not block.
   3. No private term appears in any file content or file name. Terms come from
      CHECK_PRIVATE_TERMS (comma-separated) or the untracked file .check-private-terms
      (one per line, # for comments). Matching ignores case, accents and Unicode
-     forms, and the parts of a term may be joined by anything that is not a letter
-     or digit (spaces, hyphens, underscores, line breaks) or by nothing. JSON files
-     are also scanned after decoding escapes. A file that is not UTF-8 is still
-     scanned (UTF-16 if it has a BOM, otherwise Latin-1). Terms are never printed:
-     everything this script prints is masked. Without terms the check says so;
-     with --strict it fails.
+     forms; the parts of a term may be joined by anything that is not a letter or
+     digit (spaces, hyphens, underscores, line breaks) or by nothing. A term matches
+     as a whole word (not preceded or followed by a letter or digit); a term ending
+     with * also matches inside other words. Terms shorter than 4 characters give a
+     warning; a term with no letters or digits is an error. JSON strings are also
+     scanned after decoding escapes. A file that is not UTF-8 is still scanned
+     (UTF-16 if it has a BOM, otherwise Latin-1). Terms are never printed: any
+     output line containing one is masked. Without terms the check says so; with
+     --strict it fails. Not caught: one word split across two lines, UTF-16 files
+     without a BOM.
   4. Neutral wording: technology-bound terms in SKILL.md and README.md are warnings
      (they may appear in a list of varied examples). evals.json is excluded.
   5. Markdown tables in SKILL.md and README.md, with or without outer pipes: every
@@ -200,13 +204,36 @@ def load_terms(root):
     return [t.strip() for t in terms if t.strip()]
 
 
-def term_patterns(terms):
+def term_patterns(terms, rep=None, substring=False):
+    """One pattern per term. By default a whole word: not preceded or followed by a
+    letter or digit (hyphens, underscores, dots and slashes are boundaries). A term
+    ending with * also matches inside other words."""
     pats = []
-    for t in terms:
-        parts = re.findall(r"\w+", normalize(t))
-        if parts:
-            pats.append(re.compile(SEP.join(re.escape(p) for p in parts)))
+    for k, t in enumerate(terms, 1):
+        whole_word = not (substring or t.endswith("*"))
+        parts = re.findall(r"[^\W_]+", normalize(t.rstrip("*")))
+        if not parts:
+            if rep is not None:
+                rep.error("private terms", f"term #{k} has no letters or digits and cannot be checked")
+            continue
+        if rep is not None and sum(len(p) for p in parts) < 4:
+            rep.warning("private terms", f"term #{k} is shorter than 4 characters: expect false positives")
+        body = SEP.join(re.escape(p) for p in parts)
+        pats.append(re.compile(rf"(?<![^\W_]){body}(?![^\W_])" if whole_word else body))
     return pats
+
+
+def json_strings(value):
+    """Every key and string value of a JSON document, one by one."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            yield k
+            yield from json_strings(v)
+    elif isinstance(value, list):
+        for v in value:
+            yield from json_strings(v)
 
 
 def check_private(root, files, terms, rep, strict):
@@ -216,7 +243,7 @@ def check_private(root, files, terms, rep, strict):
                "private names were NOT checked")
         (rep.error if strict else rep.warning)("private terms", msg)
         return
-    pats = term_patterns(terms)
+    pats = term_patterns(terms, rep)
     for rel in files:
         if os.path.basename(rel) == TERMS_FILE:
             continue
@@ -228,19 +255,19 @@ def check_private(root, files, terms, rep, strict):
         except OSError:
             rep.error(rel, "unreadable file, not checked")
             continue
-        views = [normalize(text)]
+        body = normalize(text)
+        strings = []
         if rel.endswith(".json"):
             try:
-                views.append(normalize(json.dumps(json.loads(text), ensure_ascii=False)))
+                strings = [normalize(x) for x in json_strings(json.loads(text))]
             except ValueError:
                 pass
         for k, p in enumerate(pats, 1):
-            for view in views:
-                m = p.search(view)
-                if m:
-                    line = view.count("\n", 0, m.start()) + 1 if view is views[0] else "decoded"
-                    rep.error(f"{rel}:{line}", f"private term #{k} of the configured list")
-                    break
+            m = p.search(body)
+            if m:
+                rep.error(f"{rel}:{body.count(chr(10), 0, m.start()) + 1}", f"private term #{k} of the configured list")
+            elif any(p.search(x) for x in strings):
+                rep.error(f"{rel}:decoded", f"private term #{k} of the configured list (after decoding JSON escapes)")
 
 
 # 4 ---------------------------------------------------------------------------
@@ -303,17 +330,21 @@ def check_tables(root, rep):
 
 # ----------------------------------------------------------------------------
 
-def staged_tree(root):
-    tmp = tempfile.mkdtemp(prefix="check-staged-")
-    subprocess.run(["git", "-C", root, "checkout-index", "-a", "--prefix=" + tmp + os.sep], check=True)
-    out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True)
-    files = [f for f in out.stdout.decode("utf-8", "replace").split("\0") if f]
-    return tmp, files
+def staged_tree(root, tmp):
+    """Write the staged content into tmp; return the staged file list, or None if root is not a git repository."""
+    try:
+        subprocess.run(["git", "-C", root, "checkout-index", "-a", "--prefix=" + tmp + os.sep],
+                       check=True, capture_output=True)
+        out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return [f for f in out.stdout.decode("utf-8", "replace").split("\0") if f]
 
 
 def mask(lines, terms):
     """Hide any part of an output line (location or message) that contains a private term."""
-    pats = term_patterns(terms)
+    # substring patterns: when hiding output, err on the side of hiding too much
+    pats = term_patterns(terms, substring=True)
     hit = lambda s: any(p.search(normalize(s)) for p in pats)
     out = []
     for line in lines:
@@ -341,23 +372,36 @@ def main():
     root, tmp = args.root, None
     try:
         if args.staged:
-            tmp, files = staged_tree(args.root)
+            tmp = tempfile.mkdtemp(prefix="check-staged-")
+            files = staged_tree(args.root, tmp)
+            if files is None:
+                rep.error("--staged", "not a git repository (or git is not available)")
+                files = []
             root = tmp
         else:
             files = list_files(root)
-        check_evals(root, rep)
-        check_version(root, rep)
-        check_private(root, files, terms, rep, args.strict)
-        check_neutral(root, rep)
-        check_tables(root, rep)
+        if files or not args.staged:
+            run_checks(root, files, terms, rep, args.strict)
     finally:
         if tmp:
             shutil.rmtree(tmp, ignore_errors=True)
+    print_report(rep, terms, args.staged)
+    return 1 if rep.errors else 0
+
+
+def run_checks(root, files, terms, rep, strict):
+    check_evals(root, rep)
+    check_version(root, rep)
+    check_private(root, files, terms, rep, strict)
+    check_neutral(root, rep)
+    check_tables(root, rep)
+
+
+def print_report(rep, terms, staged):
     for line in mask(rep.errors + rep.warnings, terms):
         print(line)
-    scope = "staged content" if args.staged else "working tree"
+    scope = "staged content" if staged else "working tree"
     print(f"checked ({scope}): {', '.join(rep.checked)} — {len(rep.errors)} error(s), {len(rep.warnings)} warning(s)")
-    return 1 if rep.errors else 0
 
 
 if __name__ == "__main__":
