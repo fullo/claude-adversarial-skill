@@ -151,25 +151,35 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 3. State at least one **alternative hypothesis**
 4. State what **evidence would confirm or refute** each
 
-## Step 1c: PRE-CODE VALIDATION (plans and specs, before the code exists)
+## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
 
-A plan or a spec can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of the plan by the evidence behind it:
+A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims):
 
 | Class | Meaning | What to suggest |
 |-------|---------|-----------------|
-| **Demonstrated** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite | nothing; cite it |
-| **Technical hypothesis** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
-| **User-expectation hypothesis** | it depends on what the users want or will understand | a **mock** before the code, for the users to see and approve |
+| **Evidenced** | the evidence already exists: code, tests, a recorded response, or a measurement that you can cite (a result someone reports but you have not seen counts once you have read it) | nothing; cite it |
+| **Technical assumption** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
+| **User-expectation assumption** | it depends on what the users want, expect or will understand | a **mock-up** before the code (below) |
+
+The class feeds the confidence: an assumption of either kind is a claim only a run or the users can decide, so it scores at most 79 (Run-only constraint, Step 4) until its spike or mock-up is done. An assumption the plan presents as settled fact goes in FAIL as a preventive measure; one the plan already marks as open stays only in PRE-CODE VALIDATION.
 
 **A spike** is a small, throwaway experiment that answers one question. Each suggested spike states:
 1. **The question**, one per spike (e.g. "does the API honour `updated_since`?").
 2. **The measurement that decides it**: what will be run or read, and which result answers yes or no.
-3. **The decision rule**: do, don't, or postpone. A postponement names the conditions that would reopen it.
-4. **The throwaway constraint**: no production code, and no writes to real systems (no real orders, payments, messages or records). A spike that needs a real system uses read-only calls, test credentials, a sandbox or recorded responses. A proposed spike that writes to a real system is a finding, not a plan.
+3. **The decision rule**, with all three branches: the result that means do, the result that means don't, and the result that means postpone, with the conditions that would reopen it.
+4. **The throwaway constraint**: no production code, and no writes to real systems (no real orders, payments, messages or records). A spike that needs a real system uses read-only calls, test credentials, a sandbox or recorded responses. A proposed spike that writes to a real system is a demonstrated defect of the plan, in FAIL.
 
 Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
 
-The verifier suggests spikes; it does not run them. Running one is a run and writing it is a write (Execution and consent).
+A spike that could run now (a read-only call, a recorded response) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
+
+**A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
+1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
+2. **The form** that fits the software: images, a static page, a clickable prototype, screens of a native app or a game, sample output of a command-line tool.
+3. **Today next to Proposed**: the current screen or output beside the new one, so the change is visible.
+4. **Alternatives A and B** when the choice is open, with what each one favours.
+5. **Real content and states**: long names, empty lists, many rows, errors, a translation longer than the original.
+6. **Who approves it, and the link**: the mock-up is approved by the users or their representative before development, and the link between the request, the mock-up and the change is written down.
 
 ## Step 2: ADVERSARIAL QUESTIONS
 
@@ -385,8 +395,9 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 1. [Claim text] — Mode: [Deductive/Inductive/Abductive]
 ...
 
-## PRE-CODE VALIDATION (plans and specs only; omit otherwise)
-| # | Claim | Class | Evidence or spike/mock (question, measurement, decision rule) |
+## PRE-CODE VALIDATION (artifacts that propose work not yet done; omit otherwise)
+[With many claims, list evidenced ones by number only]
+| # | Claim | Class | Evidence, or spike or mock-up (question, measurement or form, decision rule) |
 |---|-------|-------|--------------------------------------------------------------|
 
 ## FAILURE CATEGORIES IDENTIFIED
