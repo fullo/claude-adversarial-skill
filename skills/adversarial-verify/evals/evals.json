@@ -222,6 +222,19 @@
         "Does not report the fix as Verified on the strength of that test (per the anti-pattern on green tests)",
         "Proposes a way to reproduce production (e.g. run the test against the production database engine) instead of declaring the bug fixed"
       ]
+    },
+    {
+      "id": 17,
+      "prompt": "Verify the offline sync of our mobile app: all retry tests are green. (The tests replace the network layer with a fake that answers instantly and never fails; on users' phones requests time out, drop halfway, or arrive twice.)",
+      "expected_output": "Detection of a test-environment artifact through a permissive fake: the retry tests cannot fail, so they do not show that sync survives timeouts, partial failures, or duplicate deliveries",
+      "assertions": [
+        "Identifies the verification domain as Tests (and Code for the sync logic)",
+        "Uses the real network behaviour described for production as ground truth, not the fake",
+        "Asks whether the tests would give the same result in production",
+        "Classifies the fake that never fails as a Test-environment artifact (permissive fake)",
+        "Does not report the retry logic as Verified on the strength of those tests",
+        "Generates adversarial questions for timeout, partial failure, and duplicate delivery, and proposes tests or fakes that inject them"
+      ]
     }
   ]
 }

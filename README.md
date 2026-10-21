@@ -169,7 +169,7 @@ Or ask naturally:
 - **Fragile assertions** — pass by coincidence (order, timing, locale)
 - **Test-code drift** — tests written for a previous code version
 - **Flaky indicators** — `sleep()`, `retry`, `@Ignore`/`skip`
-- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by test helpers, a database that serializes transactions, permissive fakes, a different entry point or dependencies
+- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by fixtures, a different storage or concurrency model, permissive fakes, a different path into the code (emulator, direct call), different resources or dependencies
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source
