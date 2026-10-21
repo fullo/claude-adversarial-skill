@@ -41,18 +41,21 @@ The user decides what to verify and how deep, before the verification starts. Se
 
 | Choice | Options | Default |
 |--------|---------|---------|
-| **Target** | one or more domains (Step 0), or **everything** | what the request names, or what Step 0 auto-detects |
-| **Depth** | **quick**: only the highest-risk claims (Step 3c), no stress tests; **standard**: every step; **deep**: every step, stress techniques on every claim that passed, hidden-behavior probing on every claim | standard |
+| **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects, listed explicitly |
+| **Depth** | **quick**: only the highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the highest-risk claims that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
-| **Execution** | **reasoning only**: nothing is run. This is the only option in this version | reasoning only |
+| **Execution mode** | **reasoning only**: nothing is run. This is the only option in this version, so never ask it | reasoning only |
+
+Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 2b) or to find the same pattern elsewhere is allowed; occurrences found outside the scope are listed separately, not verified.
 
 Rules:
 1. **Never ask what the request already says.** "Deep", "only the migration", "don't run anything" are answers.
-2. **Small requests start at once.** A request is small when its target is one function, one file, or a change of about 200 lines or fewer, and what to verify is clear. Ask no intake question: start, and state the defaults in one line at the top of the report, with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
-3. **Large requests stop first.** When the target is **everything**, more than one domain over a whole module or project, or the scope is the whole project, do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
-4. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
-5. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
-6. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report.
+2. **Large requests stop first.** A request is large when the target is **everything**, or covers more than one domain at module or project scope, or the scope is the whole project. Large wins over every other rule, whatever the size of the diff. Do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
+3. **Every other request starts at once** with the defaults, stated in one line at the top of the report with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
+4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default; ask nothing else. A request that names its target, or touches a single domain, is clear.
+5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
+6. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
+7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. A large request then runs only at the default scope, the changed lines, and the report states that the larger verification was not done, with its cost estimate.
 
 ## Step 0: IDENTIFY
 
@@ -232,7 +235,7 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 Apply targeted stress techniques to claims that passed initial verification. The goal: determine what is **genuinely robust** (Survived: yes) vs **merely unexamined**.
 
-**Forced variety rule:** each run must use at least 3 different techniques. Never apply the same technique twice in one run.
+**Forced variety rule:** at standard depth each run must use at least 3 different techniques, and never the same technique twice on the same claim. Quick depth skips this step; deep depth applies all four techniques to each of the highest-risk claims that passed (see Intake).
 
 | Technique | What it does | Apply to |
 |-----------|-------------|---------|
@@ -293,7 +296,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 
 ```
 ## INTAKE
-[Target, depth, scope, execution used; which were defaults]
+[Target, depth, scope, execution mode used; which were defaults; how to change them]
 
 ## VERIFICATION DOMAIN
 [Code | Architecture | Data | Documentation | Tests | Analysis]

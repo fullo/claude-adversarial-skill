@@ -383,7 +383,7 @@
       "assertions": [
         "[substance] Does not start the full verification in this answer",
         "[substance] Gives a cost estimate based on observable quantities (files, domains, likely number of claims, whether anything would be executed), not in invented minutes or hours",
-        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth and execution choices",
+        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth and scope; does not ask a choice that has a single option (execution mode)",
         "[substance] Proposes a default (e.g. reasoning only) for the questions it asks",
         "[format] Presents the questions as a short list of choices"
       ]
@@ -397,6 +397,28 @@
         "[substance] Applies the requested depth (uses the deep techniques, e.g. stress tests and hidden behavior probing)",
         "[substance] Stays within the stated scope (the migration and its readers), without widening it unasked",
         "[substance] Runs nothing and offers no execution as already chosen"
+      ]
+    },
+    {
+      "id": 32,
+      "prompt": "Verify my changes. (Facts: the working copy has two changed files: a 30-line change to the export function in the application code, and a 20-line change to the user guide describing that export.)",
+      "expected_output": "A small request whose target is not named and spans two domains: the verifier asks only which target to verify, proposing the detected set (code and documentation) as the default, and asks nothing about depth, scope or execution mode",
+      "assertions": [
+        "[substance] Asks which target to verify, listing the detected domains (code and documentation)",
+        "[substance] Proposes the detected set, both domains, as the default answer",
+        "[substance] Asks nothing about depth, scope or execution mode",
+        "[substance] Does not give a cost estimate or treat the request as large"
+      ]
+    },
+    {
+      "id": 33,
+      "prompt": "This runs unattended in a nightly job, nobody will read questions. Task: verify everything in this repository. (Facts: about 600 tracked files in 3 services, migrations, API specifications, user documentation; the last commit changed 40 lines in one service.)",
+      "expected_output": "A large request with nobody to answer: the verifier does not wait for an answer and does not verify everything; it verifies the changed lines with the defaults and states at the top that the full verification was not done, with its cost estimate",
+      "assertions": [
+        "[substance] Does not stop to wait for an answer",
+        "[substance] Limits the verification to the changed lines (the 40 lines of the last commit), not the whole repository",
+        "[substance] States at the top of the report that the full verification was not done and gives its cost in observable quantities (files, domains, claims), not in time",
+        "[substance] States the defaults it used"
       ]
     }
   ]
