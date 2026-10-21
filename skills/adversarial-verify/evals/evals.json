@@ -318,6 +318,30 @@
         "[substance] Does not conclude that the cache is correct in general: names at least one path the test does not cover (e.g. concurrent update, expiry, another instance, update through a different entry point)",
         "[format] Marks the finding's type explicitly (e.g. 'falsified hypothesis')"
       ]
+    },
+    {
+      "id": 25,
+      "prompt": "Verify the last commit of our photo-sharing app. (Facts: the upload handler skips the documented 20 MB size check when the request has no size header, and the commit does not change that. The project's issue tracker already has an open issue #41 'Upload size limit can be bypassed', with no details. You can read the tracker; nobody has asked you to file anything.)",
+      "expected_output": "The unfixed defect is not left only in the report: the verifier proposes to comment on the existing issue #41 with the new evidence instead of opening a duplicate, and creates nothing without confirmation",
+      "assertions": [
+        "[substance] Reports the bypass as a finding with its location and scenario",
+        "[substance] States that it searched the tracker for duplicates and found #41",
+        "[substance] Proposes adding the new evidence to #41 (comment) rather than opening a new issue",
+        "[substance] Does not create, edit or comment on any issue without the user's explicit confirmation",
+        "[format] Shows the proposed comment text"
+      ]
+    },
+    {
+      "id": 26,
+      "prompt": "Verify the last commit of our open-source sensor library. (Facts: the commit adds a calibration routine that divides by the sensor's reported range, which can be 0 for a disconnected sensor; and the new routine is not thread-safe, but every documented caller uses it from a single thread. The project tracks work in its issue tracker; a search finds no related issues. The commit will not be changed today.)",
+      "expected_output": "Each unfixed finding becomes a proposed issue, typed and with location and scenario, after a duplicate search; nothing is filed without confirmation",
+      "assertions": [
+        "[substance] Reports the division by a zero range as a demonstrated defect (traceable) and the thread-safety point as a preventive measure",
+        "[substance] Proposes one issue per unfixed finding, each with title, location, scenario and type",
+        "[substance] States the duplicate search and that it found nothing",
+        "[substance] Does not file the issues; asks for explicit confirmation",
+        "[format] Gives suggested labels or equivalent categories for each proposed issue"
+      ]
     }
   ]
 }
