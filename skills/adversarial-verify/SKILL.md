@@ -1,7 +1,7 @@
 ---
 name: adversarial-verify
 description: >-
-  Adversarial verification of code, architecture, data, documentation, tests, or analysis
+  Adversarial verification of code, architecture, data, documentation, tests, analysis or UX
   using Chain-of-Verification (CoV) with abstractive red-teaming, hidden behavior
   probing, stress techniques, and tri-modal reasoning (deductive, inductive, abductive).
   Identifies failure categories, detects undocumented behaviors, stress-tests for
@@ -9,14 +9,16 @@ description: >-
   Asks what to verify and how deep before large verifications, runs nothing
   without consent, and with approval turns suspicions into tests and probes them
   with mutation.
+  Before code it classifies a plan's assumptions and suggests spikes and mock-ups;
+  it verifies spike reports and the usability of interfaces.
   Use when the user says "verify", "adversarial check", "CoV review",
-  "/adversarial-verify", "review my changes", or "stress test".
+  "/adversarial-verify", "review my changes", "verify this plan", or "stress test".
 license: MIT
 compatibility: Requires a version control system (e.g. git) for diff analysis
 metadata:
   author: fullo
-  version: "4.0"
-  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, red-team, audit, stress test, chaos review
+  version: "4.1"
+  trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, verify this plan, verify this spike, check the UX, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
     - "Abstractive Red-Teaming: Anthropic 2026 — alignment.anthropic.com/2026/abstractive-red-teaming"
@@ -77,7 +79,7 @@ The verifier reasons; it runs or writes something only with the user's consent.
 
 ## Step 0: IDENTIFY
 
-Determine what needs verification. There are six domains:
+Determine what needs verification. There are seven domains:
 
 | Domain | Scope | Examples |
 |--------|-------|---------|
@@ -86,17 +88,20 @@ Determine what needs verification. There are six domains:
 | **Data** | Data integrity, schemas, contracts | database schemas and migrations, file and message formats, event schemas, save files, API specs, configs |
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
 | **Tests** | Test suite integrity and honesty | test files, coverage reports, CI configs |
-| **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
+| **Analysis** | Agent outputs, reports, docs, spike and prototype reports | summaries, recommendations, generated content, experiment results |
+| **UX** | Usability of an interface, for its users | web pages, native mobile or desktop apps, games, command-line and terminal interfaces, mock-ups |
 
 **Auto-detect from context:**
-- The version control diff (e.g. `git diff`) has changes → **Code**
+- The version control diff (e.g. `git diff`) has changes to logic → **Code**
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schemas, migrations, file or message formats, event contracts, or API specs involved → **Data**
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
+- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**. A change made only of interface code (styles, templates, layout, menus), with no logic and no text change, is **UX**, not Code: one domain, so the target is clear (Intake rule 4)
+- The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan: **Architecture**, with Step 1c
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
-- When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
+- When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain; for interface text, what it says is Documentation, whether it fits, reads and can be reached is UX
 
 ## Step 0a: GATHER ARTIFACTS
 
@@ -106,6 +111,7 @@ Determine what needs verification. There are six domains:
 - **Documentation**: read doc files, then read the code/features they describe to cross-reference
 - **Tests**: read test files, then read the production code they claim to verify, then the test bootstrap and shared helpers and the production configuration they should reproduce
 - **Analysis**: read the full agent output, report, or document under review
+- **UX**: read the screens, templates, styles and theme tokens involved, the texts and their translations, and any screenshots, recordings or interface tests the project has; list the target formats (sizes, input methods: touch, mouse, keyboard, controller; light and dark themes)
 
 ## Step 0b: ESTABLISH GROUND TRUTH
 
@@ -117,6 +123,7 @@ Determine what needs verification. There are six domains:
 | **Documentation** | Actual codebase, current API or interface, the running software, version history |
 | **Tests** | Production code, requirements, coverage reports, CI results, production configuration and runtime (to tell a real pass from a test-environment artifact) |
 | **Analysis** | Source material, original data, cited references, actual codebase |
+| **UX** | The approved mock-up (for a mock-up under review: the request it answers), the design system and the project's own guidelines, the platform's guidelines, and WCAG 2.2 where it applies |
 
 In this skill, **production** means wherever the software really runs: a deployed service, a user's device, the target hardware, a released build or package.
 
@@ -132,6 +139,7 @@ Break every artifact into **individual verifiable claims**. Each claim should be
 **Documentation:** "The README install instructions produce a working setup" / "The API docs match the actual interface (functions, commands, endpoints, messages)"
 **Tests:** "This test fails when the bug it covers is reintroduced" / "The coverage report reflects actual branch execution"
 **Analysis:** "The cited function exists at the referenced path" / "The recommendation follows from the evidence"
+**UX:** "The hint text is readable in dark mode" / "Every menu entry can be reached with the controller" / "The German labels fit at the narrowest supported width"
 
 ## Step 1b: CLASSIFY REASONING MODE
 
@@ -150,6 +158,36 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 2. State your **hypothesis** (the best explanation)
 3. State at least one **alternative hypothesis**
 4. State what **evidence would confirm or refute** each
+
+## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
+
+A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims, ranked as in Step 3c):
+
+| Class | Meaning | What to suggest |
+|-------|---------|-----------------|
+| **Evidenced** | the evidence already exists: code, tests, a recorded response, a measurement, recorded user evidence (research notes, test sessions) or an already approved mock-up, that you can cite. A result someone only reports counts once you have read the result itself (the output, the log, the measurement); a spike's result counts once it passes the spike checklist (Step 3, Analysis) | nothing; cite it |
+| **Technical assumption** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
+| **User-expectation assumption** | it depends on what the users want, expect or will understand | a **mock-up** before the code (below) |
+
+The class feeds the confidence: an assumption of either kind is a claim only a run or the users can decide, so it scores at most 79 (Run-only constraint, Step 4) until its spike or mock-up is done. An assumption the plan presents as settled fact goes in FAIL as a preventive measure, with its open question as the scenario; one the plan already marks as open stays only in PRE-CODE VALIDATION.
+
+**A spike** is a small, throwaway experiment that answers one question. Each suggested spike states:
+1. **The question**, one per spike (e.g. "does the API honour `updated_since`?").
+2. **The measurement that decides it**: what will be run or read, and which result answers yes or no.
+3. **The decision rule**, with all three branches: the result that means do, the result that means don't, and the result that means postpone, with the conditions that would reopen it.
+4. **The throwaway constraint**: no production code, and no writes to real systems (no real orders, payments, messages or records). A spike that needs a real system uses read-only calls, test credentials, a sandbox or recorded responses. A proposed spike that writes to a real system is a demonstrated defect of the plan, in FAIL.
+
+Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
+
+Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (e.g. a read-only call with test credentials) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
+
+**A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
+1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
+2. **The form** that fits the software: images, a static page, a clickable prototype, screens of a native app or a game, sample output of a command-line tool.
+3. **Today next to Proposed**: the current screen or output beside the new one, so the change is visible, when a current one exists.
+4. **Alternatives A and B** when the choice is open, with what each one favours.
+5. **Real content and states**: long names, empty lists, many rows, errors, a translation longer than the original.
+6. **Who approves it, and the link**: the mock-up is approved by the users or their representative before development, and the link between the request, the mock-up and the change is written down.
 
 ## Step 2: ADVERSARIAL QUESTIONS
 
@@ -196,11 +234,11 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 ### Invariants touched
 
-For each project invariant found in Step 0b, decide whether the artifact touches it. For code and data: the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, and analyses: the artifact proposes, describes, or concludes something about that subject. For each one it touches:
+For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, analyses and mock-ups: the artifact proposes, describes, shows or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
 3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
-4. **Plans, specs, docs, and analyses** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
+4. **Plans, specs, docs, analyses and mock-ups** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
 
@@ -221,6 +259,34 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 - **false red** — a test that fails only because of a limit, timeout, or missing resource of the test environment, which would not happen in production.
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
+
+**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point that applies (a held-out set and sample limits only when something was sampled or tuned), and report the ones that fail, typed as in the Finding format (tuning on the evaluation data is a demonstrated defect of the report; a missing seed is a preventive measure):
+- **The question** is explicit, one per spike, and the result answers that question, not a neighbouring one.
+- **The deciding measurement and the decision rule were fixed before the result** (Step 1c): which number answers yes or no, and what means do, don't or postpone. A threshold chosen after seeing the result is not a test.
+- **The bench is reproducible**: data, seed, versions of tools and libraries, machine, and the exact command or steps.
+- **The sample's limits are declared**: how much data, from where and when, confounding variables, synthetic or hand-picked data.
+- **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
+- **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
+- **The decision is written** and follows the rule fixed before the spike, if there was one: do, don't, or postpone. A postponement names the conditions that would reopen it.
+- **The throwaway constraint held**: no spike code went into production, and the spike did not write to a real system. Code that should survive is rewritten for production, not promoted. If it used personal data, say where that data is now and whether it should be deleted.
+
+A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
+
+**UX:** adapt each point to the kind of interface (web, native app, game, command-line or terminal); WCAG 2.2 is the reference where it applies. Check, in every target format (sizes, input methods, themes):
+- **Render**: the layout holds in each format; nothing is cut off or off screen; navigation stays reachable.
+- **Contrast**: text at least 4.5:1 (3:1 for large text), graphics and the boundaries of controls at least 3:1, in every theme including dark mode. Compute the ratio from the actual colours; do not estimate it. A computed failure is a demonstrated defect when the artifact shows those values apply (no later rule, theme or fallback overrides them); otherwise it is a preventive measure until the rendered check.
+- **Legibility**: text size for the viewing distance, line length, heading hierarchy; zoom to 200% and reflow at 320 px wide without loss of content, where the platform has them.
+- **Targets**: the size of what is touched or clicked, against the project's threshold or WCAG 2.5.8.
+- **Keyboard, controller and focus**: everything reachable with each supported input, the focus visible from the viewing distance, the order logical.
+- **Real content**: long names, translations longer than the original, empty values, many items.
+- **States**: empty, loading, error, success; error messages shown where they are seen, next to what caused them (their wording is Documentation).
+- **Basic accessibility**: labels on fields, text alternatives for images, an accessible name for icon-only buttons.
+- **Motion and perceived speed**: reduced-motion preferences respected; time to the first useful content on a slow network or device.
+- **Sensitive data**: no secrets or personal data visible on screen, in screenshots or recordings.
+
+**UX check round.** Suggest a check of the main screens in the project's target formats, using its interface tests if it has any. It is a run, so it is proposed under Execution and consent, with the screens, formats and inputs it covers. A measured fact (a width, a colour pair) can be computed by reasoning; how the screen really renders cannot.
+
+**Alternative interfaces.** For each weak point found, suggest one or two alternatives with a short comparison: what each improves, what it makes worse, and its cost. The verifier describes the alternatives in the Fix of the FAIL row; when a choice between them is open, it suggests a mock-up as in Step 1c, listed in the same Fix.
 
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 
@@ -320,7 +386,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
 
-**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced.
+**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. How an interface really renders (Step 3, UX) is also run-only. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up, or recorded user evidence you have read supports it (Step 1c, Evidenced); a report that users want it does not lift the cap.
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
@@ -351,19 +417,24 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [Target, depth, scope, execution mode used; which were defaults; how to change them]
 
 ## VERIFICATION DOMAIN
-[Code | Architecture | Data | Documentation | Tests | Analysis]
+[Code | Architecture | Data | Documentation | Tests | Analysis | UX]
 
 ## GROUND TRUTH
 [Sources used for verification]
 
 ## INVARIANTS
 [Where you looked; how many found; "none found" is a valid answer. List only the touched ones]
-| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data) / Respected? (plans, specs, docs, analyses) |
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data, UX) / Respected? (plans, specs, docs, analyses, mock-ups) |
 |---|-----------|--------|------------|-------------------------------------|------------------------|
 
 ## DECOMPOSED CLAIMS
 1. [Claim text] — Mode: [Deductive/Inductive/Abductive]
 ...
+
+## PRE-CODE VALIDATION (artifacts that propose work not yet done; omit otherwise)
+[With many claims, list evidenced ones by number only]
+| # | Claim | Class | Confidence | Evidence; or spike (question, measurement, decision rule); or mock-up (question, form, alternatives, approver) |
+|---|-------|-------|------------|--------------------------------------------------------------|
 
 ## FAILURE CATEGORIES IDENTIFIED
 | Category | Instances | Files affected |
@@ -415,15 +486,16 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Subtlety flags: [code hiding complexity]
 
 ### SUMMARY
-- Domain: [Code/Architecture/Data/Documentation/Tests/Analysis]
+- Domain: [Code/Architecture/Data/Documentation/Tests/Analysis/UX]
 - Claims: X verified, Y in FAIL (defects and preventive measures), Z falsified
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
-- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)
+- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data, UX) or respected (plans, specs, docs, analyses, mock-ups)
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
+- Pre-code: N evidenced, M technical assumptions (spikes suggested), K user-expectation assumptions (mock-ups suggested)
 - Executed: N tests run (red, green, on which versions); mutation score and survivors, if the probe ran, with what it excludes
 - Proposed: N checks and M writes awaiting an answer
 - Recommendation: [trust adjustment or approval]

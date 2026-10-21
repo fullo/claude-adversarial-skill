@@ -6,4 +6,13 @@
 root="$(git rev-parse --show-toplevel)" || exit 1
 py=python3
 command -v "$py" >/dev/null 2>&1 || py=python
-exec "$py" -I "$root/scripts/check.py" --strict --staged --root "$root"
+"$py" -I "$root/scripts/check.py" --strict --staged --root "$root" || exit 1
+# Eval facts: only when the staged change touches the evals, and on exactly the staged files.
+# Fact files are code: review them like any other code before committing.
+if git diff --cached --name-only | grep -q '^skills/adversarial-verify/evals/'; then
+  tmp="$(mktemp -d)" || exit 1
+  git checkout-index -a --prefix="$tmp/" || { rm -rf "$tmp"; exit 1; }
+  out="$("$py" -I "$root/scripts/check_facts.py" --root "$tmp")"; rc=$?
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || { printf "%s\n" "$out"; exit 1; }
+fi

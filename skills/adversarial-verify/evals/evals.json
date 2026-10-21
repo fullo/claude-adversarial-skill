@@ -529,6 +529,143 @@
         "[substance] States the cost of the probe in observable terms (number of mutants or mutated lines, which tests run for each), not in invented minutes",
         "[substance] Asks whether to run it"
       ]
+    },
+    {
+      "id": 43,
+      "prompt": "Verify this plan before we start coding.\n\nPLAN: order sync\n1. Every 10 minutes the job calls the shop's API, GET /orders?updated_since=<last run>&per_page=500, and stores every order returned.\n2. Each order is stored with our existing OrderRepository.save(), already used by the nightly import (see repo/orders.py, covered by tests/test_orders.py: 14 tests, which we ran this morning; output pasted below).\n3. Shop managers want to see the synced orders in a new 'Today' dashboard, grouped by status.\n4. The sync finishes in under a minute for 20,000 orders.\n\n(Facts: the repository has no API client, no recorded API response and no measurement yet; the shop's API documentation is not in the repository; nobody has called the API. The test output: '14 passed in 2.1s'; the tests use the same database engine as production.)",
+      "expected_output": "Before code, the verifier classifies each claim: 2 is evidenced (the repository code and its test run), 1 and 4 are technical assumptions that need a spike, 3 is a user-expectation assumption (a mock-up, not a spike). Each spike has a question, a deciding measurement, a decision rule with three branches and a throwaway constraint",
+      "assertions": [
+        "[substance] Treats claim 2 as evidenced for what its code and tests show (storing an order with OrderRepository.save) and suggests no spike to re-prove it; a check or spike limited to a gap the tests do not cover (e.g. whether save() updates an order already stored) is allowed",
+        "[substance] Treats claims 1 and 4 as technical assumptions nobody has observed yet and suggests a spike for them before any production code",
+        "[substance] Gives each suggested spike a question, the measurement that decides it, and a decision rule saying when to do, when not to do, and when to postpone (with the conditions to reopen)",
+        "[substance] States the throwaway constraint for the spikes: no production code, no writes to real systems (e.g. read-only calls with test credentials)",
+        "[substance] Raises at least two adversarial questions about the external API (e.g. updated_since silently ignored, per_page capped below 500 so pagination is needed, documentation differing from real responses)",
+        "[substance] Treats claim 3 as an assumption about what users expect, not a technical one, and does not propose a spike for it",
+        "[format] Reports the result in a pre-code validation section listing each claim with its class and the proposed spike"
+      ]
+    },
+    {
+      "id": 44,
+      "prompt": "Verify this spike plan. Spike: to find out whether the shop sends the 'order.updated' webhook when an order is cancelled, we will create a test order on the live shop with a real card, cancel it, and watch our endpoint for an hour. Then we decide whether to build the webhook receiver.",
+      "expected_output": "The verifier flags that the spike breaks the throwaway constraint (it writes to a real system with real money and side effects), and proposes ways to answer the same question without touching the live shop; it keeps the question and asks for a decision rule",
+      "assertions": [
+        "[substance] Flags that the spike writes to a real system (a real order and payment on the live shop) and breaks the throwaway constraint",
+        "[substance] Names concrete side effects (e.g. charges and refunds, emails to staff or customers, stock, reports, other webhooks)",
+        "[substance] Proposes a way to answer the same question without writing to the live system (e.g. the shop's test mode or sandbox, recorded webhook payloads, the vendor's documentation checked against a read-only call)",
+        "[substance] Notes the spike has no decision rule (what result means build, don't build, or postpone) and asks for one or proposes one"
+      ]
+    },
+    {
+      "id": 45,
+      "prompt": "Verify this spec before we start coding tomorrow.\n\nSPEC: 'My invoices' page\nCustomers get a new page listing their invoices, with filters by year and by status, a download button on each row, and a total at the top. It replaces the current 'Billing' page, which shows only the last invoice.\n\n(Facts: there is no mock-up, sketch or user feedback for this page; the data for invoices already exists and is served by an existing, tested endpoint.)",
+      "expected_output": "The verifier treats the page layout and behaviour as user-expectation assumptions and suggests a mock-up before the code: today's Billing page next to the proposed one, A/B alternatives for the open choices, real content and states, approval before development and the link written down; it does not make the mock-up itself and does not ask for a spike for the existing data",
+      "assertions": [
+        "[substance] Treats what the page shows and how it behaves (e.g. what the total means, how filters work, what the rows show) as assumptions about what users expect",
+        "[substance] Suggests a mock-up before any code, with today's Billing page shown next to the proposed page",
+        "[substance] Proposes A/B alternatives for at least one open choice (e.g. total of paid or of all invoices, filters as tabs or menus)",
+        "[substance] Asks the mock-up to show real content and states (e.g. no invoices, many invoices, long names, a failed download)",
+        "[substance] Says the mock-up must be approved by users or their representative before development and the link between the spec, the mock-up and the change written down",
+        "[substance] Does not make the mock-up itself, and does not suggest a spike to prove that the invoice data exists; a check or spike on something the endpoint is not shown to do (e.g. filter by year or status, compute the total) is allowed"
+      ]
+    },
+    {
+      "id": 46,
+      "prompt": "Verify this spike report before we decide.\n\nSPIKE: matching invoice lines to our product catalogue\nQuestion: can simple heuristics match invoice lines to products well enough to skip manual entry?\nData: 120 invoices received last month, all from our three largest suppliers.\nMethod: we wrote matching rules (fuzzy name match, unit price within 5%), then adjusted the thresholds on the 120 invoices until the accuracy stopped improving.\nResult: 97% of lines matched correctly on the 120 invoices.\nDecision: build it.",
+      "expected_output": "The verifier finds that the heuristics were tuned and evaluated on the same 120 invoices, so 97% says nothing about new invoices; it asks for a held-out set, flags the sample's limits and the missing error analysis, checks reproducibility and the handling of real invoice data, and says the decision does not yet rest on evidence",
+      "assertions": [
+        "[substance] Identifies that the thresholds were tuned on the same 120 invoices used to measure the 97%, so the result does not show how the rules work on new invoices",
+        "[substance] Asks for a held-out set (invoices never used for tuning) or a new sample to measure accuracy",
+        "[substance] Flags the sample's limits (one month, only the three largest suppliers) as a reason the result may not generalise",
+        "[substance] Asks for the errors, not only the average: which lines failed, and how many wrong matches looked plausible",
+        "[substance] Raises reproducibility (data kept, rule and threshold versions, the exact steps) or the handling of real invoices (where they are, whether they contain personal data)",
+        "[substance] Concludes that the decision 'build it' does not yet rest on evidence and states what result would support it"
+      ]
+    },
+    {
+      "id": 47,
+      "prompt": "Verify this spike report.\n\nSPIKE: PDF parsing library\nWe tried the library on a few PDFs on a laptop. It was fast enough and the output looked fine.\nDecision: postpone, we'll see later.",
+      "expected_output": "The verifier finds the spike has no explicit question, no measurement, no reproducible bench and no stated sample, and that the postponement has no conditions to reopen it; it asks for each missing element without inventing numbers",
+      "assertions": [
+        "[substance] Says the question is not explicit (fast enough for what, which output counts as fine)",
+        "[substance] Says the bench is not reproducible: which PDFs, how many, which library version, which machine, which command",
+        "[substance] Says there is no measurement behind 'fast enough' and 'looked fine' and asks for numbers and the criteria",
+        "[substance] Says the postponement names no conditions that would reopen it and asks for them",
+        "[substance] Does not invent figures or results the report does not contain"
+      ]
+    },
+    {
+      "id": 48,
+      "prompt": "Verify the new theme of our settings page before release. The whole stylesheet change:\n\n:root { --bg: #ffffff; --text: #333333; --muted: #6b6b6b; --link: #2563eb; }\n@media (prefers-color-scheme: dark) {\n  :root { --bg: #1e1e1e; --text: #d0d0d0; --muted: #6b6b6b; --link: #2563eb; --input-border: #3a3a3a; }\n}\nbody { background: var(--bg); color: var(--text); font-size: 16px; }\n.hint { color: var(--muted); font-size: 14px; }\na { color: var(--link); }\ninput { border: 1px solid var(--input-border, #8a8a8a); }\n\n(Facts: the page shows body text, hint text under each field (class hint), links, and text inputs. Both light and dark modes ship. Nothing has been run.)",
+      "expected_output": "In the UX domain, the verifier checks contrast in both themes: light passes; in dark mode the hint text (#6b6b6b on #1e1e1e, about 3.1:1) and the links (#2563eb on #1e1e1e, about 3.2:1) are below 4.5:1 for normal text, and the input border (#3a3a3a on #1e1e1e, about 1.5:1) is below 3:1 for a control's boundary; it proposes fixes and a check in the real browser",
+      "assertions": [
+        "[substance] Checks contrast in both light and dark mode, not only the default theme",
+        "[substance] Flags the dark-mode hint text (#6b6b6b on #1e1e1e) as below 4.5:1 for normal-size text, with a ratio near 3.1:1",
+        "[substance] Flags the dark-mode links (#2563eb on #1e1e1e) as below 4.5:1, with a ratio near 3.2:1",
+        "[substance] Flags the dark-mode input border (#3a3a3a on #1e1e1e) as below the 3:1 required for the boundary of a control, with a ratio near 1.5:1",
+        "[substance] Does not flag the light-mode text colours against their background, which pass (e.g. #333333 on #ffffff about 12.6:1, #6b6b6b on #ffffff about 5.3:1); a note that links told apart from body text by colour alone need another cue is allowed",
+        "[substance] Proposes concrete replacement colours or a rule, and a check of the rendered page in both modes (proposed, not run)"
+      ]
+    },
+    {
+      "id": 49,
+      "prompt": "Verify the German translation of our mobile bottom navigation before release.\n\nThe bar has four buttons, each 25% of the screen width, label below an icon, one line, overflow hidden. English labels: 'Home', 'Orders', 'Saved', 'Settings'. German labels: 'Startseite', 'Bestellungen', 'Gemerkt', 'Einstellungen'.\n\n(Facts, measured by a colleague in the browser at 375 px width with the project's font at 12 px: each button is 93.75 px wide with 8 px padding on each side; label widths are 'Startseite' 61 px, 'Bestellungen' 79 px, 'Gemerkt' 50 px, 'Einstellungen' 82 px. On the widest phones in the project's target list (430 px) the buttons are 107.5 px. The project's minimum supported width is 320 px. Nothing else has been run.)",
+      "expected_output": "The verifier works out that at 375 px the usable width is 77.75 px, so 'Bestellungen' and 'Einstellungen' are clipped, and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; it reports the layout breaking in the narrow format with real translated text and proposes one or two alternatives with what each improves and costs",
+      "assertions": [
+        "[substance] Computes the usable label width at 375 px (93.75 - 16 = 77.75 px) and finds 'Bestellungen' (79 px) and 'Einstellungen' (82 px) clipped",
+        "[substance] Checks the narrowest supported width (320 px: 80 px buttons, 64 px usable): 'Bestellungen' and 'Einstellungen' are clipped, 'Startseite' (61 px) and 'Gemerkt' (50 px) fit",
+        "[substance] Says that clipped labels lose meaning and treats the clipping as shown by the reported widths (possibly pending a check of the rendered bar), not only as a vague risk",
+        "[substance] Proposes one or two alternative designs (e.g. shorter labels, two-line labels, icons with a smaller font, fewer items with a 'More' menu) and compares what each improves and what it costs",
+        "[substance] Proposes checking the rendered bar at the narrowest and widest target widths (proposed, not run)"
+      ]
+    },
+    {
+      "id": 50,
+      "prompt": "Verify the pause menu of our console game before certification.\n\nThe menu has four entries: Resume, Settings, Controls, Quit to title. Entries are text, 18 px tall at 1080p, white on a 60% black overlay over the paused game. The focused entry is shown by a small arrow on its left, 8 px wide. Navigation: the controller's D-pad moves between Resume and Quit to title; Settings and Controls are reached by moving the analog stick, or by clicking with a mouse on PC. Back closes the menu.\n\n(Facts: the game ships on a console played on a TV at about 3 metres, and on PC. Nothing has been run.)",
+      "expected_output": "The UX domain applies outside the web: the verifier finds that Settings and Controls cannot be reached with the D-pad, that the focus indicator is too small to see at TV distance, that the text size and the contrast over a moving game image are not shown to be readable, and proposes a check on a real TV with a controller, plus one or two alternative designs",
+      "assertions": [
+        "[substance] Treats the pause menu as a user interface to verify (UX domain), not as code only",
+        "[substance] Flags that Settings and Controls cannot be reached with the D-pad, so navigation is not consistent for a controller",
+        "[substance] Flags the 8 px arrow as a focus indicator likely too small to see at TV distance, and asks for a clearer one",
+        "[substance] Questions text legibility at about 3 metres (18 px at 1080p) and contrast over a game image that changes under the overlay",
+        "[substance] Proposes checking the menu on a real TV with a controller, and on PC with the supported inputs (proposed, not run)",
+        "[substance] Proposes at least one alternative design with what it improves and costs"
+      ]
+    },
+    {
+      "id": 51,
+      "prompt": "Verify the last commit. Message: 'refactor: unify button styles'. The diff:\n\n .btn {\n-  padding: 12px 16px;\n-  font-size: 16px;\n-  line-height: 20px;\n+  padding: 4px 8px;\n+  font-size: 12px;\n+  line-height: 16px;\n }\n\n(Facts: .btn is used for every button of the app, which is used mostly on phones; the project's CONTRIBUTING file says touch targets must be at least 44 px tall; nothing else sets the buttons' height; nothing has been run.)",
+      "expected_output": "Though the commit calls itself a refactor, the verifier sees an interface change (UX), computes the button height before (20 + 2*12 = 44 px) and after (16 + 2*4 = 24 px), flags that every button now breaks the project's 44 px touch-target rule, notes the smaller text, and proposes a check on a phone and an alternative",
+      "assertions": [
+        "[substance] Treats the change as an interface change to verify for usability, not only as a code refactor",
+        "[substance] Computes the button height before and after (44 px and 24 px) from line-height and vertical padding",
+        "[substance] Flags that the new height breaks the project's 44 px touch-target rule for every button",
+        "[substance] Notes the text size drop to 12 px as a legibility concern on phones",
+        "[substance] Proposes a fix or an alternative (e.g. restore the vertical padding, or a minimum height) and a check on a phone (proposed, not run)"
+      ]
+    },
+    {
+      "id": 52,
+      "prompt": "Verify days_in_month in our Rust crate. You may write a new test and run it; do not change the function.\n\nfn days_in_month(year: u32, month: u32) -> u32 {\n    let _ = year;\n    match month {\n        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,\n        4 | 6 | 9 | 11 => 30,\n        2 => 28,\n        _ => panic!(\"bad month\"),\n    }\n}\n\n(Facts: you suspect leap years are ignored. The test you would write, february_2024_has_29_days, asserts assert_eq!(days_in_month(2024, 2), 29). Running it with cargo test on the current code gives: FAILED, assertion `left == right` failed, left: 28, right: 29.)",
+      "expected_output": "Same procedure as in other languages: the hypothesis comes before the test, the red result makes the leap-year defect demonstrated, the fix is proposed and not applied, and the test must turn green after the fix",
+      "assertions": [
+        "[substance] States the hypothesis (leap years ignored) before the test and names the test",
+        "[substance] Reports the run result as given (left 28, right 29) and types the finding as a demonstrated defect",
+        "[substance] Proposes a fix (29 in February of leap years: divisible by 4, except centuries not divisible by 400) without applying it, since changing the function was not approved",
+        "[substance] Says the test must pass after the fix and proposes at least one more case (e.g. 1900 or 2100 has 28, 2000 has 29)",
+        "[format] Records the test, its result and the finding type in the report"
+      ]
+    },
+    {
+      "id": 53,
+      "prompt": "Verify the tests of isWeekend in our TypeScript app. You may run a mutation probe on the changed lines, nothing else; do not write tests.\n\nexport function isWeekend(d: Date): boolean {\n  const day = d.getUTCDay();\n  return day === 0 || day === 6;\n}\n\n// tests\nexpect(isWeekend(new Date(Date.UTC(2026, 9, 24)))).toBe(true);  // Saturday\nexpect(isWeekend(new Date(Date.UTC(2026, 9, 21)))).toBe(false); // Wednesday\n\n(Facts: the mutation tool, limited to the return line, produced 4 mutants. Killed: 'day === 6' replaced with false; '||' replaced with '&&'. Survived: 'day === 0' replaced with false; the constant 0 replaced with 1. No mutant timed out or was skipped; the code was restored and the working copy is clean.)",
+      "expected_output": "The verifier reads the two survivors as one missing test (no Sunday case), types them as missing tests, proposes a Sunday test that kills both without writing it, and asks",
+      "assertions": [
+        "[substance] Reports the two survivors with their mutators, using the results as given",
+        "[substance] Explains that both survive because no test uses a Sunday, and classifies them as missing tests, not equivalent and not superfluous code",
+        "[substance] Proposes a test with a Sunday (e.g. 25 October 2026 is true) and says it kills both survivors",
+        "[substance] Does not write the test, because writing tests was not approved, and asks",
+        "[format] Presents the survivors in a table (location, mutator, outcome, reason)"
+      ]
     }
   ]
 }

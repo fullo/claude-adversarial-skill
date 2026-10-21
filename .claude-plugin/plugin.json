@@ -1,6 +1,6 @@
 {
   "name": "adversarial-verify",
-  "description": "Adversarial verification of code, architecture, data, documentation, tests and analysis: Chain-of-Verification with typed findings (demonstrated defect, preventive measure, falsified hypothesis), project invariants, and evidence-based confidence",
+  "description": "Adversarial verification of code, architecture, data, documentation, tests, analysis and UX: Chain-of-Verification with typed findings (demonstrated defect, preventive measure, falsified hypothesis), project invariants, and evidence-based confidence",
   "author": {
     "name": "Francesco Fullone — Daruma Consulting"
   }

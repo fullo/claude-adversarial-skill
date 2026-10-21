@@ -27,6 +27,11 @@ Errors make the exit code non-zero; warnings are printed but do not block.
   5. Markdown tables in SKILL.md and README.md, with or without outer pipes: every
      row has as many cells as the header (escaped pipes and pipes inside inline
      code do not count; fenced code blocks are skipped).
+  6. Eval facts: every eval from FACTS_FROM on whose prompt states facts ("(Facts")
+     has a file facts/<id>.py|.rs|.ts (run by scripts/check_facts.py) or a line
+     "<id>: <reason>" in facts/NOT_COMPUTABLE, not both; every fact file belongs to
+     an existing eval and carries the sha256 of that eval's prompt, so a prompt
+     edited after its facts were checked fails until they are checked again.
 
 Files checked: the files tracked by git (all files outside .git if git is not
 available). With --staged, exactly the content staged for the next commit.
@@ -36,6 +41,7 @@ Requires Python 3.8 or later. On Windows use `py -3 scripts/check.py`.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -53,6 +59,9 @@ TERMS_FILE = ".check-private-terms"
 EVAL_KEYS = {"id", "prompt", "expected_output", "assertions"}
 TAGGED_FROM = 21  # evals written with the evals-first method carry [substance]/[format] tags
 TAG_RE = re.compile(r"^\[(substance|format)\]\s+\S")
+FACTS_DIR = "skills/adversarial-verify/evals/facts"
+FACTS_FROM = 29  # from here on, an eval that states facts needs a fact file or a reason
+FACT_EXTS = (".py", ".rs", ".ts")
 
 # Terms that tie the text to one language, technology or kind of software.
 # Warnings only: some may appear inside a list of varied examples.
@@ -397,6 +406,56 @@ def run_checks(root, files, terms, rep, strict):
     check_private(root, files, terms, rep, strict)
     check_neutral(root, rep)
     check_tables(root, rep)
+    check_facts(root, rep)
+
+
+# 6 ---------------------------------------------------------------------------
+
+def check_facts(root, rep):
+    rep.checked.append("eval facts")
+    try:
+        evals = json.loads(read_text(root, EVALS)).get("evals", [])
+    except (OSError, ValueError, AttributeError):
+        return  # check 1 already reports it
+    ids = {e.get("id") for e in evals if isinstance(e, dict)}
+    fdir = os.path.join(root, FACTS_DIR)
+    files = sorted(os.listdir(fdir)) if os.path.isdir(fdir) else []
+    with_file = {}
+    for name in files:
+        stem, ext = os.path.splitext(name)
+        if ext in FACT_EXTS and not stem.startswith("_"):
+            if not stem.isdigit() or int(stem) not in ids:
+                rep.error(f"{FACTS_DIR}/{name}", "fact file for an eval that does not exist")
+            else:
+                with_file[int(stem)] = name
+    prompts = {e.get("id"): str(e.get("prompt", "")) for e in evals if isinstance(e, dict)}
+    for i, name in with_file.items():
+        head = read_text(root, f"{FACTS_DIR}/{name}")[:2000]
+        m = re.search(r"prompt-sha256:\s*([0-9a-f]{64})", head)
+        want = hashlib.sha256(prompts[i].encode("utf-8")).hexdigest()
+        if not m:
+            rep.error(f"{FACTS_DIR}/{name}", f"no 'prompt-sha256:' line binding it to eval {i}'s prompt")
+        elif m.group(1) != want:
+            rep.error(f"{FACTS_DIR}/{name}", f"eval {i}'s prompt changed since its facts were checked: re-check the facts, then set prompt-sha256: {want}")
+    reasons = {}
+    nc = os.path.join(fdir, "NOT_COMPUTABLE")
+    if os.path.isfile(nc):
+        for n, line in enumerate(read_text(root, f"{FACTS_DIR}/NOT_COMPUTABLE").splitlines(), 1):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            m = re.match(r"^(\d+):\s*(\S.*)?$", line)
+            if not m or not m.group(2):
+                rep.error(f"{FACTS_DIR}/NOT_COMPUTABLE:{n}", "expected '<id>: <reason>'")
+                continue
+            reasons[int(m.group(1))] = m.group(2)
+    for i in sorted(set(reasons) & set(with_file)):
+        rep.error(f"{FACTS_DIR}/NOT_COMPUTABLE", f"eval {i} has a fact file and a reason not to have one")
+    for e in evals:
+        if not isinstance(e, dict) or type(e.get("id")) is not int or e["id"] < FACTS_FROM:
+            continue
+        if "(Facts" in str(e.get("prompt", "")) and e["id"] not in with_file and e["id"] not in reasons:
+            rep.error(f"{EVALS} id {e['id']}", "states facts but has no fact file and no reason in facts/NOT_COMPUTABLE")
 
 
 def print_report(rep, terms, staged):
