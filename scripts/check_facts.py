@@ -32,7 +32,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FACTS_REL = os.path.join("skills", "adversarial-verify", "evals", "facts")
 EXTS = (".py", ".rs", ".ts")
 ASSERTS = {".rs": re.compile(r"\b(assert|assert_eq|assert_ne|panic)!"), ".ts": re.compile(r"\bthrow\b")}
-STRIP = re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`', re.S)
+STRIP = {
+    # Rust: a single quote also starts a lifetime ('a), so only "..." strings are removed.
+    ".rs": re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"', re.S),
+    ".ts": re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`', re.S),
+}
 
 
 def has_assertion(path):
@@ -44,7 +48,7 @@ def has_assertion(path):
         except SyntaxError:
             return True  # let the run report the syntax error
         return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))
-    return bool(ASSERTS[ext].search(STRIP.sub(" ", text)))
+    return bool(ASSERTS[ext].search(STRIP[ext].sub(" ", text)))
 
 
 def command(path, tmp):

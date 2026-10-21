@@ -92,13 +92,13 @@ Determine what needs verification. There are seven domains:
 | **UX** | Usability of an interface, for its users | web pages, native mobile or desktop apps, games, command-line and terminal interfaces, mock-ups |
 
 **Auto-detect from context:**
-- The version control diff (e.g. `git diff`) has changes → **Code**
+- The version control diff (e.g. `git diff`) has changes to logic → **Code**
 - User references PLAN.md, SPEC.md, ADR → **Architecture**
 - Schemas, migrations, file or message formats, event contracts, or API specs involved → **Data**
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
-- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**. A change made only of interface code (styles, templates, layout, menus, copy), with no logic, is **UX**, not Code: one domain, so the target is clear (Intake rule 4)
+- Screens, templates, stylesheets, themes, layouts, menus, terminal output or mock-ups changed or under review → **UX**. A change made only of interface code (styles, templates, layout, menus), with no logic and no text change, is **UX**, not Code: one domain, so the target is clear (Intake rule 4)
 - The report of a spike, prototype or experiment already done → **Analysis** (with the spike checklist, Step 3); a spike not yet run is a plan: **Architecture**, with Step 1c
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain; for interface text, what it says is Documentation, whether it fits, reads and can be reached is UX
@@ -386,7 +386,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Hard constraint:** if you cannot name the specific file, line, doc page, or code path you verified, you CANNOT score above 79.
 
-**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. How an interface really renders (Step 3, UX) is also run-only. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up; a report that users want it does not lift the cap.
+**Run-only constraint:** a claim that only a run can decide (a query plan, a measured performance, the behavior of an external system, a test result) CANNOT score above 79 until that run is done or its result is supplied, however well the code is traced. How an interface really renders (Step 3, UX) is also run-only. The same holds for a claim only the users can decide (a user-expectation assumption, Step 1c): at most 79 until the users or their representative approve a mock-up, or recorded user evidence you have read supports it (Step 1c, Evidenced); a report that users want it does not lift the cap.
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
