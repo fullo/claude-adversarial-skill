@@ -3,37 +3,51 @@
 
 Errors make the exit code non-zero; warnings are printed but do not block.
 
-  1. evals.json: valid JSON, exactly the keys id/prompt/expected_output/assertions,
-     ids unique and consecutive from 1, no empty assertion, and every assertion of
-     eval TAGGED_FROM or later starts with [substance] or [format].
-  2. The version in SKILL.md's frontmatter matches the README badge.
-  3. No private term appears in the repository files. The terms are read from the
-     environment variable CHECK_PRIVATE_TERMS (comma-separated) or from the
-     untracked file .check-private-terms (one per line, # for comments). They are
-     never printed. Without terms the check says so; with --strict it fails.
-  4. Neutral wording: technology-bound terms in SKILL.md and README.md are reported
-     as warnings (they may appear legitimately in a list of varied examples).
-     evals.json is excluded: concrete cases are allowed there.
-  5. Markdown tables in SKILL.md and README.md: every row has as many cells as the
-     header (escaped pipes and pipes inside inline code do not count).
+  1. evals.json: valid JSON; exactly the keys id/prompt/expected_output/assertions;
+     integer ids 1..n in file order; non-empty prompt, expected output and
+     assertions; every assertion of eval TAGGED_FROM or later starts with
+     [substance] or [format] followed by text.
+  2. The version in SKILL.md's frontmatter matches every skill badge in the README.
+  3. No private term appears in any file content or file name. Terms come from
+     CHECK_PRIVATE_TERMS (comma-separated) or the untracked file .check-private-terms
+     (one per line, # for comments). Matching ignores case, accents and Unicode
+     forms, and the parts of a term may be joined by anything that is not a letter
+     or digit (spaces, hyphens, underscores, line breaks) or by nothing. JSON files
+     are also scanned after decoding escapes. A file that is not UTF-8 is still
+     scanned (UTF-16 if it has a BOM, otherwise Latin-1). Terms are never printed:
+     everything this script prints is masked. Without terms the check says so;
+     with --strict it fails.
+  4. Neutral wording: technology-bound terms in SKILL.md and README.md are warnings
+     (they may appear in a list of varied examples). evals.json is excluded.
+  5. Markdown tables in SKILL.md and README.md, with or without outer pipes: every
+     row has as many cells as the header (escaped pipes and pipes inside inline
+     code do not count; fenced code blocks are skipped).
 
-Usage: python3 scripts/check.py [--strict] [--root PATH]
+Files checked: the files tracked by git (all files outside .git if git is not
+available). With --staged, exactly the content staged for the next commit.
+
+Usage: python3 scripts/check.py [--strict] [--staged] [--root PATH]
+Requires Python 3.8 or later. On Windows use `py -3 scripts/check.py`.
 """
 
 import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
+import unicodedata
 
-SKILL = os.path.join("skills", "adversarial-verify", "SKILL.md")
-EVALS = os.path.join("skills", "adversarial-verify", "evals", "evals.json")
+SKILL = "skills/adversarial-verify/SKILL.md"
+EVALS = "skills/adversarial-verify/evals/evals.json"
 README = "README.md"
 TERMS_FILE = ".check-private-terms"
 
 EVAL_KEYS = {"id", "prompt", "expected_output", "assertions"}
 TAGGED_FROM = 21  # evals written with the evals-first method carry [substance]/[format] tags
-TAGS = ("[substance]", "[format]")
+TAG_RE = re.compile(r"^\[(substance|format)\]\s+\S")
 
 # Terms that tie the text to one language, technology or kind of software.
 # Warnings only: some may appear inside a list of varied examples.
@@ -44,6 +58,14 @@ STACK_TERMS = [
     r"\bPHP\b", r"\bJava\b", r"Kotlin", r"JavaScript", r"TypeScript", r"Python",
     r"Unity", r"Godot", r"Unreal", r"\bDocker\b", r"Kubernetes", r"\bAWS\b",
 ]
+
+SEP = r"[\W_]*"  # anything that is not a letter or digit, possibly nothing
+
+
+def normalize(text):
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return text.casefold()
 
 
 class Report:
@@ -59,15 +81,49 @@ class Report:
         self.warnings.append(f"WARNING {where}: {msg}")
 
 
-def read(root, path):
-    with open(os.path.join(root, path), encoding="utf-8") as f:
-        return f.read()
+def decode(data):
+    """Decode bytes without ever giving up: UTF-8, UTF-16 with BOM, else Latin-1."""
+    if data.startswith((b"\xff\xfe", b"\xfe\xff")):
+        try:
+            return data.decode("utf-16"), "utf-16"
+        except UnicodeDecodeError:
+            pass
+    try:
+        return data.decode("utf-8-sig"), "utf-8"
+    except UnicodeDecodeError:
+        return data.decode("latin-1"), "latin-1"
 
+
+def read_text(root, rel, rep=None):
+    with open(os.path.join(root, rel), "rb") as f:
+        text, enc = decode(f.read())
+    if enc != "utf-8" and rep is not None and rel in (SKILL, README, EVALS):
+        rep.error(rel, f"not UTF-8 (read as {enc})")
+    return text
+
+
+def list_files(root):
+    try:
+        out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True)
+        files = [f for f in out.stdout.decode("utf-8", "replace").split("\0") if f]
+        if files:
+            return files
+    except (OSError, subprocess.CalledProcessError):
+        pass
+    found = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d != ".git"]
+        for name in filenames:
+            found.append(os.path.relpath(os.path.join(dirpath, name), root).replace(os.sep, "/"))
+    return found
+
+
+# 1 ---------------------------------------------------------------------------
 
 def check_evals(root, rep):
     rep.checked.append("evals")
     try:
-        data = json.loads(read(root, EVALS))
+        data = json.loads(read_text(root, EVALS, rep))
     except (OSError, ValueError) as e:
         rep.error(EVALS, f"not valid JSON ({e.__class__.__name__}: {e})")
         return
@@ -75,151 +131,232 @@ def check_evals(root, rep):
     if not isinstance(evals, list) or not evals:
         rep.error(EVALS, "no 'evals' list")
         return
-    seen = set()
     ids = []
     for n, e in enumerate(evals, 1):
         where = f"{EVALS} eval #{n}"
         if not isinstance(e, dict):
             rep.error(where, "not an object")
             continue
-        keys = set(e)
-        if keys != EVAL_KEYS:
-            extra = sorted(keys - EVAL_KEYS)
-            missing = sorted(EVAL_KEYS - keys)
-            if extra:
-                rep.error(where, f"unexpected keys {extra} (put facts in the prompt)")
-            if missing:
-                rep.error(where, f"missing keys {missing}")
+        extra, missing = sorted(set(e) - EVAL_KEYS), sorted(EVAL_KEYS - set(e))
+        if extra:
+            rep.error(where, f"unexpected keys {extra} (put facts in the prompt)")
+        if missing:
+            rep.error(where, f"missing keys {missing}")
         i = e.get("id")
-        if not isinstance(i, int):
+        if type(i) is not int:  # bool is an int subclass: reject it
             rep.error(where, "id is not an integer")
             continue
-        where = f"{EVALS} id {i}"
-        if i in seen:
-            rep.error(where, "duplicate id")
-        seen.add(i)
         ids.append(i)
+        where = f"{EVALS} id {i}"
+        for key in ("prompt", "expected_output"):
+            if key in e and (not isinstance(e[key], str) or not e[key].strip()):
+                rep.error(where, f"empty {key}")
         assertions = e.get("assertions")
         if not isinstance(assertions, list) or not assertions:
             rep.error(where, "no assertions")
             continue
-        for a in assertions:
+        for k, a in enumerate(assertions, 1):
             if not isinstance(a, str) or not a.strip():
-                rep.error(where, "empty assertion")
-            elif i >= TAGGED_FROM and not a.startswith(TAGS):
-                rep.error(where, f"assertion does not start with [substance] or [format]: {a[:60]!r}")
-    if sorted(ids) != list(range(1, len(ids) + 1)) and len(ids) == len(seen):
-        rep.error(EVALS, f"ids are not consecutive from 1 (found {sorted(ids)[:3]}...{sorted(ids)[-3:]})")
+                rep.error(where, f"empty assertion #{k}")
+            elif i >= TAGGED_FROM and not TAG_RE.match(a):
+                rep.error(where, f"assertion #{k} does not start with [substance] or [format] followed by text")
+    dups = sorted({i for i in ids if ids.count(i) > 1})
+    if dups:
+        rep.error(EVALS, f"duplicate id {dups}")
+    if ids != list(range(1, len(ids) + 1)):
+        rep.error(EVALS, "ids are not consecutive from 1 in file order")
 
+
+# 2 ---------------------------------------------------------------------------
 
 def check_version(root, rep):
     rep.checked.append("version")
-    m = re.search(r'^\s*version:\s*"?([0-9][0-9.]*)"?\s*$', read(root, SKILL), re.M)
-    b = re.search(r"badge/skill-v([0-9][0-9.]*)-", read(root, README))
+    skill = read_text(root, SKILL, rep)
+    fm = re.match(r"\A---\n(.*?)\n---\n", skill.replace("\r\n", "\n"), re.S)
+    m = re.search(r'^\s*version:\s*"?([0-9][0-9.]*)"?\s*$', fm.group(1), re.M) if fm else None
+    badges = re.findall(r"badge/skill-v([0-9][0-9.]*)-", read_text(root, README, rep))
     if not m:
         rep.error(SKILL, "no version in the frontmatter")
-    if not b:
+    if not badges:
         rep.error(README, "no version badge")
-    if m and b and m.group(1) != b.group(1):
-        rep.error(README, f"version mismatch: SKILL.md says {m.group(1)}, README badge says {b.group(1)}")
+    if m:
+        for b in badges:
+            if b != m.group(1):
+                rep.error(README, f"version mismatch: SKILL.md says {m.group(1)}, a README badge says {b}")
 
+
+# 3 ---------------------------------------------------------------------------
 
 def load_terms(root):
     raw = os.environ.get("CHECK_PRIVATE_TERMS")
     if raw is not None:
-        return [t.strip() for t in raw.split(",") if t.strip()]
-    path = os.path.join(root, TERMS_FILE)
-    if os.path.exists(path):
-        with open(path, encoding="utf-8") as f:
-            return [l.strip() for l in f if l.strip() and not l.strip().startswith("#")]
-    return None
+        terms = raw.split(",")
+    else:
+        path = os.path.join(root, TERMS_FILE)
+        if not os.path.exists(path):
+            return []
+        with open(path, "rb") as f:
+            terms = [l for l in decode(f.read())[0].splitlines() if not l.strip().startswith("#")]
+    return [t.strip() for t in terms if t.strip()]
 
 
-def repo_files(root):
-    skip = {".git", "__pycache__"}
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in skip]
-        for name in filenames:
-            if name == TERMS_FILE:
-                continue
-            p = os.path.join(dirpath, name)
-            yield os.path.relpath(p, root)
+def term_patterns(terms):
+    pats = []
+    for t in terms:
+        parts = re.findall(r"\w+", normalize(t))
+        if parts:
+            pats.append(re.compile(SEP.join(re.escape(p) for p in parts)))
+    return pats
 
 
-def check_private(root, rep, strict):
+def check_private(root, files, terms, rep, strict):
     rep.checked.append("private terms")
-    terms = load_terms(root)
     if not terms:
         msg = (f"no private terms configured (set CHECK_PRIVATE_TERMS or create {TERMS_FILE}); "
                "private names were NOT checked")
         (rep.error if strict else rep.warning)("private terms", msg)
         return
-    patterns = [re.compile(r"(?<![\w-])" + re.escape(t) + r"(?![\w-])", re.I) for t in terms]
-    for rel in repo_files(root):
-        try:
-            text = read(root, rel)
-        except (UnicodeDecodeError, OSError):
+    pats = term_patterns(terms)
+    for rel in files:
+        if os.path.basename(rel) == TERMS_FILE:
             continue
-        for ln, line in enumerate(text.splitlines(), 1):
-            for k, p in enumerate(patterns, 1):
-                if p.search(line):
-                    # never print the term or the line: the list itself is private
-                    rep.error(f"{rel}:{ln}", f"private term #{k} of the configured list")
+        for k, p in enumerate(pats, 1):
+            if p.search(normalize(rel)):
+                rep.error(rel, f"private term #{k} in the file name")
+        try:
+            text = read_text(root, rel)
+        except OSError:
+            rep.error(rel, "unreadable file, not checked")
+            continue
+        views = [normalize(text)]
+        if rel.endswith(".json"):
+            try:
+                views.append(normalize(json.dumps(json.loads(text), ensure_ascii=False)))
+            except ValueError:
+                pass
+        for k, p in enumerate(pats, 1):
+            for view in views:
+                m = p.search(view)
+                if m:
+                    line = view.count("\n", 0, m.start()) + 1 if view is views[0] else "decoded"
+                    rep.error(f"{rel}:{line}", f"private term #{k} of the configured list")
+                    break
 
+
+# 4 ---------------------------------------------------------------------------
 
 def check_neutral(root, rep):
     rep.checked.append("neutral wording")
-    patterns = [(t, re.compile(t)) for t in STACK_TERMS]
+    patterns = [re.compile(t) for t in STACK_TERMS]
     for rel in (SKILL, README):
-        for ln, line in enumerate(read(root, rel).splitlines(), 1):
-            for t, p in patterns:
+        for ln, line in enumerate(read_text(root, rel).splitlines(), 1):
+            for p in patterns:
                 m = p.search(line)
                 if m:
                     rep.warning(f"{rel}:{ln}", f"technology-bound term {m.group(0)!r}: keep it only as one of varied examples")
 
 
-def cells(line):
-    # drop inline code spans and escaped pipes before counting separators
-    line = re.sub(r"`[^`]*`", "", line).replace("\\|", "")
-    return line.count("|")
+# 5 ---------------------------------------------------------------------------
+
+DELIM = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$")
+
+
+def count_cells(line):
+    s = re.sub(r"`[^`]*`", "x", line).replace("\\|", "x").strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|"):
+        s = s[:-1]
+    return s.count("|") + 1
 
 
 def check_tables(root, rep):
     rep.checked.append("tables")
     for rel in (SKILL, README):
-        lines = read(root, rel).splitlines()
-        in_fence = False
+        lines = read_text(root, rel).splitlines()
+        fence = None
         i = 0
         while i < len(lines):
             s = lines[i].strip()
-            if s.startswith("```"):
-                in_fence = not in_fence
-            if not in_fence and s.startswith("|"):
-                header = cells(s)
+            f = re.match(r"^(`{3,}|~{3,})", s)
+            if f:
+                if fence is None:
+                    fence = f.group(1)[0]
+                elif s.startswith(fence * 3):
+                    fence = None
+                i += 1
+                continue
+            if fence is None and i > 0 and DELIM.match(lines[i]) and "|" in lines[i] + lines[i - 1]:
+                header = count_cells(lines[i - 1])
                 start = i
-                while i < len(lines) and lines[i].strip().startswith("|"):
-                    n = cells(lines[i].strip())
+                if count_cells(lines[i]) != header:
+                    rep.error(f"{rel}:{i + 1}", f"table delimiter has {count_cells(lines[i])} cells, header at line {i} has {header}")
+                i += 1
+                while i < len(lines) and lines[i].strip() and "|" in lines[i]:
+                    n = count_cells(lines[i])
                     if n != header:
-                        rep.error(f"{rel}:{i + 1}", f"table row has {n} separators, header at line {start + 1} has {header}")
+                        rep.error(f"{rel}:{i + 1}", f"table row has {n} cells, header at line {start} has {header}")
                     i += 1
                 continue
             i += 1
 
 
+# ----------------------------------------------------------------------------
+
+def staged_tree(root):
+    tmp = tempfile.mkdtemp(prefix="check-staged-")
+    subprocess.run(["git", "-C", root, "checkout-index", "-a", "--prefix=" + tmp + os.sep], check=True)
+    out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True, check=True)
+    files = [f for f in out.stdout.decode("utf-8", "replace").split("\0") if f]
+    return tmp, files
+
+
+def mask(lines, terms):
+    """Hide any part of an output line (location or message) that contains a private term."""
+    pats = term_patterns(terms)
+    hit = lambda s: any(p.search(normalize(s)) for p in pats)
+    out = []
+    for line in lines:
+        m = re.match(r"^(ERROR|WARNING) (.*?): (.*)$", line)
+        if not m:
+            out.append("[line hidden: it contains a private term]" if hit(line) else line)
+            continue
+        level, where, msg = m.groups()
+        if hit(where):
+            where = "[location hidden: its path contains a private term]"
+        if hit(msg):
+            msg = "[message hidden: it contains a private term]"
+        out.append(f"{level} {where}: {msg}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--strict", action="store_true", help="fail when no private terms are configured")
+    ap.add_argument("--staged", action="store_true", help="check the content staged for the next commit")
     ap.add_argument("--root", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     args = ap.parse_args()
+    terms = load_terms(args.root)  # always from the working repo: the list is never committed
     rep = Report()
-    check_evals(args.root, rep)
-    check_version(args.root, rep)
-    check_private(args.root, rep, args.strict)
-    check_neutral(args.root, rep)
-    check_tables(args.root, rep)
-    for line in rep.errors + rep.warnings:
+    root, tmp = args.root, None
+    try:
+        if args.staged:
+            tmp, files = staged_tree(args.root)
+            root = tmp
+        else:
+            files = list_files(root)
+        check_evals(root, rep)
+        check_version(root, rep)
+        check_private(root, files, terms, rep, args.strict)
+        check_neutral(root, rep)
+        check_tables(root, rep)
+    finally:
+        if tmp:
+            shutil.rmtree(tmp, ignore_errors=True)
+    for line in mask(rep.errors + rep.warnings, terms):
         print(line)
-    print(f"checked: {', '.join(rep.checked)} — {len(rep.errors)} error(s), {len(rep.warnings)} warning(s)")
+    scope = "staged content" if args.staged else "working tree"
+    print(f"checked ({scope}): {', '.join(rep.checked)} — {len(rep.errors)} error(s), {len(rep.warnings)} warning(s)")
     return 1 if rep.errors else 0
 
 

@@ -1,10 +1,13 @@
 """Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.
 
 Run from the repo root: python3 -m unittest scripts/test_check.py
+Every failing case must come from the script's own ERROR and summary, and no
+private test term may ever be printed.
 """
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -16,31 +19,31 @@ SKILL = os.path.join("skills", "adversarial-verify", "SKILL.md")
 EVALS = os.path.join("skills", "adversarial-verify", "evals", "evals.json")
 
 # Built at run time so that no test term appears literally in any repo file,
-# including this one (the check scans every file).
-NONE = "-".join(["no", "such", "term", "7f3a"])
-SECRET = "secret" + "proj"
+# including this one (the check scans every file). Neither occurs in the repo.
+NONE = "nosuch" + "term7f3a"  # a single word: separators inside a term match loosely
+T1 = "zq" + "vorblax"                 # one-word private term
+T2 = "quil" + "lane " + "dor" + "vex"  # two-word private term
 
 
-class CheckTest(unittest.TestCase):
+class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        for item in ("README.md", "skills", ".claude-plugin", "scripts"):
-            src = os.path.join(ROOT, item)
-            dst = os.path.join(self.tmp, item)
+        for item in ("README.md", "skills", ".claude-plugin", "scripts", ".gitignore"):
+            src, dst = os.path.join(ROOT, item), os.path.join(self.tmp, item)
             if os.path.isdir(src):
-                shutil.copytree(src, dst)
+                shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__"))
             else:
                 shutil.copy(src, dst)
 
     def tearDown(self):
-        shutil.rmtree(self.tmp)
+        shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def run_check(self, *args, env_terms=None, terms_file=None):
+    def run_check(self, *args, terms=None, terms_file=None):
         env = {k: v for k, v in os.environ.items() if k != "CHECK_PRIVATE_TERMS"}
-        if env_terms is not None:
-            env["CHECK_PRIVATE_TERMS"] = env_terms
+        if terms is not None:
+            env["CHECK_PRIVATE_TERMS"] = terms
         if terms_file is not None:
-            with open(os.path.join(self.tmp, ".check-private-terms"), "w") as f:
+            with open(os.path.join(self.tmp, ".check-private-terms"), "wb") as f:
                 f.write(terms_file)
         return subprocess.run(
             [sys.executable, "-I", os.path.join(self.tmp, "scripts", "check.py"), "--root", self.tmp, *args],
@@ -49,86 +52,204 @@ class CheckTest(unittest.TestCase):
 
     def assert_fails(self, r, *tokens):
         """A failure counts only if the script ran, reported an ERROR and named what failed."""
-        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("checked:", r.stdout, "the script did not run to its summary")
+        out = r.stdout + r.stderr
+        self.assertNotEqual(r.returncode, 0, out)
+        self.assertIn("checked (", r.stdout, "the script did not run to its summary:\n" + out)
         self.assertIn("ERROR", r.stdout)
         for t in tokens:
             self.assertIn(t, r.stdout)
+        self.assert_no_leak(r)
 
     def assert_passes(self, r):
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn("checked:", r.stdout, "the script did not run to its summary")
+        out = r.stdout + r.stderr
+        self.assertEqual(r.returncode, 0, out)
+        self.assertIn("checked (", r.stdout, "the script did not run to its summary:\n" + out)
         self.assertNotIn("ERROR", r.stdout)
 
-    def edit(self, path, old, new):
-        p = os.path.join(self.tmp, path)
-        s = open(p, encoding="utf-8").read()
+    def assert_no_leak(self, r):
+        low = (r.stdout + r.stderr).lower()
+        for t in (T1, T2, T2.replace(" ", "")):
+            self.assertNotIn(t, low, "a private term was printed")
+
+    def path(self, rel):
+        return os.path.join(self.tmp, rel)
+
+    def edit(self, rel, old, new):
+        s = open(self.path(rel), encoding="utf-8").read()
         self.assertIn(old, s)
-        open(p, "w", encoding="utf-8").write(s.replace(old, new, 1))
+        open(self.path(rel), "w", encoding="utf-8").write(s.replace(old, new, 1))
+
+    def append(self, rel, text):
+        with open(self.path(rel), "a", encoding="utf-8") as f:
+            f.write("\n" + text + "\n")
 
     def evals(self):
-        p = os.path.join(self.tmp, EVALS)
-        return p, json.load(open(p, encoding="utf-8"))
+        with open(self.path(EVALS), encoding="utf-8") as f:
+            return json.load(f)
 
-    # --- the repo as it is ---
+    def save_evals(self, d):
+        with open(self.path(EVALS), "w", encoding="utf-8") as f:
+            json.dump(d, f, indent=2, ensure_ascii=False)
 
+
+class RepoTest(Base):
     def test_repo_passes(self):
-        self.assert_passes(self.run_check(env_terms=NONE))
+        self.assert_passes(self.run_check(terms=NONE))
 
-    # --- 1. evals ---
+    def test_repo_passes_strict(self):
+        self.assert_passes(self.run_check("--strict", terms=NONE))
 
-    def test_broken_json_fails(self):
-        p = os.path.join(self.tmp, EVALS)
-        open(p, "a").write("{")
-        self.assert_fails(self.run_check(env_terms=NONE), "evals.json")
 
-    def test_duplicate_id_fails(self):
-        p, d = self.evals()
-        d["evals"][-1]["id"] = d["evals"][-2]["id"]
-        json.dump(d, open(p, "w"), indent=2)
-        self.assert_fails(self.run_check(env_terms=NONE), "duplicate id")
+class EvalsTest(Base):
+    def test_broken_json(self):
+        open(self.path(EVALS), "a").write("{")
+        self.assert_fails(self.run_check(terms=NONE), "not valid JSON")
 
-    def test_gap_in_ids_fails(self):
-        p, d = self.evals()
-        d["evals"][-1]["id"] += 5
-        json.dump(d, open(p, "w"), indent=2)
-        self.assert_fails(self.run_check(env_terms=NONE), "consecutive")
+    def test_duplicate_id(self):
+        d = self.evals(); d["evals"][-1]["id"] = d["evals"][-2]["id"]; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "duplicate id")
 
-    def test_extra_key_fails(self):
-        p, d = self.evals()
-        d["evals"][-1]["context"] = "facts outside the prompt"
-        json.dump(d, open(p, "w"), indent=2)
-        self.assert_fails(self.run_check(env_terms=NONE), "context")
+    def test_gap(self):
+        d = self.evals(); d["evals"][-1]["id"] += 5; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "consecutive")
 
-    def test_empty_assertion_fails(self):
-        p, d = self.evals()
-        d["evals"][0]["assertions"].append("  ")
-        json.dump(d, open(p, "w"), indent=2)
-        self.assert_fails(self.run_check(env_terms=NONE), "empty assertion")
+    def test_duplicate_and_gap_both_reported(self):
+        d = self.evals(); d["evals"][-1]["id"] = 1; d["evals"].append(dict(d["evals"][0], id=99)); self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "duplicate id", "consecutive")
 
-    def test_untagged_assertion_in_new_eval_fails(self):
-        p, d = self.evals()
-        d["evals"][-1]["assertions"][0] = "Does something without a tag"
-        json.dump(d, open(p, "w"), indent=2)
-        self.assert_fails(self.run_check(env_terms=NONE), "[substance]")
+    def test_swapped_order(self):
+        d = self.evals(); d["evals"][0], d["evals"][1] = d["evals"][1], d["evals"][0]; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "consecutive")
 
-    # --- 2. version ---
+    def test_boolean_id(self):
+        d = self.evals(); d["evals"][0]["id"] = True; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "id is not an integer")
 
-    def test_version_mismatch_fails(self):
+    def test_extra_key(self):
+        d = self.evals(); d["evals"][-1]["context"] = "facts outside the prompt"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "context")
+
+    def test_missing_key(self):
+        d = self.evals(); del d["evals"][-1]["expected_output"]; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "missing keys")
+
+    def test_empty_prompt(self):
+        d = self.evals(); d["evals"][3]["prompt"] = "   "; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "empty prompt")
+
+    def test_empty_assertion(self):
+        d = self.evals(); d["evals"][0]["assertions"].append("  "); self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "empty assertion")
+
+    def test_untagged_assertion_in_new_eval(self):
+        d = self.evals(); d["evals"][-1]["assertions"][0] = "Does something"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "[substance]")
+
+    def test_untagged_assertion_at_the_boundary(self):
+        d = self.evals()
+        e = [x for x in d["evals"] if x["id"] == 21][0]
+        e["assertions"][0] = "Does something"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "id 21")
+
+    def test_old_untagged_eval_is_accepted(self):
+        d = self.evals()
+        e = [x for x in d["evals"] if x["id"] == 20][0]
+        self.assertFalse(e["assertions"][0].startswith("["), "eval 20 is untagged by design")
+        self.assert_passes(self.run_check(terms=NONE))
+
+    def test_tag_without_text(self):
+        d = self.evals(); d["evals"][-1]["assertions"][0] = "[format]"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=NONE), "followed by text")
+
+
+class VersionTest(Base):
+    def test_badge_mismatch(self):
         self.edit("README.md", "badge/skill-v", "badge/skill-v9")
-        self.assert_fails(self.run_check(env_terms=NONE), "version")
+        self.assert_fails(self.run_check(terms=NONE), "version mismatch")
 
-    # --- 3. private names ---
+    def test_second_badge_mismatch(self):
+        self.append("README.md", "![old](https://img.shields.io/badge/skill-v2.0-blue)")
+        self.assert_fails(self.run_check(terms=NONE), "version mismatch")
 
-    def test_private_term_from_env_fails(self):
-        self.edit(SKILL, "## Overview", "## Overview\n\nSeen first in " + SECRET.capitalize() + ".")
-        r = self.run_check(env_terms=SECRET + ", other")
-        self.assert_fails(r, "SKILL.md", "private term")
-        self.assertNotIn(SECRET, r.stdout.lower(), "the forbidden term itself must not be printed")
+    def test_version_outside_frontmatter_does_not_count(self):
+        s = open(self.path(SKILL), encoding="utf-8").read()
+        v = re.search(r'version: "([0-9.]+)"', s).group(1)
+        s = s.replace(f'  version: "{v}"\n', "", 1) + f'\n```\nversion: "{v}"\n```\n'
+        open(self.path(SKILL), "w", encoding="utf-8").write(s)
+        self.assert_fails(self.run_check(terms=NONE), "no version in the frontmatter")
 
-    def test_private_term_from_file_fails(self):
-        self.edit("README.md", "## What it catches", "## What it catches\n\nAs in " + SECRET + "-x.")
-        self.assert_fails(self.run_check(terms_file="# private\n" + SECRET + "-x\n"), "README.md", "private term")
+
+class PrivateTest(Base):
+    def leak(self, text, rel=SKILL):
+        self.append(rel, text)
+        return self.run_check(terms=f"{T1},{T2}")
+
+    def test_exact(self):
+        self.assert_fails(self.leak(f"Seen in {T1}."), "private term #1")
+
+    def test_case(self):
+        self.assert_fails(self.leak(f"Seen in {T1.upper()}."), "private term #1")
+
+    def test_hyphen_suffix_and_prefix(self):
+        self.assert_fails(self.leak(f"See {T1}-labs and my-{T1}."), "private term #1")
+
+    def test_underscore_and_camel(self):
+        self.assert_fails(self.leak(f"{T1}_labs {T1.capitalize()}Labs"), "private term #1")
+
+    def test_inside_url(self):
+        self.assert_fails(self.leak(f"https://example.com/{T1}-docs"), "private term #1")
+
+    def test_accented(self):
+        self.assert_fails(self.leak(f"Seen in {T1.replace('o', 'ó')}."), "private term #1")
+
+    def test_two_words_joined_any_way(self):
+        a, b = T2.split()
+        for variant in (f"{a}-{b}", f"{a}_{b}", f"{a}{b}", f"{a}\n{b}", f"{a.upper()}  {b}"):
+            with self.subTest(variant=variant.replace(a.upper(), "A").replace(a, "A").replace(b, "B")):
+                self.tearDown(); self.setUp()
+                self.assert_fails(self.leak(f"Seen in {variant}."), "private term #2")
+
+    def test_file_name(self):
+        name = os.path.join("skills", "adversarial-verify", f"{T1}-notes.md")
+        open(self.path(name), "w").write("clean\n")
+        self.assert_fails(self.run_check(terms=T1), "file name", "location hidden")
+
+    def test_latin1_file(self):
+        open(self.path("notes.txt"), "wb").write(f"caf\xe9 {T1}\n".encode("latin-1"))
+        self.assert_fails(self.run_check(terms=T1), "notes.txt", "private term #1")
+
+    def test_utf16_file(self):
+        open(self.path("notes16.txt"), "wb").write(f"{T1}\n".encode("utf-16"))
+        self.assert_fails(self.run_check(terms=T1), "notes16.txt")
+
+    def test_json_escape(self):
+        escaped = "".join(f"\\u{ord(c):04x}" for c in T1)
+        p = self.path(os.path.join(".claude-plugin", "plugin.json"))
+        d = open(p, encoding="utf-8").read().replace('"description": "', f'"description": "{escaped} ', 1)
+        open(p, "w", encoding="utf-8").write(d)
+        self.assert_fails(self.run_check(terms=T1), "plugin.json")
+
+    def test_terms_file_with_bom_and_comments(self):
+        self.append(SKILL, f"Seen in {T1}.")
+        r = self.run_check(terms_file=("﻿" + f"{T1}\n# a comment\n").encode("utf-8"))
+        self.assert_fails(r, "private term #1")
+
+    def test_bom_before_a_comment_keeps_it_a_comment(self):
+        # with the BOM read as text, "# skill" would become the term "skill" and fail every file
+        r = self.run_check("--strict", terms_file=("\ufeff# skill\n" + NONE + "\n").encode("utf-8"))
+        self.assert_passes(r)
+
+    def test_terms_file_itself_is_not_scanned(self):
+        self.assert_passes(self.run_check(terms_file=f"{T1}\n".encode()))
+
+    def test_leak_through_another_check_is_masked(self):
+        # the evals check prints unexpected key names: a key named after the term must be masked
+        d = self.evals(); d["evals"][-1][f"{T1}_notes"] = "x"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=T1), "message hidden")
+
+    def test_assertion_text_is_never_printed(self):
+        d = self.evals(); d["evals"][-1]["assertions"][0] = f"Mentions {T1} internals"; self.save_evals(d)
+        self.assert_fails(self.run_check(terms=T1), "assertion #1")
 
     def test_missing_terms_is_said_not_silent(self):
         r = self.run_check()
@@ -138,34 +259,78 @@ class CheckTest(unittest.TestCase):
     def test_missing_terms_fails_in_strict_mode(self):
         self.assert_fails(self.run_check("--strict"), "no private terms configured")
 
+    def test_empty_env_fails_in_strict_mode(self):
+        self.assert_fails(self.run_check("--strict", terms=" , "), "no private terms configured")
+
     def test_terms_file_is_gitignored(self):
-        self.assertIn(".check-private-terms", open(os.path.join(ROOT, ".gitignore")).read())
+        self.assertIn(".check-private-terms", open(os.path.join(ROOT, ".gitignore")).read().split())
 
-    # --- 4. neutral wording: warning only ---
 
+@unittest.skipUnless(shutil.which("git"), "git not available")
+class StagedTest(Base):
+    def git(self, *args):
+        env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.com",
+                   GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@example.com")
+        subprocess.run(["git", "-C", self.tmp, *args], check=True, capture_output=True, env=env)
+
+    def setUp(self):
+        super().setUp()
+        self.git("init", "-q")
+        self.git("add", "-A")
+        self.git("commit", "-q", "-m", "base")
+
+    def test_staged_leak_with_clean_working_tree(self):
+        open(self.path("leak.md"), "w").write(f"{T1}\n")
+        self.git("add", "leak.md")
+        open(self.path("leak.md"), "w").write("clean\n")
+        self.assert_fails(self.run_check("--staged", terms=T1), "leak.md")
+        self.assert_passes(self.run_check(terms=T1))  # the working tree alone looks clean
+
+    def test_untracked_files_are_not_checked(self):
+        os.makedirs(self.path(".venv"))
+        open(self.path(os.path.join(".venv", "x.txt")), "w").write(f"{T1}\n")
+        self.assert_passes(self.run_check(terms=T1))
+        self.assert_passes(self.run_check("--staged", terms=T1))
+
+
+class NeutralTest(Base):
     def test_stack_term_warns_without_failing(self):
-        self.edit(SKILL, "## Overview", "## Overview\n\nAdd a NOT NULL column.")
-        r = self.run_check(env_terms=NONE)
+        self.append(SKILL, "Add a NOT NULL column.")
+        r = self.run_check(terms=NONE)
         self.assert_passes(r)
         self.assertIn("WARNING", r.stdout)
         self.assertIn("NOT NULL", r.stdout)
 
-    def test_stack_term_in_evals_is_ignored(self):
-        # eval 16 names SQLite and PostgreSQL on purpose: they are examples, not guidance
-        self.assertIn("SQLite", open(os.path.join(self.tmp, EVALS)).read())
-        r = self.run_check(env_terms=NONE)
+    def test_evals_are_excluded(self):
+        self.assertIn("SQLite", open(self.path(EVALS)).read())
+        r = self.run_check(terms=NONE)
         self.assert_passes(r)
-        self.assertNotIn("evals.json", r.stdout.split("checked:")[0])
+        self.assertNotIn("evals.json", r.stdout.split("checked (")[0])
 
-    # --- 5. tables ---
 
-    def test_broken_table_row_fails(self):
+class TablesTest(Base):
+    def test_row_missing_a_separator(self):
         self.edit(SKILL, "| **Frequency assumptions** |", "| **Frequency assumptions** ")
-        self.assert_fails(self.run_check(env_terms=NONE), "table")
+        self.assert_fails(self.run_check(terms=NONE), "table row")
 
-    def test_escaped_pipe_is_not_a_separator(self):
-        self.edit(SKILL, "| **Frequency assumptions** |", "| **Frequency \\| assumptions** |")
-        self.assert_passes(self.run_check(env_terms=NONE))
+    def test_row_lost_leading_pipe_and_a_cell(self):
+        self.edit(SKILL, "| **Frequency assumptions** |", "**Frequency assumptions** ")
+        self.assert_fails(self.run_check(terms=NONE), "table row")
+
+    def test_table_without_outer_pipes(self):
+        self.append(SKILL, "\nA | B | C\n--- | --- | ---\n1 | 2\n")
+        self.assert_fails(self.run_check(terms=NONE), "table row")
+
+    def test_escaped_pipe_and_code_span_are_not_separators(self):
+        self.edit(SKILL, "| **Frequency assumptions** |", "| **Frequency \\| `a|b` assumptions** |")
+        self.assert_passes(self.run_check(terms=NONE))
+
+    def test_broken_table_inside_a_fence_is_ignored(self):
+        for fence in ("```", "~~~"):
+            with self.subTest(fence=fence):
+                self.tearDown(); self.setUp()
+                self.append(SKILL, f"\n{fence}\n| a | b |\n|---|---|\n| 1 |\n{fence}\n")
+                self.assert_passes(self.run_check(terms=NONE))
 
 
 if __name__ == "__main__":

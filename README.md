@@ -191,20 +191,22 @@ Or ask naturally:
 
 ## Repository checks
 
-`scripts/check.py` enforces the repository's own invariants before a commit:
+`scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else:
 
-- **evals.json**: valid, the same four keys in every case, ids unique and consecutive, no empty assertions, and `[substance]`/`[format]` tags on every assertion from eval 21 on.
-- **Version**: SKILL.md's frontmatter and the README badge agree.
-- **Private names**: none of the configured terms appears in any file. The list is never committed or printed. Put it in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated).
+- **evals.json**: valid, the same four keys in every case, integer ids 1..n in file order, no empty prompt or assertion, and `[substance]`/`[format]` tags followed by text on every assertion from eval 21 on.
+- **Version**: SKILL.md's frontmatter and every skill badge in the README agree.
+- **Private names**: none of the configured terms appears in any tracked file's content or name. Matching ignores case, accents and how the parts of a term are joined (space, hyphen, underscore, line break, or nothing), and also covers JSON escapes and files that are not UTF-8. Put the list in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated). The list is never committed, and everything the script prints is masked.
 - **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
-- **Tables**: every Markdown table row has as many cells as its header.
+- **Tables**: every Markdown table row, with or without outer pipes, has as many cells as its header.
 
 ```bash
-python3 scripts/check.py            # errors fail, warnings don't; says so if no private terms are set
-python3 scripts/check.py --strict   # also fails when no private terms are configured
+python3 scripts/check.py                    # working tree; says so if no private terms are set
+python3 scripts/check.py --strict --staged  # what the next commit will contain; fails without private terms
 python3 -m unittest scripts/test_check.py
-ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # run --strict before every commit
+ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # runs --strict --staged before every commit
 ```
+
+On Windows use `py -3 scripts/check.py`, and copy `scripts/pre-commit` into `.git/hooks/` instead of linking it (Git for Windows runs it with its own `sh`).
 
 ## Trust Integration
 
