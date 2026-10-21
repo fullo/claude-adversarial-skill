@@ -1,7 +1,20 @@
 {
   "name": "adversarial-verify",
-  "description": "Adversarial verification of code, architecture, data, documentation, tests, analysis and UX: Chain-of-Verification with typed findings (demonstrated defect, preventive measure, falsified hypothesis), project invariants, and evidence-based confidence",
+  "version": "4.1",
+  "description": "Adversarial verification of code, architecture, data, documentation, tests, analysis and UX: Chain-of-Verification with typed findings (demonstrated defect, preventive measure, falsified hypothesis), project invariants, evidence-based confidence, consent before running anything, and validation of plans with spikes and mock-ups before code",
   "author": {
     "name": "Francesco Fullone — Daruma Consulting"
-  }
+  },
+  "repository": "https://github.com/fullo/claude-adversarial-skill",
+  "license": "MIT",
+  "keywords": [
+    "adversarial",
+    "verification",
+    "chain-of-verification",
+    "red-team",
+    "code-review",
+    "mutation-testing",
+    "spike",
+    "ux"
+  ]
 }

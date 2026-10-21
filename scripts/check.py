@@ -7,7 +7,9 @@ Errors make the exit code non-zero; warnings are printed but do not block.
      integer ids 1..n in file order; non-empty prompt, expected output and
      assertions; every assertion of eval TAGGED_FROM or later starts with
      [substance] or [format] followed by text.
-  2. The version in SKILL.md's frontmatter matches every skill badge in the README.
+  2. The version in SKILL.md's frontmatter matches every skill badge in the README,
+     the "version" string in .claude-plugin/plugin.json and the first "## <version>"
+     entry of CHANGELOG.md (the newest one).
   3. No private term appears in any file content or file name. Terms come from
      CHECK_PRIVATE_TERMS (comma-separated) or the untracked file .check-private-terms
      (one per line, # for comments). Matching ignores case, accents and Unicode
@@ -54,6 +56,8 @@ import unicodedata
 SKILL = "skills/adversarial-verify/SKILL.md"
 EVALS = "skills/adversarial-verify/evals/evals.json"
 README = "README.md"
+PLUGIN = ".claude-plugin/plugin.json"
+CHANGELOG = "CHANGELOG.md"
 TERMS_FILE = ".check-private-terms"
 
 EVAL_KEYS = {"id", "prompt", "expected_output", "assertions"}
@@ -197,6 +201,22 @@ def check_version(root, rep):
         for b in badges:
             if b != m.group(1):
                 rep.error(README, f"version mismatch: SKILL.md says {m.group(1)}, a README badge says {b}")
+    try:
+        plugin = json.loads(read_text(root, PLUGIN, rep))
+    except ValueError as e:
+        rep.error(PLUGIN, f"not valid JSON: {e}")
+        plugin = None
+    if plugin is not None:
+        pv = plugin.get("version") if isinstance(plugin, dict) else None
+        if not isinstance(pv, str):
+            rep.error(PLUGIN, "no version (a string)")
+        elif m and pv != m.group(1):
+            rep.error(PLUGIN, f"version mismatch: SKILL.md says {m.group(1)}, plugin.json says {pv}")
+    first = re.search(r"^## +([0-9][0-9.]*)\b", read_text(root, CHANGELOG, rep), re.M)
+    if not first:
+        rep.error(CHANGELOG, "no version entry (## <version>)")
+    elif m and first.group(1) != m.group(1):
+        rep.error(CHANGELOG, f"version mismatch: SKILL.md says {m.group(1)}, the newest entry says {first.group(1)}")
 
 
 # 3 ---------------------------------------------------------------------------

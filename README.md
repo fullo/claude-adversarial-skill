@@ -111,7 +111,7 @@ claude plugin install adversarial-verify@fullo-plugins
 claude plugin update adversarial-verify@fullo-plugins
 ```
 
-The plugin system uses git commit hashes as versions. There is no automatic update notification: run the command above periodically to stay current.
+The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.1), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Usage
 
@@ -215,7 +215,7 @@ Or ask naturally:
 `scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else. Running the eval facts (`scripts/check_facts.py`, the unit tests of the checks, and the pre-commit hook when a commit touches the evals) also needs `rustc` and `node` 22.6 or later:
 
 - **evals.json**: valid, the same four keys in every case, integer ids 1..n in file order, no empty prompt or assertion, and `[substance]`/`[format]` tags followed by text on every assertion from eval 21 on.
-- **Version**: SKILL.md's frontmatter and every skill badge in the README agree.
+- **Version**: SKILL.md's frontmatter, every skill badge in the README, the `version` in `.claude-plugin/plugin.json` and the newest entry of `CHANGELOG.md` agree.
 - **Private names**: none of the configured terms appears in any tracked file's content or name. Matching ignores case, accents and how the parts of a term are joined (space, hyphen, underscore, line break, or nothing), and also covers JSON escapes and files that are not UTF-8. A term matches anywhere, also inside other words (`name` finds `NameLabs`, `name2026`, `names`). Prefix a term with `=` to match it only as a whole word, for common words that would otherwise cause false positives. Terms shorter than 4 characters give a warning. Put the list in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated). The list is never committed, and any output line containing a term is masked. Not caught: a one-word term written as two words (a space or line break in the middle), UTF-16 files without a byte-order mark, and, for `=` terms, forms glued to other letters or digits.
 - **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
 - **Tables**: every Markdown table row, with or without outer pipes, has as many cells as its header.
