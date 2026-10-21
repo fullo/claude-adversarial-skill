@@ -9,7 +9,7 @@ A Claude Code skill that performs rigorous adversarial verification across code,
 
 ## What it does
 
-When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
+When invoked, this skill puts the agent in the stance of a skeptical verifier that follows a structured protocol:
 
 **Intake:**
 - **Intake** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
@@ -30,13 +30,13 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 
 **Deep Verification (Steps 3–3e):**
 - **Independently verify** each claim by tracing actual paths
-- **UX check round** — render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; one or two alternative interfaces with what each improves and costs
-- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning (when anything was tuned), numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
+- **UX** — targets checked: render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; a check round of the main screens, proposed with consent; one or two alternative interfaces with what each improves and costs
+- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning (when anything was tuned), numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, the throwaway constraint respected (no writes to real systems), and where any personal data is and whether it should be deleted
 - **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
-- **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
+- **Executable falsification** — with approved checks, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
 - **Mutation probe** — on request (proposed otherwise, with scope and cost), mutates the changed lines (with the language's tool, or 3-5 hand mutations on the riskiest lines), restores the code, and types every survivor as a missing test, superfluous code or an equivalent mutant; a perfect score is suspicious until you see why the mutants died
 
 **Reporting (Steps 4–5):**
@@ -227,7 +227,7 @@ The mutation probe uses the project's tool when it is already installed (install
 | Go | go-mutesting (avito-tech fork) | `go-mutesting ./pkg/...` | No git option | Positional files, directories, packages; `exclude_dirs` | Its built-in exec replaces the original file with the mutant; the README does not explain the restore | [README](https://github.com/avito-tech/go-mutesting) |
 | Ruby | mutant | `mutant run --use rspec --usage opensource 'Namespace*'` | `--since <git-ref>`: subjects (methods) overlapping a hunk of `git diff <ref>` | Subject expressions (`'Person#adult?'`, `'Ns*'`), `--require` | Free only for open source; commercial use needs a paid subscription; `--since` misses indirect effects, so the docs recommend a periodic full run | [README](https://github.com/mbj/mutant), [incremental](https://github.com/mbj/mutant/blob/main/docs/incremental.md) |
 
-Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on Gradle, PIT on Kotlin, a git filter for Cosmic Ray, and whether mutmut, StrykerJS, Stryker.NET, Infection, Gremlins and mutant mutate in place or on a copy. Whatever the tool, the skill mutates a separate copy of the repository and confirms at the end that your working copy is unchanged.
+Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on Gradle, PIT on Kotlin, a git filter for Cosmic Ray, and whether mutmut, StrykerJS, Stryker.NET, Infection, Gremlins and mutant mutate in place or on a copy. Whatever the tool, the skill mutates a separate copy of the repository, unless you approve mutating your working copy, and confirms at the end that your working copy is unchanged.
 
 ## Repository checks
 
@@ -255,15 +255,15 @@ Optionally integrates with a multi-agent trust scoring system:
 
 - Each demonstrated defect: **-1 trust** to the agent that wrote it (preventive measures and falsified hypotheses don't count)
 - Each false positive: **-1 trust** to the verifier
-- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the developer
+- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the author
 
 Track trust in `.claude/agent-trust.json`:
 
 ```json
 {
   "agents": {
-    "dev": { "trust": 7, "clean_commits": 0 },
-    "test": { "trust": 7, "clean_commits": 0 }
+    "dev": { "trust": 7, "clean_reviews": 0 },
+    "test": { "trust": 7, "clean_reviews": 0 }
   }
 }
 ```
