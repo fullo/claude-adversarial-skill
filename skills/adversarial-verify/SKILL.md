@@ -172,7 +172,7 @@ The class feeds the confidence: an assumption of either kind is a claim only a r
 
 Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
 
-A spike that could run now (a read-only call, a recorded response) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
+Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (a read-only call, a recorded response) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
 
 **A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
 1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
@@ -255,12 +255,15 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 **Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point and report the ones that fail:
 - **The question** is explicit, one per spike, and the result answers that question, not a neighbouring one.
+- **The deciding measurement and the decision rule were fixed before the result** (Step 1c): which number answers yes or no, and what means do, don't or postpone. A threshold chosen after seeing the result is not a test.
 - **The bench is reproducible**: data, seed, versions of tools and libraries, machine, and the exact command or steps.
 - **The sample's limits are declared**: how much data, from where and when, confounding variables, synthetic or hand-picked data.
 - **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
 - **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
 - **The decision is written**: do, don't, or postpone. A postponement names the conditions that would reopen it.
-- **Real systems and personal data**: did the spike write to a real system, or use personal data? Say where the data is now and whether it should be deleted.
+- **The throwaway constraint held**: no spike code went into production unreviewed, and the spike did not write to a real system. If it used personal data, say where that data is now and whether it should be deleted.
+
+A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
 
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 

@@ -535,7 +535,7 @@
       "prompt": "Verify this plan before we start coding.\n\nPLAN: order sync\n1. Every 10 minutes the job calls the shop's API, GET /orders?updated_since=<last run>&per_page=500, and stores every order returned.\n2. Each order is stored with our existing OrderRepository.save(), already used by the nightly import (see repo/orders.py, covered by tests/test_orders.py: 14 tests, which we ran this morning; output pasted below).\n3. Shop managers want to see the synced orders in a new 'Today' dashboard, grouped by status.\n4. The sync finishes in under a minute for 20,000 orders.\n\n(Facts: the repository has no API client, no recorded API response and no measurement yet; the shop's API documentation is not in the repository; nobody has called the API. The test output: '14 passed in 2.1s'; the tests use the same database engine as production.)",
       "expected_output": "Before code, the verifier classifies each claim: 2 is evidenced (the repository code and its test run), 1 and 4 are technical assumptions that need a spike, 3 is a user-expectation assumption (a mock-up, not a spike). Each spike has a question, a deciding measurement, a decision rule with three branches and a throwaway constraint",
       "assertions": [
-        "[substance] Treats claim 2 as evidenced for what its code and tests show (storing an order with OrderRepository.save) and suggests no spike to re-prove it; questioning a gap the tests do not cover (e.g. whether save() updates an order already stored) is allowed",
+        "[substance] Treats claim 2 as evidenced for what its code and tests show (storing an order with OrderRepository.save) and suggests no spike to re-prove it; a check or spike limited to a gap the tests do not cover (e.g. whether save() updates an order already stored) is allowed",
         "[substance] Treats claims 1 and 4 as technical assumptions nobody has observed yet and suggests a spike for them before any production code",
         "[substance] Gives each suggested spike a question, the measurement that decides it, and a decision rule saying when to do, when not to do, and when to postpone (with the conditions to reopen)",
         "[substance] States the throwaway constraint for the spikes: no production code, no writes to real systems (e.g. read-only calls with test credentials)",
@@ -565,7 +565,7 @@
         "[substance] Proposes A/B alternatives for at least one open choice (e.g. total of paid or of all invoices, filters as tabs or menus)",
         "[substance] Asks the mock-up to show real content and states (e.g. no invoices, many invoices, long names, a failed download)",
         "[substance] Says the mock-up must be approved by users or their representative before development and the link between the spec, the mock-up and the change written down",
-        "[substance] Does not make the mock-up itself, and does not suggest a spike to prove that the invoice data exists; a check on something the endpoint is not shown to do (e.g. filter by year or status, compute the total) is allowed"
+        "[substance] Does not make the mock-up itself, and does not suggest a spike to prove that the invoice data exists; a check or spike on something the endpoint is not shown to do (e.g. filter by year or status, compute the total) is allowed"
       ]
     },
     {
@@ -591,6 +591,44 @@
         "[substance] Says there is no measurement behind 'fast enough' and 'looked fine' and asks for numbers and the criteria",
         "[substance] Says the postponement names no conditions that would reopen it and asks for them",
         "[substance] Does not invent figures or results the report does not contain"
+      ]
+    },
+    {
+      "id": 48,
+      "prompt": "Verify the new theme of our settings page before release. The whole stylesheet change:\n\n:root { --bg: #ffffff; --text: #333333; --muted: #6b6b6b; --link: #2563eb; }\n@media (prefers-color-scheme: dark) {\n  :root { --bg: #1e1e1e; --text: #d0d0d0; --muted: #6b6b6b; --link: #2563eb; --input-border: #3a3a3a; }\n}\nbody { background: var(--bg); color: var(--text); font-size: 16px; }\n.hint { color: var(--muted); font-size: 14px; }\na { color: var(--link); }\ninput { border: 1px solid var(--input-border, #8a8a8a); }\n\n(Facts: the page shows body text, hint text under each field (class hint), links, and text inputs. Both light and dark modes ship. Nothing has been run.)",
+      "expected_output": "In the UX domain, the verifier checks contrast in both themes: light passes; in dark mode the hint text (#6b6b6b on #1e1e1e, about 3.1:1) and the links (#2563eb on #1e1e1e, about 3.2:1) are below 4.5:1 for normal text, and the input border (#3a3a3a on #1e1e1e, about 1.5:1) is below 3:1 for a control's boundary; it proposes fixes and a check in the real browser",
+      "assertions": [
+        "[substance] Checks contrast in both light and dark mode, not only the default theme",
+        "[substance] Flags the dark-mode hint text (#6b6b6b on #1e1e1e) as below 4.5:1 for normal-size text, with a ratio near 3.1:1",
+        "[substance] Flags the dark-mode links (#2563eb on #1e1e1e) as below 4.5:1, with a ratio near 3.2:1",
+        "[substance] Flags the dark-mode input border (#3a3a3a on #1e1e1e) as below the 3:1 required for the boundary of a control, with a ratio near 1.5:1",
+        "[substance] Does not flag the light-mode colours, which pass (e.g. #333333 on #ffffff about 12.6:1, #6b6b6b on #ffffff about 5.3:1)",
+        "[substance] Proposes concrete replacement colours or a rule, and a check of the rendered page in both modes (proposed, not run)"
+      ]
+    },
+    {
+      "id": 49,
+      "prompt": "Verify the German translation of our mobile bottom navigation before release.\n\nThe bar has four buttons, each 25% of the screen width, label below an icon, one line, overflow hidden. English labels: 'Home', 'Orders', 'Saved', 'Settings'. German labels: 'Startseite', 'Bestellungen', 'Gemerkt', 'Einstellungen'.\n\n(Facts, measured by a colleague in the browser at 375 px width with the project's font at 12 px: each button is 93.75 px wide with 8 px padding on each side; label widths are 'Startseite' 61 px, 'Bestellungen' 79 px, 'Gemerkt' 50 px, 'Einstellungen' 82 px. On the widest phones in the project's target list (430 px) the buttons are 107.5 px. The project's minimum supported width is 320 px. Nothing else has been run.)",
+      "expected_output": "The verifier works out that at 375 px the usable width is 77.75 px, so 'Bestellungen' and 'Einstellungen' are clipped, and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; it reports the layout breaking in the narrow format with real translated text and proposes one or two alternatives with what each improves and costs",
+      "assertions": [
+        "[substance] Computes the usable label width at 375 px (93.75 - 16 = 77.75 px) and finds 'Bestellungen' (79 px) and 'Einstellungen' (82 px) clipped",
+        "[substance] Checks the narrowest supported width (320 px: 80 px buttons, 64 px usable): 'Bestellungen' and 'Einstellungen' are clipped, 'Startseite' (61 px) and 'Gemerkt' (50 px) fit",
+        "[substance] Says that clipped labels lose meaning and that this is a defect shown by the measured widths, not only a risk",
+        "[substance] Proposes one or two alternative designs (e.g. shorter labels, two-line labels, icons with a smaller font, fewer items with a 'More' menu) and compares what each improves and what it costs",
+        "[substance] Proposes checking the rendered bar at the narrowest and widest target widths (proposed, not run)"
+      ]
+    },
+    {
+      "id": 50,
+      "prompt": "Verify the pause menu of our console game before certification.\n\nThe menu has four entries: Resume, Settings, Controls, Quit to title. Entries are text, 18 px tall at 1080p, white on a 60% black overlay over the paused game. The focused entry is shown by a small arrow on its left, 8 px wide. Navigation: the controller's D-pad moves between Resume and Quit to title; Settings and Controls are reached by moving the analog stick, or by clicking with a mouse on PC. Back closes the menu.\n\n(Facts: the game ships on a console played on a TV at about 3 metres, and on PC. Nothing has been run.)",
+      "expected_output": "The UX domain applies outside the web: the verifier finds that Settings and Controls cannot be reached with the D-pad, that the focus indicator is too small to see at TV distance, that the text size and the contrast over a moving game image are not shown to be readable, and proposes a check on a real TV with a controller, plus one or two alternative designs",
+      "assertions": [
+        "[substance] Treats the pause menu as a user interface to verify (UX domain), not as code only",
+        "[substance] Flags that Settings and Controls cannot be reached with the D-pad, so navigation is not consistent for a controller",
+        "[substance] Flags the 8 px arrow as a focus indicator likely too small to see at TV distance, and asks for a clearer one",
+        "[substance] Questions text legibility at about 3 metres (18 px at 1080p) and contrast over a game image that changes under the overlay",
+        "[substance] Proposes checking the menu on a real TV with a controller, and on PC with keyboard (proposed, not run)",
+        "[substance] Proposes at least one alternative design with what it improves and costs"
       ]
     }
   ]
