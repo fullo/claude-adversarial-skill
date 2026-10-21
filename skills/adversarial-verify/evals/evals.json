@@ -402,12 +402,13 @@
     {
       "id": 32,
       "prompt": "Verify my changes. (Facts: the working copy has two changed files: a 30-line change to the export function in the application code, and a 20-line change to the user guide describing that export.)",
-      "expected_output": "A small request whose target is not named and spans two domains: the verifier asks only which target to verify, proposing the detected set (code and documentation) as the default, and asks nothing about depth, scope or execution mode",
+      "expected_output": "A small request whose target is not named and spans two domains: the verifier asks only which target to verify, proposing the detected set (code and documentation) as the default, asks nothing about depth, scope or execution mode, and waits for the answer before verifying",
       "assertions": [
         "[substance] Asks which target to verify, listing the detected domains (code and documentation)",
         "[substance] Proposes the detected set, both domains, as the default answer",
         "[substance] Asks nothing about depth, scope or execution mode",
-        "[substance] Does not give a cost estimate or treat the request as large"
+        "[substance] Does not give a cost estimate or treat the request as large",
+        "[substance] Does not start the verification before the answer"
       ]
     },
     {

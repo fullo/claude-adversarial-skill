@@ -62,7 +62,7 @@ Detects behaviors the code doesn't advertise using four probing strategies: indi
 Decomposes the adversarial process into five modules: suspicion modeling (what would a reviewer miss?), attack selection (highest-risk claims first), plan synthesis (multi-step trace chains), execution (actually read the code), and subtlety detection (code that hides complexity).
 
 ### Stress Techniques
-Inspired by Principles of Chaos Engineering, adapted for review. Four techniques with forced variety (minimum 3 per run, never repeat): **Existence Question** (should this exist at all?), **Scale Shift** (what at 10x? at zero?), **Time Travel** (what in 6 months?), **Requirement Inversion** (what if the opposite?). Produces **Survived: yes/no** verdicts — knowing what's robust is as valuable as knowing what's fragile.
+Inspired by Principles of Chaos Engineering, adapted for review. Four techniques with forced variety (at standard depth minimum 3 per run, never twice on the same claim; none at quick depth, all four on the top 3 risks at deep depth): **Existence Question** (should this exist at all?), **Scale Shift** (what at 10x? at zero?), **Time Travel** (what in 6 months?), **Requirement Inversion** (what if the opposite?). Produces **Survived: yes/no** verdicts — knowing what's robust is as valuable as knowing what's fragile.
 
 ### Tri-Modal Reasoning
 Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.

@@ -42,20 +42,20 @@ The user decides what to verify and how deep, before the verification starts. Se
 | Choice | Options | Default |
 |--------|---------|---------|
 | **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects, listed explicitly |
-| **Depth** | **quick**: only the highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the highest-risk claims that passed, hidden-behavior probing on every claim | standard |
+| **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
 | **Execution mode** | **reasoning only**: nothing is run. This is the only option in this version, so never ask it | reasoning only |
 
-Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 2b) or to find the same pattern elsewhere is allowed; occurrences found outside the scope are listed separately, not verified.
+Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately, not verified.
 
 Rules:
 1. **Never ask what the request already says.** "Deep", "only the migration", "don't run anything" are answers.
-2. **Large requests stop first.** A request is large when the target is **everything**, or covers more than one domain at module or project scope, or the scope is the whole project. Large wins over every other rule, whatever the size of the diff. Do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
-3. **Every other request starts at once** with the defaults, stated in one line at the top of the report with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
-4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default; ask nothing else. A request that names its target, or touches a single domain, is clear.
+2. **Large requests stop first.** A request is large when it covers more than one domain at module or project scope, or the scope is the whole project. **Everything** asked at changed-lines scope ("everything in this diff") is not large: it means every domain Step 0 detects in the change. Large wins over every other rule, whatever the size of the diff. Do not start. Give a cost estimate in observable quantities only: files in scope, domains, a rough number of claims, and whether anything would be run. Never in minutes or hours. Then ask the open choices, each with its default, and wait for the answer.
+3. **Every other request starts at once, once its target is clear (rule 4),** with the defaults, stated in one line at the top of the report with how to change them (e.g. "Defaults: standard depth, changed lines, reasoning only. Say 'deep' or 'whole module' to change.").
+4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default, and wait for the answer; ask nothing else. A request that names its target, or touches a single domain, is clear.
 5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
 6. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
-7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. A large request then runs only at the default scope, the changed lines, and the report states that the larger verification was not done, with its cost estimate.
+7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. An unclear target takes the detected set. A large request then runs only at the default scope, the changed lines against the previous commit (or the base the run was given), and the report states that the larger verification was not done, with its cost estimate. If there are no changed lines, report the cost estimate, state that nothing was verified, and stop.
 
 ## Step 0: IDENTIFY
 
@@ -331,6 +331,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 |---|-----------|------|----------|------|------------|-------|
 
 ## STRESS TEST RESULTS
+[At quick depth write "Skipped (quick depth)" instead of the table]
 | # | Technique | Target | Survived | Confidence | Evidence |
 |---|-----------|--------|----------|------------|---------|
 
@@ -399,4 +400,4 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't claim absence without stating where you looked** — "X doesn't exist" requires citing what you checked
 - **Don't report only problems** — stress tests that survive are equally valuable results
 - **Don't call a risk a bug** — type every problem or suspicion you report: demonstrated defect, preventive measure, or falsified hypothesis
-- **Don't use the same technique twice** — forced variety prevents analytical tunnel vision
+- **Don't use the same technique twice on the same claim** — forced variety prevents analytical tunnel vision
