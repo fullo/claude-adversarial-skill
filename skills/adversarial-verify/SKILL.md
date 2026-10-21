@@ -86,7 +86,7 @@ Determine what needs verification. There are six domains:
 | **Data** | Data integrity, schemas, contracts | database schemas and migrations, file and message formats, event schemas, save files, API specs, configs |
 | **Documentation** | Technical, process, and user-facing docs | README, API docs, CHANGELOG, guides, help text, error messages, UI copy |
 | **Tests** | Test suite integrity and honesty | test files, coverage reports, CI configs |
-| **Analysis** | Agent outputs, reports, docs | summaries, recommendations, generated content |
+| **Analysis** | Agent outputs, reports, docs, spike and prototype reports | summaries, recommendations, generated content, experiment results |
 
 **Auto-detect from context:**
 - The version control diff (e.g. `git diff`) has changes → **Code**
@@ -95,6 +95,7 @@ Determine what needs verification. There are six domains:
 - README, CHANGELOG, docs/, help text, or error messages changed → **Documentation**
 - Test files, coverage reports, or CI configs changed → **Tests**
 - Reviewing another agent's output or report → **Analysis**
+- A spike, prototype or experiment report → **Analysis** (with the spike checklist, Step 3)
 - Multiple domains may apply — within the target settled at intake, verify each separately, one section per domain
 - When domains overlap (e.g., a change to the code that defines stored data = Code + Data), assign each claim to its primary domain
 
@@ -251,6 +252,15 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 - **false red** — a test that fails only because of a limit, timeout, or missing resource of the test environment, which would not happen in production.
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
+
+**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point and report the ones that fail:
+- **The question** is explicit, one per spike, and the result answers that question, not a neighbouring one.
+- **The bench is reproducible**: data, seed, versions of tools and libraries, machine, and the exact command or steps.
+- **The sample's limits are declared**: how much data, from where and when, confounding variables, synthetic or hand-picked data.
+- **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
+- **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
+- **The decision is written**: do, don't, or postpone. A postponement names the conditions that would reopen it.
+- **Real systems and personal data**: did the spike write to a real system, or use personal data? Say where the data is now and whether it should be deleted.
 
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 

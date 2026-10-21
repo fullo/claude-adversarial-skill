@@ -25,6 +25,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Decompose** artifacts into individual verifiable claims
 - **Classify reasoning mode** — deductive, inductive, or abductive per claim
 - **Pre-code validation** — for plans, specs and other proposals of work not yet done, every claim is evidenced, a technical assumption (suggest a throwaway spike: question, deciding measurement, do/don't/postpone rule, no writes to real systems) or a user-expectation assumption (suggest a mock-up: today next to proposed, A/B alternatives, real content, approved before development)
+- **Spike reports** — verified as analyses before a decision rests on them: explicit question, reproducible bench, declared sample limits, a held-out set never used for tuning, numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
 - **Generate adversarial questions** for each claim ("what would make this fail?")
 - **Abstract to failure categories** — find patterns, not just individual bugs
 

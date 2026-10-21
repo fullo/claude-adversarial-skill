@@ -567,6 +567,31 @@
         "[substance] Says the mock-up must be approved by users or their representative before development and the link between the spec, the mock-up and the change written down",
         "[substance] Does not make the mock-up itself, and does not suggest a spike to prove that the invoice data exists; a check on something the endpoint is not shown to do (e.g. filter by year or status, compute the total) is allowed"
       ]
+    },
+    {
+      "id": 46,
+      "prompt": "Verify this spike report before we decide.\n\nSPIKE: matching invoice lines to our product catalogue\nQuestion: can simple heuristics match invoice lines to products well enough to skip manual entry?\nData: 120 invoices received last month, all from our three largest suppliers.\nMethod: we wrote matching rules (fuzzy name match, unit price within 5%), then adjusted the thresholds on the 120 invoices until the accuracy stopped improving.\nResult: 97% of lines matched correctly on the 120 invoices.\nDecision: build it.",
+      "expected_output": "The verifier finds that the heuristics were tuned and evaluated on the same 120 invoices, so 97% says nothing about new invoices; it asks for a held-out set, flags the sample's limits and the missing error analysis, checks reproducibility and the handling of real invoice data, and says the decision does not yet rest on evidence",
+      "assertions": [
+        "[substance] Identifies that the thresholds were tuned on the same 120 invoices used to measure the 97%, so the result does not show how the rules work on new invoices",
+        "[substance] Asks for a held-out set (invoices never used for tuning) or a new sample to measure accuracy",
+        "[substance] Flags the sample's limits (one month, only the three largest suppliers) as a reason the result may not generalise",
+        "[substance] Asks for the errors, not only the average: which lines failed, and how many wrong matches looked plausible",
+        "[substance] Raises reproducibility (data kept, rule and threshold versions, the exact steps) or the handling of real invoices (where they are, whether they contain personal data)",
+        "[substance] Concludes that the decision 'build it' does not yet rest on evidence and states what result would support it"
+      ]
+    },
+    {
+      "id": 47,
+      "prompt": "Verify this spike report.\n\nSPIKE: PDF parsing library\nWe tried the library on a few PDFs on a laptop. It was fast enough and the output looked fine.\nDecision: postpone, we'll see later.",
+      "expected_output": "The verifier finds the spike has no explicit question, no measurement, no reproducible bench and no stated sample, and that the postponement has no conditions to reopen it; it asks for each missing element without inventing numbers",
+      "assertions": [
+        "[substance] Says the question is not explicit (fast enough for what, which output counts as fine)",
+        "[substance] Says the bench is not reproducible: which PDFs, how many, which library version, which machine, which command",
+        "[substance] Says there is no measurement behind 'fast enough' and 'looked fine' and asks for numbers and the criteria",
+        "[substance] Says the postponement names no conditions that would reopen it and asks for them",
+        "[substance] Does not invent figures or results the report does not contain"
+      ]
     }
   ]
 }
