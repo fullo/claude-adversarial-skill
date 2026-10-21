@@ -271,7 +271,7 @@
         "Checks that the constraint bites on the new path: the importer writes into the constrained table, and the constraint is applied in production",
         "Reports the invariant as enforced on the changed path (PASS) with the location of the constraint",
         "Does not report a FAIL only because no test covers the invariant",
-        "May still raise separate claims, such as how a rejected row is handled by the importer"
+        "Asks what the importer does when the constraint rejects a row (whole file fails, row skipped, error reported) and reports it as a separate claim"
       ]
     }
   ]
