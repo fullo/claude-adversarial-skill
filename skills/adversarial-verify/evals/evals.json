@@ -372,7 +372,7 @@
       "assertions": [
         "[substance] Asks no intake question about scope, depth or execution before starting (questions about missing context are allowed but must not replace the verification)",
         "[substance] States in one line the defaults it used (standard depth, reasoning only, the changed lines) and how to change them",
-        "[substance] Does not run or offer to run anything as if already chosen",
+        "[substance] Runs nothing; any executable check is only proposed, with a question",
         "[substance] Carries out the verification of the function in the same answer (e.g. 31 February accepted, malformed input, extra parts)"
       ]
     },
@@ -383,7 +383,7 @@
       "assertions": [
         "[substance] Does not start the full verification in this answer",
         "[substance] Gives a cost estimate based on observable quantities (files, domains, likely number of claims, whether anything would be executed), not in invented minutes or hours",
-        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth and scope; does not ask a choice that has a single option (execution mode)",
+        "[substance] Asks the user to confirm 'everything' or to narrow it, and asks for depth, scope and execution mode",
         "[substance] Proposes a default (e.g. reasoning only) for the questions it asks",
         "[format] Presents the questions as a short list of choices"
       ]
@@ -396,7 +396,7 @@
         "[substance] Asks no intake question: target, depth, execution and scope are all in the request",
         "[substance] Applies the requested depth (uses the deep techniques, e.g. stress tests and hidden behavior probing)",
         "[substance] Stays within the stated scope (the migration and its readers), without widening it unasked",
-        "[substance] Runs nothing and offers no execution as already chosen"
+        "[substance] Runs nothing; any executable check is only proposed, with a question"
       ]
     },
     {
@@ -428,7 +428,7 @@
       "expected_output": "A reasoning-only verification that does not run anything, scores the index claim below 80 because only the query plan can decide it, and ends with a proposed executable check (the plan of the query on staging) saying what would confirm it, what would refute it and its cost, then asks whether to run it",
       "assertions": [
         "[substance] Runs nothing and does not claim to have seen a query plan or any execution result",
-        "[substance] Scores the claim 'the query uses the index' below 80, or leaves it as a hypothesis, because only the query plan decides it",
+        "[substance] Does not score above 79 the claim that the query actually uses the index (it may say by reasoning that the index is usable), because only the query plan decides whether it is chosen",
         "[substance] Proposes a concrete executable check for that claim (e.g. the database's plan or explain command for the new query on the staging copy)",
         "[substance] For the proposed check states what result would confirm the claim and what result would refute it",
         "[substance] States the cost or side effects of the check in observable terms (read only, one query, staging only), not in invented minutes",
@@ -440,7 +440,7 @@
       "prompt": "Verify parse_day in our command-line tool. You may run the existing test suite, nothing else.\n\ndef parse_day(text):\n    parts = text.split('-')\n    year, month, day = int(parts[0]), int(parts[1]), int(parts[2])\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > 31:\n        raise ValueError('bad day')\n    return (year, month, day)\n\n(Facts: the existing test suite has 3 tests for parse_day, all with valid dates; running it gives '3 passed'. No test covers 31 February or input with extra parts.)",
       "expected_output": "The verifier uses the approved execution (the existing suite) and reports its result, finds the defects by reasoning, proposes a new test and a fix but does not write them because writing was not approved, and asks",
       "assertions": [
-        "[substance] Reports the result of the approved run (3 passed) and says it does not cover the suspected defects",
+        "[substance] Uses the result of the approved suite as given in the facts (3 passed), without presenting any other run as observed, and says it does not cover the suspected defects",
         "[substance] Identifies at least one defect by reasoning (e.g. 31 February accepted, extra parts ignored, malformed input)",
         "[substance] Proposes a new test and/or a fix but does not write or run them, because only the existing suite was approved",
         "[substance] Asks for approval before writing the test or the fix",

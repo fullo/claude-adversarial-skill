@@ -55,11 +55,13 @@ Rules:
 4. **Ask the target when it is not clear.** If the request names no target and Step 0 detects more than one domain, ask which to verify, proposing the detected set as the default, and wait for the answer; ask nothing else. A request that names its target, or touches a single domain, is clear.
 5. **Missing material is not intake.** If the artifact itself is missing (no code, no diff, no file), ask for it. That is a request for input, not an intake question.
 6. **Ask with a multiple-choice tool** when one is available, otherwise as a short list of choices.
-7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. An unclear target takes the detected set. A large request then runs only at the default scope, the changed lines against the previous commit (or the base the run was given), and the report states that the larger verification was not done, with its cost estimate. If there are no changed lines, report the cost estimate, state that nothing was verified, and stop.
+7. **Nobody to answer** (an automated or unattended run): use the defaults and state them at the top of the report. An unclear target takes the detected set. Proposed checks stay proposed: execution happens only if the run's own instructions gave consent (Execution and consent, rule 3). A large request then runs only at the default scope, the changed lines against the previous commit (or the base the run was given), and the report states that the larger verification was not done, with its cost estimate. If there are no changed lines, report the cost estimate, state that nothing was verified, and stop.
 
 ### Execution and consent
 
 The verifier reasons; it runs or writes something only with the user's consent.
+
+**Reading is not running.** Reading files, searching them and read-only version-control commands (e.g. a diff or a log) inspect the artifact and need no consent. **Running** is anything that executes the project's code or tools, or reaches outside the repository: tests, scripts, builds, linters, type checkers, dry runs, queries, network or database access. Ground truth that only a run can give (runtime traces, the running software) is used only when the user supplied it or approved the run.
 
 1. **Without consent nothing is run and nothing is written**: no command, test, query or script; no new test, fix, doc change or commit.
 2. **Consent covers only what it names.** Approval to run the existing test suite does not approve writing a new test or a fix: each needs its own approval.
@@ -350,13 +352,6 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 | # | Observation | Hypothesis | Alternative | Test to confirm |
 |---|-------------|-----------|-------------|----------------|
 
-## PROPOSED EXECUTABLE CHECKS
-[One row for every claim scored below 80 that running something would decide. Omit the section if there is none]
-| # | Claim | Confidence now | Check (command, test or query) | Confirms if | Refutes if | Cost and side effects | Status |
-|---|-------|----------------|--------------------------------|-------------|------------|-----------------------|--------|
-[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result]
-[End with the question: which checks to run, and nothing runs without an answer]
-
 ## HIDDEN BEHAVIORS DETECTED
 | # | Location | Advertised | Actual | Type (if a problem) | Confidence |
 |---|----------|-----------|--------|---------------------|------------|
@@ -378,6 +373,13 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
 - Recommendation: [trust adjustment or approval]
+
+## PROPOSED EXECUTABLE CHECKS
+[One row for every claim scored below 80 that running something would decide. Omit the section if there is none]
+| # | Claim | Confidence now | Check (command, test or query) | Confirms if | Refutes if | Cost and side effects | Status |
+|---|-------|----------------|--------------------------------|-------------|------------|-----------------------|--------|
+[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result. After approved runs, issue the report again: each claim a run decided moves to PASS or FAIL with the command and its output]
+[End the report with the question: which checks to run, and nothing runs without an answer]
 ```
 
 For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end.
@@ -388,7 +390,7 @@ After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `AD
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json`: demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
+If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 2): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
 
 ## References
 
