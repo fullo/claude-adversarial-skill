@@ -14,7 +14,6 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 **Intake:**
 - **Ask before starting** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
 - **Execution with consent** — reading and searching the code is not running; by default nothing is run: the report ends with proposed executable checks (what would confirm, what would refute, cost) and asks; only approved checks run, for that verification only, and writing a test or a fix needs its own approval
-- **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
 
 **Pre-verification (Steps 0–0b):**
 - **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
@@ -34,6 +33,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
+- **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
 
 **Reporting (Steps 4–5):**
 - **Report findings** with reasoning-aware confidence scoring and anti-fabrication discipline

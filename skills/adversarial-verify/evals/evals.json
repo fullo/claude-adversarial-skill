@@ -472,26 +472,26 @@
     },
     {
       "id": 38,
-      "prompt": "Verify this change. You may write and run tests; do not change the code.\n\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\n(Facts: you suspect that totals ending in .x5 after the discount are rounded the wrong way. The test you would write, test_discount_half_rounding, checks discount(10.05, 'WELCOME10') == 9.04 and discount(0.05, 'WELCOME10') == 0.04. Running it on the current code gives: PASSED. Nobody has run it against a version with the rounding changed.)",
-      "expected_output": "The test is green without any change, so the hypothesis is falsified, stated plainly; since the test was never seen failing, the falsification is conditional and names the check that would complete it; the test stays as a regression guard; no fix is proposed",
+      "prompt": "Verify this change. You may write and run tests; do not change the code.\n\n-    return total * 0.9\n+    return round(total * 0.9, 2)\n\n(the full function after the change:)\ndef discount(total, code):\n    if code == 'WELCOME10':\n        return round(total * 0.9, 2)\n    return total\n\n(Facts: you suspect that some discounted totals still come out with more than two decimals. The test you would write, test_discount_has_two_decimals, calls discount(k / 100, 'WELCOME10') for every k from 0 to 10000 and asserts that the result times 100 is a whole number within 1e-9. Running it on the current code gives: PASSED. Running it on the previous version (return total * 0.9) gives: FAILED at k = 1 (0.01 * 0.9 = 0.009000000000000001).)",
+      "expected_output": "The test is green on the current code and red on the previous one, so it could have failed: the hypothesis is fully falsified, stated plainly, the test stays as a regression guard and also shows the change fixed something; no fix is proposed; what the test did not cover stays open",
       "assertions": [
-        "[substance] States the hypothesis before the test and reports the run result as given (passed)",
+        "[substance] States the hypothesis before the test and reports both results as given (passed now, failed on the previous version)",
         "[substance] Declares the hypothesis falsified, not 'could not reproduce' and not a defect",
-        "[substance] Marks the falsification as conditional because the test was never seen failing, and names the check that would complete it (e.g. red with a different rounding)",
+        "[substance] Treats the falsification as full, not conditional, because the test was seen failing on the previous version",
         "[substance] Keeps the test as a regression guard and proposes no fix for the falsified suspicion",
-        "[substance] Names what the test did not cover (e.g. other values, other codes) as still open"
+        "[substance] Names what the test did not cover as still open (e.g. totals above 100, negative totals, other codes, the rounding direction of halves)"
       ]
     },
     {
       "id": 39,
-      "prompt": "Verify the fix in the last commit. You may run tests, on this commit and on its parent; do not write anything.\n\n(Facts: the commit changes parse_day to reject days beyond the length of the month, and adds the test test_rejects_31_april, which calls parse_day('2026-04-31') and expects ValueError. Running that test on this commit: PASSED. Running the same test on the parent commit, before the fix: PASSED.)",
-      "expected_output": "The verifier reads both outcomes: green before and after means the test does not cover the defect the commit claims to fix, so the fix is not proved by it and the defect could slip back unnoticed; it proposes a test that would be red on the parent",
+      "prompt": "Verify the fix in the last commit. You may run tests, on this commit and on its parent; do not write anything.\n\nThe parent version:\n\nDAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]\n\ndef parse_day(text):\n    year, month, day = (int(p) for p in text.split('-'))\n    if month < 1 or month > 12:\n        raise ValueError('bad month')\n    if day < 1 or day > DAYS[month - 1]:\n        raise ValueError('bad day')\n    return (year, month, day)\n\nThe commit message: 'Accept 29 February in leap years'. The commit changes the day check to allow 29 days in February when the year is a leap year, and adds the test test_rejects_31_april, which calls parse_day('2026-04-31') and expects ValueError.\n\n(Facts: running test_rejects_31_april on this commit: PASSED. Running it on the parent commit: PASSED.)",
+      "expected_output": "Green before and after: the added test does not cover what the commit claims to fix (29 February in leap years), so the fix is not proved by it and could regress unnoticed; the verifier proposes a test that is red on the parent and green on this commit, without writing it",
       "assertions": [
         "[substance] Reports both results as given: passed on this commit and passed on the parent",
-        "[substance] Concludes that the test does not prove the fix, because it was green before the fix too",
-        "[substance] Says what that means: the defect could come back without any test failing",
-        "[substance] Explains what the expected outcome would have been (red on the parent, green on this commit)",
-        "[substance] Proposes a stronger test or a reason to check (e.g. why 31 April already failed before), without writing it, since writing was not approved"
+        "[substance] Concludes that the test does not prove the fix, because it was green before the fix too (the parent already rejects 31 April)",
+        "[substance] Says what that means: the leap-year fix could break again without any test failing",
+        "[substance] States the expected pattern for a test that proves the fix: red on the parent, green on this commit",
+        "[substance] Proposes such a test (e.g. parse_day('2024-02-29') accepted, and '2026-02-29' and '2100-02-29' rejected) without writing it, since writing was not approved"
       ]
     }
   ]

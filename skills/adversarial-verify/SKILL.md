@@ -269,19 +269,20 @@ The cycle connects all three reasoning modes: abduction generates the hypothesis
 
 ## Step 3e: EXECUTABLE FALSIFICATION (only with approved execution)
 
-When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
+When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test, at any depth, for the claims that depth verifies. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
 
 1. **Hypothesis first.** State the suspected defect and the observable effect before writing the test.
-2. **Test that reproduces it.** The test exercises the suspected path and asserts the suspected effect. Writing it needs consent to write (Execution and consent, rule 2).
+2. **Test that reproduces it.** The test exercises the suspected path and asserts the suspected effect, with an expected value taken from the spec or the ground truth, not from the code under test. Writing it needs consent to write (Execution and consent, rule 2).
 3. **Run it on the current version.**
-   - **Red**: the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
+   - **Red**: check first that the red is not a test-environment artifact or a wrong expectation in the test (Step 2b, *false red*; Step 4). Then the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
    - **Green with no change**: the hypothesis is **falsified**. Say so, keep the test as a regression guard, and propose no fix. It is fully falsified only if the test could have failed (Finding format, *Falsified hypothesis, in full*); otherwise it is conditionally falsified.
 4. **Fix only what a test showed broken.** A suspicion no test confirmed gets no fix; call any safeguard a preventive measure.
-5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted), and say what each means:
+5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted). Running on the parent is covered by consent to run there; reverting the fix in the working copy is writing and needs its own consent, so prefer a separate copy. Read the four cells:
    - red before, green after: the test covers the defect and proves the fix;
-   - green before too: the test does not prove the fix, and the defect could come back with no test failing. Propose a test that is red before the fix.
+   - green before and after: the test does not prove the fix, and the defect could come back with no test failing. A claim that the fix works, resting on this test, cannot score above 79. Propose a test that is red before the fix;
+   - red after, whatever before: the fix does not work, or broke something; go back to rule 3.
 
-Record every test in the report: the hypothesis, the test, where it ran, the result, and the finding type it produced.
+Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the result, and the finding type. The verdict goes in its own table (FAIL or FALSIFIED HYPOTHESES), and an approved proposed check points to its EXECUTED TESTS row in its Status.
 
 ## Step 4: EVIDENCE-BASED REPORTING
 
