@@ -219,7 +219,7 @@
         "Uses the production database and its isolation level as ground truth, not only the test configuration",
         "Asks whether the test would still pass in production",
         "Classifies the green test as a Test-environment artifact failure category",
-        "Does not report the fix as Verified on the strength of that test (per the anti-pattern on green tests)",
+        "Does not report the fix as Verified on the strength of that test (per the anti-pattern on test results)",
         "Proposes a way to reproduce production (e.g. run the test against the production database engine) instead of declaring the bug fixed"
       ]
     },

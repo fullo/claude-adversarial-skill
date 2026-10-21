@@ -139,7 +139,7 @@ Group adversarial questions into **general failure patterns**, then search the c
 | **Missing completeness** | New item added to one list but not all related ones | Enums, switch/when, serializers, tests, factory methods |
 | **Silent fallthrough** | Error or edge case handled by doing nothing | catch blocks, default cases, empty else branches |
 | **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
-| **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing. Unlike *mock leakage*, the assertion does check the code, but against a fake that behaves better than the real system | Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
+| **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing. Unlike *mock leakage*, the assertion does check the code, but in an environment (often a fake) that behaves better than the real one | Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
 
 ## Step 3: INDEPENDENT VERIFY
 
