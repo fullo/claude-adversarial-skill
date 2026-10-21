@@ -65,7 +65,7 @@ Inspired by Principles of Chaos Engineering, adapted for review. Four techniques
 Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.
 
 ### Anti-Fabrication Discipline
-Before claiming something doesn't exist, you must state where you looked. Every finding is typed as a demonstrated defect, a preventive measure, or a falsified hypothesis (said plainly, only if the check could have failed, kept as a regression check, limited to the paths it covered). Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). No invariants found is reported as such, with where you looked, never filled with invented ones. Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production.
+Before claiming something doesn't exist, you must state where you looked. Every finding is typed as a demonstrated defect, a preventive measure, or a falsified hypothesis (said plainly, only if the check could have failed — otherwise conditionally falsified — kept as a regression check, limited to the paths it covered). Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). No invariants found is reported as such, with where you looked, never filled with invented ones. Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production.
 
 ### Agent Meta-Verification
 When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.
@@ -137,7 +137,7 @@ Or ask naturally:
 - **Initialization order bugs** — field A used before field B is set
 - **Concurrent modification** — adding to a list while iterating it
 - **State leaks** — data persisting across calls, requests or frames when it shouldn't
-- **Timing dependence** — behaviour tied to frame rate, call rate, clock or latency
+- **Timing dependence** — behavior tied to frame rate, call rate, clock or latency
 - **Boundary conditions** — off-by-one, tolerance windows
 - **Unit and sign errors** — wrong direction, currency, unit or coordinate system
 - **Resource exhaustion** — unbounded lists, missing cleanup
@@ -173,7 +173,7 @@ Or ask naturally:
 - **Fragile assertions** — pass by coincidence (order, timing, locale)
 - **Test-code drift** — tests written for a previous code version
 - **Flaky indicators** — fixed sleeps, automatic retries, tests disabled or skipped
-- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by fixtures, a different storage or concurrency model, permissive fakes, a different path into the code (emulator, direct call), different resources or dependencies
+- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by fixtures, a different storage or concurrency model, permissive fakes, a different path into the code (emulator, direct call), different resources or dependencies, or a false red caused only by the test environment
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source
@@ -195,7 +195,7 @@ Optionally integrates with a multi-agent trust scoring system:
 
 - Each demonstrated defect: **-1 trust** to the agent that wrote it (preventive measures and falsified hypotheses don't count)
 - Each false positive: **-1 trust** to the verifier
-- Every 3 clean reviews: **+1 trust** to the developer
+- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the developer
 
 Track trust in `.claude/agent-trust.json`:
 

@@ -139,7 +139,7 @@ Group adversarial questions into **general failure patterns**, then search the c
 | **Frequency assumptions** | Function assumed to be called exactly once per cycle | Event handlers, callbacks, update loops |
 | **Implicit ordering** | A assumed to run before B without enforcement | Init sequences, lifecycle methods, async chains |
 | **Stale state** | State that was valid earlier but may have changed | Cached values, shared references, cross-module state |
-| **Missing completeness** | New item added to one list but not all related ones | Enumerations and every place that branches on them, serializers, tests, factory methods |
+| **Missing completeness** | New item added to one list but not all related ones | Enumerations and every place that branches on them, serializers, tests, every place that creates instances (constructors, factory functions, parsers) |
 | **Silent fallthrough** | Error or edge case handled by doing nothing | Error handlers that swallow errors, ignored error returns, default cases, empty else branches |
 | **Assumed environment** | Code assumes specific runtime conditions | Timezone, locale, OS, memory, network, file system |
 | **Test-environment artifact** | A test passes (or fails) because of how the test environment differs from production, not because of the code. Unlike *assumed environment*, the code may be fine: it is the test that proves nothing. Unlike *mock leakage*, the assertion does check the code, but in an environment (often a fake) that behaves better than the real one | Test bootstrap, fixtures and shared helpers; how tests store data and run concurrent work; fakes and stubs of external systems; the path the test takes into the code vs the one production takes; dependencies, resources, time and network available to tests vs production |
@@ -252,21 +252,21 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ### Finding format
 
+Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type, except that a hidden behavior is typed when you report it as a problem.
+
 1. **Location** — file:line or section reference
-2. **Quote** — the problematic code, spec text, schema, or claim
+2. **Quote** — the problematic code, spec text, schema, or claim (for a falsified hypothesis: the check)
 3. **Type** — one of:
    - **Demonstrated defect** — a trace, test, or reproduction shows it happening;
    - **Preventive measure** — a plausible risk that nothing shows happening;
    - **Falsified hypothesis** — a check designed to show a suspected defect did not show it.
-4. **Scenario** — for a defect, a concrete example of how it fails; for a preventive measure, what would turn it into a defect (an input, a caller, a condition); for a falsified hypothesis, the check and its result
-5. **Reasoning mode** — Deductive / Inductive / Abductive
-6. **Confidence** — per the scoring table above, for the finding as typed (a preventive measure scores how sure you are that the risk exists, not that it happens)
-7. **Survived** — yes (confirmed robust) / no (fragile) / n/a (not stress-tested)
-8. **Fix** — for a defect, the specific change; for a preventive measure, the safeguard you propose; for a falsified hypothesis, none (the check stays as a regression guard); for a surviving stress test, "Confirmed robust"
+4. **Severity** — the impact if the finding is real; for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario
+5. **Scenario** — for a defect, a concrete example of how it fails; for a preventive measure, what would turn it into a defect (an input, a caller, a condition); for a falsified hypothesis, the check and its result
+6. **Reasoning mode** — Deductive / Inductive / Abductive
+7. **Confidence** — per the scoring table above, for the finding as typed (a preventive measure scores how sure you are that the risk exists, not that it happens)
+8. **Fix** — for a defect, the specific change; for a preventive measure, the safeguard you propose; for a falsified hypothesis, none (the check stays as a regression guard)
 
-**Falsified hypothesis, in full.** Say it plainly; don't leave it as "could not reproduce". A check falsifies a suspicion only if it **could have failed**: it was seen failing with the suspected defect injected, or you can show that it exercises the suspected path and asserts the suspected effect. It also falls under the test-environment constraint (Step 4). If you cannot show that it could have failed, report it as **conditionally falsified** and name the check that would complete it, for example: "red when the invalidation is removed". The falsification covers only the paths the check exercised. Name the ones it did not cover; they stay open. Propose no fix for a defect that was not shown.
-
-**Severity** is the impact if the finding is real: for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario.
+**Falsified hypothesis, in full.** Say it plainly; don't leave it as "could not reproduce". A check falsifies a suspicion only if it **could have failed**: it was seen failing with the suspected defect injected, or you can show that it exercises the suspected path and asserts the suspected effect. It also falls under the test-environment constraint (Step 4). If you cannot show that it could have failed, report it as **conditionally falsified** and name the check that would complete it, for example: "red when the invalidation is removed". The falsification covers only the paths the check exercised. Name the ones it did not cover; they stay open, as rows in HYPOTHESES. Propose no fix for a defect that was not shown.
 
 **One finding, one type.** If a problem is demonstrated on one path and only plausible on another, report two findings. Preventive measures and demonstrated defects both go in the FAIL table, and its Type column says which. Falsified hypotheses go in their own table.
 
@@ -281,7 +281,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ## INVARIANTS
 [Where you looked; how many found; "none found" is a valid answer. List only the touched ones]
-| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? |
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data) / Respected? (plans, specs, docs, analyses) |
 |---|-----------|--------|------------|-------------------------------------|------------------------|
 
 ## DECOMPOSED CLAIMS
@@ -298,7 +298,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 |---|-------|---------|
 
 ### FALSIFIED HYPOTHESES
-| # | Location | Suspected defect | Check | Status (falsified / conditionally) | Could it have failed? (how shown, or the check that would complete it) | Paths not covered | Mode | Confidence |
+| # | Location | Suspected defect | Check (quote) | Status (falsified / conditionally) | Could it have failed? (how shown, or the check that would complete it) | Paths not covered | Mode | Confidence |
 |---|----------|------------------|-------|------------------------------------|------------------------------------------------------------------------|-------------------|------|------------|
 
 ### FAIL ❌
@@ -314,8 +314,8 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 |---|-------------|-----------|-------------|----------------|
 
 ## HIDDEN BEHAVIORS DETECTED
-| # | Location | Advertised | Actual | Confidence |
-|---|----------|-----------|--------|------------|
+| # | Location | Advertised | Actual | Type (if a problem) | Confidence |
+|---|----------|-----------|--------|---------------------|------------|
 
 ## ADVERSARIAL SCAFFOLD FINDINGS
 - Reviewer blind spots: [what a normal reviewer would miss]
@@ -325,14 +325,14 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ### SUMMARY
 - Domain: [Code/Architecture/Data/Documentation/Tests/Analysis]
-- Claims: X verified, Y failed
+- Claims: X verified, Y in FAIL (defects and preventive measures), Z falsified
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
-- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path
+- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
-- Critical issues: N
+- Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
 - Recommendation: [trust adjustment or approval]
 ```
 
@@ -344,7 +344,7 @@ After reporting, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `AD
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json`: demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews → author +1.
+If the project uses `.claude/agent-trust.json`: demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
 
 ## References
 
@@ -372,5 +372,5 @@ If the project uses `.claude/agent-trust.json`: demonstrated defect found → au
 - **Don't collect evidence without hypotheses** — every finding needs a conclusion
 - **Don't claim absence without stating where you looked** — "X doesn't exist" requires citing what you checked
 - **Don't report only problems** — stress tests that survive are equally valuable findings
-- **Don't call a risk a bug** — type every finding: demonstrated defect, preventive measure, or falsified hypothesis
+- **Don't call a risk a bug** — type every problem or suspicion you report: demonstrated defect, preventive measure, or falsified hypothesis
 - **Don't use the same technique twice** — forced variety prevents analytical tunnel vision
