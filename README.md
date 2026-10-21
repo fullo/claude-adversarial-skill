@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v3.5-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v3.6-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -15,6 +15,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 - **Identify** what needs verification — code, architecture, data, documentation, tests, or analysis
 - **Gather artifacts** — the actual outputs to verify
 - **Establish ground truth** — what to verify against
+- **Find the project's invariants** — rules that must never break, or say where you looked if there are none
 
 **Chain-of-Verification (Steps 1–2b):**
 - **Decompose** artifacts into individual verifiable claims
@@ -24,6 +25,7 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 
 **Deep Verification (Steps 3–3d):**
 - **Independently verify** each claim by tracing actual paths
+- **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
@@ -40,15 +42,15 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 |--------|-----------------|--------------|
 | **Code** | Source changes, logic, behavior | Tests, type system, spec |
 | **Architecture** | Design decisions, spec coverage | Requirements, constraints, patterns |
-| **Data** | Schemas, migrations, contracts | Production schema, validation rules |
-| **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API, git history |
-| **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports |
+| **Data** | Schemas, migrations, file and message formats, contracts | Production schema, validation rules, data already in the field |
+| **Documentation** | Technical, process, and user-facing docs | Actual codebase, current API or interface, version history |
+| **Tests** | Test suite integrity and honesty | Production code, requirements, coverage reports, production configuration |
 | **Analysis** | Agent outputs, reports, docs | Source material, cited references |
 
 ## Techniques
 
 ### Abstractive Red-Teaming
-Instead of finding individual bugs, identifies **failure categories** — general patterns that produce bugs repeatedly. Searches the entire codebase for instances of the same pattern (frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment).
+Instead of finding individual bugs, identifies **failure categories** — general patterns that produce bugs repeatedly. Searches the entire codebase for instances of the same pattern (frequency assumptions, implicit ordering, stale state, missing completeness, silent fallthrough, assumed environment, test-environment artifact).
 
 ### Hidden Behavior Probing
 Detects behaviors the code doesn't advertise using four probing strategies: indirect probing (trace actual execution), scaffolded probing (chain findings), cross-reference probing (claims vs reality), and absence probing (what's NOT there).
@@ -63,7 +65,7 @@ Inspired by Principles of Chaos Engineering, adapted for review. Four techniques
 Each claim is classified by reasoning mode — **deductive** (verify against ground truth), **inductive** (generalize from 3+ instances), or **abductive** (generate best explanation from observations). Abductive findings are reported as hypotheses with alternative explanations and proposed tests, never as verified facts.
 
 ### Anti-Fabrication Discipline
-Before claiming something doesn't exist, you must state where you looked. Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). Hard constraint: no score above 79 without citing specific file/line/doc.
+Before claiming something doesn't exist, you must state where you looked. Every finding is typed as a demonstrated defect, a preventive measure, or a falsified hypothesis (said plainly, only if the check could have failed — otherwise conditionally falsified — kept as a regression check, limited to the paths it covered). Confidence scoring is tied to reasoning mode: deductive (80-100, source cited), inductive (60-79, 3+ instances), abductive (40-59, hypothesis with alternatives). No invariants found is reported as such, with where you looked, never filled with invented ones. Hard constraint: no score above 79 without citing specific file/line/doc. Test-environment constraint: no score above 79 for a claim resting on a test result until that result is checked against production.
 
 ### Agent Meta-Verification
 When reviewing output from another AI agent, checks for: sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, and evidence cherry-picking.
@@ -134,8 +136,10 @@ Or ask naturally:
 - **Logic flaws** — code that passes simple tests but fails edge cases
 - **Initialization order bugs** — field A used before field B is set
 - **Concurrent modification** — adding to a list while iterating it
-- **State leaks** — data persisting across frames/calls when it shouldn't
-- **Boundary conditions** — off-by-one, coordinate system errors
+- **State leaks** — data persisting across calls, requests or frames when it shouldn't
+- **Timing dependence** — behavior tied to frame rate, call rate, clock or latency
+- **Boundary conditions** — off-by-one, tolerance windows
+- **Unit and sign errors** — wrong direction, currency, unit or coordinate system
 - **Resource exhaustion** — unbounded lists, missing cleanup
 
 ### Architecture
@@ -146,14 +150,14 @@ Or ask naturally:
 - **Breaking changes** — API contract violations
 
 ### Data
-- **Schema inconsistency** — migration doesn't match model
-- **Data loss risk** — destructive migration without backup
-- **Constraint gaps** — missing NOT NULL, FK, uniqueness
-- **Backward compat** — old code reading new schema
+- **Schema inconsistency** — a migration or format change doesn't match the code that reads and writes the data
+- **Data loss risk** — a destructive migration or in-place upgrade without a backup or a way back
+- **Constraint gaps** — missing required fields, references or uniqueness, whatever the storage or format enforces
+- **Backward and forward compatibility** — old readers of new data, new readers of old records or files
 
 ### Documentation
 - **Stale instructions** — install/setup steps that no longer work
-- **API drift** — documented endpoints don't match implementation
+- **API drift** — the documented interface (functions, commands, endpoints, messages) doesn't match the implementation
 - **Missing docs** — new features with no documentation
 - **Broken examples** — code samples that don't compile or run
 - **Misleading error messages** — error text doesn't match error condition
@@ -168,7 +172,8 @@ Or ask naturally:
 - **Missing negative tests** — only happy path tested
 - **Fragile assertions** — pass by coincidence (order, timing, locale)
 - **Test-code drift** — tests written for a previous code version
-- **Flaky indicators** — `sleep()`, `retry`, `@Ignore`/`skip`
+- **Flaky indicators** — fixed sleeps, automatic retries, tests disabled or skipped
+- **Test-environment artifacts** — the test passes (or fails) only because the test environment differs from production: defaults changed by fixtures, a different storage or concurrency model, permissive fakes, a different path into the code (emulator, direct call), different resources or dependencies, or a false red caused only by the test environment
 
 ### Analysis
 - **Hallucinated facts** — claims without traceable source
@@ -188,9 +193,9 @@ Or ask naturally:
 
 Optionally integrates with a multi-agent trust scoring system:
 
-- Each confirmed bug: **-1 trust** to the agent that wrote it
+- Each demonstrated defect: **-1 trust** to the agent that wrote it (preventive measures and falsified hypotheses don't count)
 - Each false positive: **-1 trust** to the verifier
-- Every 3 clean reviews: **+1 trust** to the developer
+- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the developer
 
 Track trust in `.claude/agent-trust.json`:
 

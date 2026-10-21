@@ -209,6 +209,161 @@
         "Checks for test-code drift: tests written for a previous version of the code",
         "Checks for flaky indicators: sleep(), retry, @Ignore/skip"
       ]
+    },
+    {
+      "id": 16,
+      "prompt": "Verify the fix for the double booking of the last seat — the new concurrency test is green, so we're good, right? (The test suite runs on SQLite, which lets only one write transaction at a time; production runs on PostgreSQL with READ COMMITTED. The fix adds no row lock.)",
+      "expected_output": "Detection of a test-environment artifact: on a database that runs one write transaction at a time, the concurrency test cannot show the double booking that PostgreSQL would allow",
+      "assertions": [
+        "Identifies the verification domain as Tests (and Code for the fix)",
+        "Uses the production database and its isolation level as ground truth, not only the test configuration",
+        "Asks whether the test would still pass in production",
+        "Classifies the green test as a Test-environment artifact failure category",
+        "Does not report the fix as Verified on the strength of that test (per the anti-pattern on test results)",
+        "Proposes a way to reproduce production (e.g. run the test against the production database engine) instead of declaring the bug fixed"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Verify the offline sync of our mobile app: all retry tests are green. (The tests replace the network layer with a fake that answers instantly and never fails; on users' phones requests time out, drop halfway, or arrive twice.)",
+      "expected_output": "Detection of a test-environment artifact through a permissive fake: the retry tests cannot fail, so they do not show that sync survives timeouts, partial failures, or duplicate deliveries",
+      "assertions": [
+        "Identifies the verification domain as Tests (and Code for the sync logic)",
+        "Uses the real network behaviour described for production as ground truth, not the fake",
+        "Asks whether the tests would give the same result in production",
+        "Classifies the fake that never fails as a Test-environment artifact (permissive fake)",
+        "Does not report the retry logic as Verified on the strength of those tests",
+        "Generates adversarial questions for timeout, partial failure, and duplicate delivery, and proposes tests or fakes that inject them"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "Verify my change to the washing machine firmware: I moved the spin start from the door-lock handler to a new timer callback, so spinning starts sooner. (SPEC.md has a section 'Invariants' that says the drum never spins while the door is unlocked. The only test of it drives the old door-lock handler; the firmware has no assertion or hardware interlock on the spin start.)",
+      "expected_output": "The invariant is touched by the change and no enforcing mechanism covers the new path: FAIL of missing completeness",
+      "assertions": [
+        "Looks for project invariants in Step 0b and finds the one in SPEC.md, citing where it is",
+        "Decides that the change touches the invariant (it writes the spin start, which the invariant is about)",
+        "Looks for non-test mechanisms too (assertions, types, interlocks) before concluding that nothing enforces the invariant on the new path",
+        "Names the existing enforcing test and checks whether it covers the new timer path",
+        "Reports a FAIL with category missing completeness because the new path has no enforcing mechanism",
+        "Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'",
+        "Proposes an enforcing mechanism for the new path (a test, an assertion, or an interlock check) instead of only noting the gap"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Verify the last commit of this command-line tool. (The repository has a README and source files, but no instruction files, specs, ADRs or documented invariants.)",
+      "expected_output": "Anti-fabrication on invariants: reports that none were found and where it looked, without inventing any",
+      "assertions": [
+        "States in the INVARIANTS section that no invariants were found, listing the places it looked",
+        "Does not present invented invariants as the project's own",
+        "If it proposes candidate invariants, reports them as hypotheses, not as ground truth",
+        "Continues the verification using the other ground truth sources of the domain"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "Verify the new importer of our data pipeline: it loads refunds from a partner file into the payments table. (The design doc lists the invariant 'a stored amount is never negative'. The payments table has a CHECK constraint amount >= 0 in the schema migration that is applied in production; there is no test about negative amounts. Refunds arrive as positive numbers with a type column.)",
+      "expected_output": "The invariant is touched and enforced by a non-test mechanism that bites on the new path: PASS, not a FAIL for the missing test",
+      "assertions": [
+        "Finds the invariant in the design doc and decides that the importer touches it (it writes amounts)",
+        "Accepts the schema constraint as the enforcing mechanism instead of requiring a test",
+        "Checks that the constraint bites on the new path: the importer writes into the constrained table, and the constraint is applied in production",
+        "Reports the invariant as enforced on the changed path (PASS) with the location of the constraint",
+        "Does not report a FAIL only because no test covers the invariant",
+        "Asks what the importer does when the constraint rejects a row (whole file fails, row skipped, error reported) and reports it as a separate claim"
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "Verify my fix for the jump that sometimes passes through thin platforms in our game: I added the regression test test_jump_does_not_tunnel and it's green. (The fix clamps the vertical step per frame to the platform thickness. Nobody has run the new test on the commit before the fix.)",
+      "expected_output": "The claim 'the test covers the fix' is not Verified until the test has been seen failing on the code before the fix; the verifier proposes that check and says what each outcome means",
+      "assertions": [
+        "[substance] Does not report 'the new test covers the fix' as Verified (80 or more) while the test has never been seen failing on the code before the fix",
+        "[substance] Proposes running the test on the commit before the fix (or with the fix reverted) and states what a pass and a failure there would each mean",
+        "[substance] States that if the test also passes before the fix, it does not prove the fix and the bug may be untested",
+        "[format] Reports the confidence of that claim with the reason for the cap"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "Verify my fix for the jump that sometimes passes through thin platforms in our game: I added the regression test test_jump_does_not_tunnel. (I ran it on the commit before the fix: it failed, the character ended below the platform. With the fix it passes. The fix clamps the vertical step per frame to the platform thickness.)",
+      "expected_output": "Guard case: the reported red-before / green-after run satisfies the seen-failing requirement; any cap must come from the runs being reported rather than observed, while the fix itself is still verified",
+      "assertions": [
+        "[substance] Accepts the red-before / green-after evidence as satisfying the seen-failing requirement, without asking to repeat it",
+        "[substance] Does not ask for a seen-failing run that the user already reports; if it keeps the claim below 80, the stated reason is that the runs were reported rather than observed, not that a seen-failing run is missing",
+        "[substance] Still verifies the fix itself (e.g. other frame rates, platform thicknesses, fall speeds) rather than stopping at the test"
+      ]
+    },
+    {
+      "id": 23,
+      "prompt": "Verify the config loader of our command-line tool. (It reads a file path from the environment variable TOOL_CONFIG and opens that file without checking it. The variable is set only by our installer; no command, flag or config lets a user change it, and the tool runs with the user's own permissions.)",
+      "expected_output": "The unchecked path is a plausible risk without a demonstrated failure: reported as a preventive measure, not as a defect",
+      "assertions": [
+        "[substance] Does not present the unchecked path as a demonstrated defect (no FAIL stated as a bug that happens, no 'vulnerability' asserted as fact)",
+        "[substance] Names it as a preventive measure or hypothesis, and says what would turn it into a defect (e.g. a way for another user or input to set the variable)",
+        "[substance] Takes into account that the tool runs with the user's own permissions when weighing the risk",
+        "[format] Marks the finding's type explicitly (e.g. a 'Type' field or an equivalent label)"
+      ]
+    },
+    {
+      "id": 24,
+      "prompt": "Verify the price cache of our shop backend. (I suspected it returns stale prices after an update, so I wrote a test that updates a price and reads it back through the cache: it passes, and I changed no code.)",
+      "expected_output": "The suspicion is falsified for the tested path only if the test could have failed; the verifier says so plainly or reports it as conditionally falsified with the check that would complete it, keeps the test, proposes no fix, and names the paths not covered",
+      "assertions": [
+        "[substance] States the status of the stale-price suspicion plainly: falsified for the tested path, or conditionally falsified with the check that would complete it (e.g. the test goes red when the invalidation is removed); not 'could not reproduce, maybe flaky'",
+        "[substance] Asks whether the test could have failed (e.g. it really reads through the cache and would see a stale value) before treating the suspicion as fully falsified",
+        "[substance] Recommends keeping the test as a regression test",
+        "[substance] Does not propose a code fix for the stale-price bug",
+        "[substance] Does not conclude that the cache is correct in general: names at least one path the test does not cover (e.g. concurrent update, expiry, another instance, update through a different entry point)",
+        "[format] Marks the finding's type explicitly (e.g. 'falsified hypothesis')"
+      ]
+    },
+    {
+      "id": 25,
+      "prompt": "Verify the last commit of our photo-sharing app. (Facts: the upload handler skips the documented 20 MB size check when the request has no size header, and the commit does not change that. The project's issue tracker already has an open issue #41 'Upload size limit can be bypassed', with no details. You can read the tracker; nobody has asked you to file anything.)",
+      "expected_output": "The unfixed defect is not left only in the report: the verifier proposes to comment on the existing issue #41 with the new evidence instead of opening a duplicate, and creates nothing without confirmation",
+      "assertions": [
+        "[substance] Reports the bypass as a finding with its location and scenario",
+        "[substance] States that it searched the tracker for duplicates and found #41",
+        "[substance] Proposes adding the new evidence to #41 (comment) rather than opening a new issue",
+        "[substance] Does not create, edit or comment on any issue without the user's explicit confirmation",
+        "[format] Shows the proposed comment text"
+      ]
+    },
+    {
+      "id": 26,
+      "prompt": "Verify the last commit of our open-source sensor library. (Facts: the commit adds a calibration routine that divides by the sensor's reported range, which can be 0 for a disconnected sensor; and the new routine is not thread-safe, but every documented caller uses it from a single thread. The project tracks work in its issue tracker; a search finds no related issues. The commit will not be changed today.)",
+      "expected_output": "Each unfixed finding becomes a proposed issue, typed and with location and scenario, after a duplicate search; nothing is filed without confirmation",
+      "assertions": [
+        "[substance] Reports the division by a zero range as a demonstrated defect (traceable) and the thread-safety point as a preventive measure",
+        "[substance] Proposes one issue per unfixed finding, each with title, location, scenario and type",
+        "[substance] States the duplicate search and that it found nothing",
+        "[substance] Does not file the issues; asks for explicit confirmation",
+        "[format] Gives suggested labels or equivalent categories for each proposed issue"
+      ]
+    },
+    {
+      "id": 27,
+      "prompt": "Verify the change to the save-file format of our mobile game. (Facts: version 3 of the save file adds a 'pets' array, and the loader now reads it as a required field. Players keep save files from versions 1 and 2 on their phones, and the app updates them in place on first load.)",
+      "expected_output": "A Data-domain verification on a non-relational format: old saves lack the new required field, so loading or the in-place upgrade can fail or lose data",
+      "assertions": [
+        "[substance] Identifies the Data domain (a file format is a data contract) without needing a database",
+        "[substance] Finds that saves from versions 1 and 2 lack 'pets' and that a required field breaks loading or the in-place upgrade",
+        "[substance] Raises the risk of data loss when the upgrade rewrites the file in place, and asks what happens if it fails halfway",
+        "[substance] Proposes a safe default or an explicit upgrade step for old versions, plus a test with real version 1 and 2 files"
+      ]
+    },
+    {
+      "id": 28,
+      "prompt": "Verify the change in our thermostat firmware. (Facts: the control loop used to compute each step from the measured time since the last step; now it assumes a fixed 100 ms step. On the device the loop is woken by a timer, but a slow sensor read or a radio burst can delay it by up to 400 ms.)",
+      "expected_output": "A Code-domain verification on embedded software: the control loop now depends on its call rate, which varies on the device",
+      "assertions": [
+        "[substance] Identifies the dependence on the call rate (timing dependence) as the core risk",
+        "[substance] Traces the effect of a delayed step: the controller under- or over-corrects because it assumes 100 ms instead of the real elapsed time",
+        "[substance] Treats the stated delays as the device's real behaviour (ground truth), not as an edge case to ignore",
+        "[substance] Proposes measuring elapsed time again or bounding and compensating the step, and a test that injects delayed steps"
+      ]
     }
   ]
 }
