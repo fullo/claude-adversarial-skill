@@ -44,7 +44,7 @@ The user decides what to verify and how deep, before the verification starts. Se
 | **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects, listed explicitly |
 | **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
-| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging"). When asked, offer named checks, never a bare yes or no | reasoning only |
+| **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging", "the mutation probe on the changed lines"). When asked, offer named checks, never a bare yes or no | reasoning only |
 
 Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately, not verified.
 
@@ -284,17 +284,18 @@ When the user has approved running (and, where needed, writing) tests, turn each
 
 Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the result, and the finding type. The verdict goes in its own table (FAIL or FALSIFIED HYPOTHESES), and an approved proposed check points to its EXECUTED TESTS row in its Status.
 
-### Mutation probe (Tests domain, only when the user asked for it)
+### Mutation probe (on request, any domain where tests cover the code)
 
-Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check); otherwise propose it in PROPOSED EXECUTABLE CHECKS, since it mutates the code and is slow.
+Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check), at any depth. Otherwise propose it in PROPOSED EXECUTABLE CHECKS, stating its scope (the changed lines), its cost, and that the code is mutated and then restored, since it writes and is slow.
 
-1. **Cost first.** Before starting, state the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Wait for confirmation if the user did not already approve that size.
+1. **Cost first.** State the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Approval of the probe on a scope approves that size; wait for confirmation only when the request named no scope or the probe would go beyond it. Unattended (Intake rule 7): run only if the instructions approved the probe and its scope; otherwise report the cost and leave it proposed.
 2. **Scope: the changed lines**, when the tool allows it.
-3. **Tool or hand mutations.** Use the project's mutation tool for its language if one is available. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
+3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
 4. **Restore the code** after every mutant, prefer a separate copy, and confirm the working copy is clean at the end (Execution and consent: mutating is writing, covered only by the approval of the probe).
-5. **Read every survivor.** Each one is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
-6. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
-7. **Declare what was not measured.** Mutants skipped or timed out are excluded from the score: say how many, and that the score covers only the rest.
+5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
+6. **Survivors are findings.** A missing test or superfluous code goes in FAIL as a demonstrated defect of the tests, with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is a Step 3e hypothesis: with consent to write, write it and run it, red on the mutant and green on the code.
+7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
+8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
 
 ## Step 4: EVIDENCE-BASED REPORTING
 
@@ -380,7 +381,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [Scope, tool or hand mutations, mutants generated, killed, survived, skipped or timed out, score and what it excludes]
 | # | File:Line | Mutator | Outcome | Reason | Test that would kill it |
 |---|-----------|---------|---------|--------|------------------------|
-[Outcome: missing test, superfluous code, or equivalent]
+[Outcome: missing test, superfluous code, equivalent, or not measured. Missing tests and superfluous code also go in FAIL]
 
 ## STRESS TEST RESULTS
 [At quick depth write "Skipped (quick depth)" instead of the table]
