@@ -14,7 +14,7 @@ description: >-
   Use when the user says "verify", "adversarial check", "CoV review",
   "/adversarial-verify", "review my changes", "verify this plan", or "stress test".
 license: MIT
-compatibility: Requires a version control system (e.g. git) for diff analysis
+compatibility: Uses a version control system (e.g. git, Mercurial) for diff analysis; plans, analyses and mock-ups need none
 metadata:
   author: fullo
   version: "4.1"
@@ -47,11 +47,11 @@ The user decides what to verify and how deep, before the verification starts. Se
 | Choice | Options | Default |
 |--------|---------|---------|
 | **Target** | one or more domains (Step 0), or **everything** | what the request names; otherwise the domains Step 0 detects (detection runs during intake), used at once when there is one, proposed in the question when there are several (rule 4) |
-| **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims that passed, hidden-behavior probing on every claim | standard |
+| **Depth** | **quick**: only the top 3 highest-risk claims (Step 3c), no stress techniques; **standard**: every step; **deep**: every step, all four stress techniques on each of the top 3 highest-risk claims among those that passed, hidden-behavior probing on every claim | standard |
 | **Scope** | the changed lines / the module they belong to / the whole project | the changed lines |
 | **Execution mode** | **reasoning only**: nothing is run, and the report ends with proposed executable checks; **approved checks**: only the checks the user names are run (e.g. "the existing test suite", "read-only queries on staging", "the mutation probe on the changed lines"). When asked, offer named checks, never a bare yes or no | reasoning only |
 
-Depth and execution mode are independent: depth decides how far reasoning goes, execution mode decides what may run (Step 3e and the mutation probe need approved execution at any depth).
+Depth and execution mode are independent: depth decides how far reasoning goes, execution mode decides what may run (Step 3e and the mutation probe need approved checks at any depth).
 
 Scope limits what is verified and reported, not what is read. Reading outside the scope to establish ground truth (Step 0b) or to find the same pattern elsewhere (Step 2b) is allowed; occurrences found outside the scope are listed separately (OUT OF SCOPE), not verified.
 
@@ -159,6 +159,8 @@ Most claims start deductive. Switch to inductive when looking for patterns (Step
 3. State at least one **alternative hypothesis**
 4. State what **evidence would confirm or refute** each
 
+At quick depth, rank the claims now (Step 3c, attack selection: blast radius × probability), since the later steps take only the top 3.
+
 ## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
 
 A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims, ranked as in Step 3c):
@@ -179,7 +181,7 @@ The class feeds the confidence: an assumption of either kind is a claim only a r
 
 Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
 
-Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (e.g. a read-only call with test credentials) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved execution, and writes one only with consent to write (Execution and consent).
+Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (e.g. a read-only call with test credentials) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved checks, and writes one only with consent to write (Execution and consent).
 
 **A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
 1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
@@ -205,6 +207,8 @@ For each claim, generate **adversarial counter-questions** — scenarios designe
 | "Tests cover the fix" | "Does this test still fail if I revert the fix?" |
 | "100% coverage" | "Is this line-coverage or branch-coverage? Are there branches inside covered lines?" |
 | "The test passes" / "The test fails" | "Would it give the same result in production, or only because of how the test environment is set up?" |
+| "The report's cited function exists" | "Was it moved or renamed after the report was written?" |
+| "The hint is readable in dark mode" | "Does a later theme rule or the system setting override its colour?" |
 
 ## Step 2b: ABSTRACT TO FAILURE CATEGORIES
 
@@ -234,10 +238,10 @@ For each claim, **read the actual artifact** and trace execution or logic:
 
 ### Invariants touched
 
-For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about. For plans, specs, docs, analyses and mock-ups: the artifact proposes, describes, shows or concludes something about that subject. For each one it touches:
+For each project invariant found in Step 0b, decide whether the artifact touches it. For code, data, test and interface changes (UX: screens, styles, menus): the change reads, writes, or bypasses the data, flow, or component the invariant is about; a change to the mechanism that enforces it (deleting or weakening its test, assertion or constraint) also touches it. For plans, specs, docs, analyses and mock-ups: the artifact proposes, describes, shows or concludes something about that subject. For each one it touches:
 1. **Name the mechanism** that enforces it, with its location: a test (file and test name), a type, a schema or data constraint, a runtime assertion, a static check or lint rule, a hardware interlock.
 2. **Check that it bites on the changed path:** it runs there, and it would fail (reject, raise, refuse, block) if the invariant were broken there. Ask: "if I broke the invariant on the new path, would this stop it?" A test of the old entry point, a test that runs the path without asserting the invariant, or an assertion compiled out of production builds does not count. Tests and assertions also fall under the test-environment constraint (Step 4).
-3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
+3. **Touched with nothing that bites** → FAIL, category *missing completeness*, typed as a preventive measure unless you traced an actual violation, or the change itself removed or weakened the mechanism that bit (then a demonstrated defect). If you could not trace whether the system currently respects the invariant on that path, add a row to HYPOTHESES for that question.
 4. **Plans, specs, docs, analyses and mock-ups** have no changed path, so item 3 does not apply to them as written. Instead: none of them may contradict a touched invariant (contradiction → FAIL, typed as a demonstrated defect: the contradiction is in the text). A plan or spec that changes the invariant's subject must also say what will enforce it on the new path; if it does not say → FAIL of missing completeness, typed as a preventive measure. A doc or analysis that only restates or relies on the invariant passes if it states it correctly.
 
 ### Verification targets by domain
@@ -299,7 +303,7 @@ A spike report that recommends work ("build it") is also checked by Step 1c: the
 3. **Cross-reference probing** — check if what the code *claims* matches what it *does*
 4. **Absence probing** — look for what's NOT there: missing error handling, validation, tests, logging
 
-At quick depth probe only the top 3 highest-risk claims; at standard depth, the claims Step 3c ranks as high risk; at deep depth, every claim.
+At quick depth probe only the top 3 highest-risk claims; at standard depth, at least the top 3 plus every claim whose failure would be of critical severity (Finding format, item 4); at deep depth, every claim.
 
 **Tool-to-agent gap** — for each piece of evidence, explicitly state: the **hypothesis** it supports, the **confidence** level, and what **additional evidence** would confirm or deny it.
 
@@ -321,7 +325,7 @@ At quick depth probe only the top 3 highest-risk claims; at standard depth, the 
 
 Apply targeted stress techniques to claims that passed initial verification. The goal: determine what is **genuinely robust** (Survived: yes) vs **merely unexamined**.
 
-**Forced variety rule:** at standard depth each run must use at least 3 different techniques, and never the same technique twice on the same claim. Quick depth skips this step; deep depth applies all four techniques to each of the highest-risk claims that passed (see Intake).
+**Forced variety rule:** at standard depth each run must use at least 3 different techniques, and never the same technique twice on the same claim. Quick depth skips this step; deep depth applies all four techniques to each of the top 3 highest-risk claims among those that passed (see Intake).
 
 | Technique | What it does | Apply to |
 |-----------|-------------|---------|
@@ -340,7 +344,7 @@ Apply targeted stress techniques to claims that passed initial verification. The
 
 The cycle connects all three reasoning modes: abduction generates the hypothesis, deduction or induction tests it, the result is a Survived verdict.
 
-## Step 3e: EXECUTABLE FALSIFICATION (only with approved execution)
+## Step 3e: EXECUTABLE FALSIFICATION (only with approved checks)
 
 When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test, at any depth, for the claims that depth verifies. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
 
@@ -366,7 +370,7 @@ Measures whether the tests protect the changed code, not only whether they execu
 3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
 4. **Mutate a separate copy** of the repository and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
 5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
-6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
+6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, in the section of the domain whose code the mutated lines belong to (the Tests domain is not added to the target for it), each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
 7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
 8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
 
@@ -380,7 +384,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 | Level | Range | Mode | Requirements |
 |-------|-------|------|-------------|
-| **Verified** | 80-100 | Deductive | Source cited, code traced line by line |
+| **Verified** | 80-100 | Deductive | Source cited, traced line by line (code path, spec section, schema, document) |
 | **Pattern** | 60-79 | Inductive | 3+ instances cited, OR abductive hypothesis confirmed by deductive check |
 | **Hypothesis** | 40-59 | Abductive | Observations listed, hypothesis stated, alternatives considered, test proposed |
 
@@ -392,7 +396,7 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ### Finding format
 
-Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type. A stress test that does not survive, or a hidden behavior that is a problem, is also reported as a finding in FAIL, with a reference to its row.
+Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type unless they are a problem. A stress test that does not survive, or a hidden behavior that is a problem, is also reported as a finding in FAIL, with a reference to its row.
 
 1. **Location** — file:line or section reference
 2. **Quote** — the problematic code, spec text, schema, or claim (for a falsified hypothesis: the check)
@@ -400,11 +404,11 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
    - **Demonstrated defect** — a trace, test, or reproduction shows it happening;
    - **Preventive measure** — a plausible risk that nothing shows happening;
    - **Falsified hypothesis** — a check designed to show a suspected defect did not show it.
-4. **Severity** — the impact if the finding is real; for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario; not applicable to a falsified hypothesis
+4. **Severity** — critical, high, medium or low: the impact if the finding is real; for a preventive measure, the impact if the risk ever materializes, with its likelihood stated in the Scenario; not applicable to a falsified hypothesis
 5. **Scenario** — for a defect, a concrete example of how it fails; for a preventive measure, what would turn it into a defect (an input, a caller, a condition); for a falsified hypothesis, the check and its result
 6. **Reasoning mode** — Deductive / Inductive / Abductive
 7. **Confidence** — per the scoring table above, for the finding as typed (a preventive measure scores how sure you are that the risk exists, not that it happens)
-8. **Fix** — for a defect, the specific change; for a preventive measure, the safeguard you propose; for a falsified hypothesis, none (the check stays as a regression guard)
+8. **Fix** — for a defect, the specific change; for a preventive measure, the safeguard you propose; for a falsified hypothesis, none (a written test stays as a regression guard)
 
 **Falsified hypothesis, in full.** Say it plainly; don't leave it as "could not reproduce". A check falsifies a suspicion only if it **could have failed**: it was seen failing with the suspected defect injected, or you can show that it exercises the suspected path and asserts the suspected effect. It also falls under the test-environment constraint (Step 4). If you cannot show that it could have failed, report it as **conditionally falsified** and name the check that would complete it, for example: "red when the invalidation is removed". The falsification covers only the paths the check exercised. Name the ones it did not cover; they stay open, as rows in HYPOTHESES. Propose no fix for a defect that was not shown.
 
@@ -424,7 +428,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 
 ## INVARIANTS
 [Where you looked; how many found; "none found" is a valid answer. List only the touched ones]
-| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data, UX) / Respected? (plans, specs, docs, analyses, mock-ups) |
+| # | Invariant | Source | Touched by | Enforced by (file:line / test name) | Bites on changed path? (code, data, tests, UX) / Respected? (plans, specs, docs, analyses, mock-ups) |
 |---|-----------|--------|------------|-------------------------------------|------------------------|
 
 ## DECOMPOSED CLAIMS
@@ -453,10 +457,10 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 |---|----------|------------------|-------|------------------------------------|------------------------------------------------------------------------|-------------------|------|------------|
 
 ### FAIL ❌
-| # | File:Line | Type | Severity | Mode | Confidence | Issue |
-|---|-----------|------|----------|------|------------|-------|
+| # | File:Line | Quote | Type | Severity | Scenario | Mode | Confidence | Fix |
+|---|-----------|-------|------|----------|----------|------|------------|-----|
 
-## EXECUTED TESTS (Step 3e and mutation probe, only with approved execution)
+## EXECUTED TESTS (Step 3e and mutation probe, only with approved checks)
 | # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 
@@ -467,7 +471,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [Outcome: missing test, superfluous code, equivalent, or not measured. Missing tests and superfluous code also go in FAIL]
 
 ## STRESS TEST RESULTS
-[At quick depth write "Skipped (quick depth)" instead of the table]
+[At quick depth write "Skipped (quick depth)" instead of the table; when no claim passed, "None: no claim passed"]
 | # | Technique | Target | Survived | Confidence | Evidence |
 |---|-----------|--------|----------|------------|---------|
 
@@ -490,7 +494,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Claims: X verified, Y in FAIL (defects and preventive measures), Z falsified
 - Survived: X/Y stress tests passed
 - Failure categories: N systemic patterns
-- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data, UX) or respected (plans, specs, docs, analyses, mock-ups)
+- Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data, tests, UX) or respected (plans, specs, docs, analyses, mock-ups)
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
@@ -504,20 +508,20 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 [One row for every claim scored below 80 that running something would decide, and for every other run the verifier wants to do (an untrusted link, a Step 3e test, the mutation probe): the Claim column says what the run would decide. Omit the table if there is none]
 | # | Claim | Confidence now | Check (command, test or query) | Confirms if | Refutes if | Cost and side effects | Status |
 |---|-------|----------------|--------------------------------|-------------|------------|-----------------------|--------|
-[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result. After approved runs, issue the report again: each claim a run decided moves to PASS or FAIL with the command and its output]
+[Cost in observable terms: what runs, where, whether it reads or writes, what it touches. Status: proposed, or approved and run with its result. After approved runs, issue the report again: each claim a run decided moves to PASS, FAIL or FALSIFIED HYPOTHESES with the command and its output]
 Proposed writes: [each test, fix or doc update (Step 5) the verifier wants to write, with the file and the change. Omit if none]
 [End the report with one question covering the proposed checks and writes: nothing runs or is written without an answer. Drop the question when nothing is left proposed]
 ```
 
-For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end, then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question. INTAKE appears once, at the top.
+For multi-domain verification, repeat per domain with a CROSS-DOMAIN SUMMARY at the end (the SUMMARY bullets summed across domains, plus the changes that touch several domains, each claim counted once in its primary domain), then one PROPOSED EXECUTABLE CHECKS section for all domains, so the report ends with a single question. INTAKE appears once, at the top.
 
 ## Step 5: PROJECT DISCOVERY UPDATE
 
-Before closing the report, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, `.claude/` docs. If findings are relevant, **propose** the updates under Proposed writes in the closing section — do NOT write directly. Wait for explicit confirmation of those writes (Execution and consent, rules 1 and 2), even when the request asked to update the docs.
+Before closing the report, check for: `TODO.md`, `SPEC.md`, `PLAN.md`, `CHANGELOG.md`, `ADR/`, and the agent's instruction files (e.g. `.claude/`, `AGENTS.md`). If findings are relevant, **propose** the updates under Proposed writes in the closing section — do NOT write directly. Wait for explicit confirmation of those writes (Execution and consent, rules 1 and 2), even when the request asked to update the docs.
 
 ## Trust Scoring (Optional)
 
-If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 1): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
+If the project uses `.claude/agent-trust.json` (writing it needs consent, Execution and consent, rule 1): demonstrated defect found → author -1 (preventive measures and falsified hypotheses don't count), false positive (a demonstrated defect later shown wrong; preventive measures and falsified hypotheses never count) → verifier -1, 3 clean reviews (no demonstrated defect) → author +1.
 
 ## References
 
@@ -536,7 +540,7 @@ If the project uses `.claude/agent-trust.json` (writing it needs consent, Execut
 - **Don't rely on a test result before asking if it would be the same in production** — a pass or a failure caused by the test environment proves nothing, so a finding that rests on it cannot be Verified
 - **Don't dismiss low-probability scenarios** — rare events happen every session at scale
 - **Don't trust comments** — comments lie, code doesn't
-- **Don't verify only one domain** — if code changed, check if SPEC.md still matches
+- **Don't ignore domains the change affects outside the target** — if code changed and SPEC.md may no longer match, name it in the report and offer to verify it
 - **Don't ask what the request already says** — and don't start a large verification without stating its cost first
 - **Don't skip ground truth** — without a reference, you can't verify anything
 - **Don't ignore the project's own invariants** — a rule the project says must never break is the first thing a change can break silently; check what enforces it on the changed path

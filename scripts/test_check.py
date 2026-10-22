@@ -17,6 +17,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILL = os.path.join("skills", "adversarial-verify", "SKILL.md")
 EVALS = os.path.join("skills", "adversarial-verify", "evals", "evals.json")
+PLUGIN = ".claude-plugin/plugin.json"
 
 # Built at run time so that no test term appears literally in any repo file,
 # including this one (the check scans every file). Neither occurs in the repo.
@@ -28,7 +29,7 @@ T2 = "quil" + "lane " + "dor" + "vex"  # two-word private term
 class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        for item in ("README.md", "skills", ".claude-plugin", "scripts", ".gitignore"):
+        for item in ("README.md", "CHANGELOG.md", "skills", ".claude-plugin", "scripts", ".gitignore"):
             src, dst = os.path.join(ROOT, item), os.path.join(self.tmp, item)
             if os.path.isdir(src):
                 shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__"))
@@ -177,6 +178,48 @@ class VersionTest(Base):
         s = s.replace(f'  version: "{v}"\n', "", 1) + f'\n```\nversion: "{v}"\n```\n'
         open(self.path(SKILL), "w", encoding="utf-8").write(s)
         self.assert_fails(self.run_check(terms=NONE), "no version in the frontmatter")
+
+    def plugin(self):
+        with open(self.path(PLUGIN), encoding="utf-8") as f:
+            return json.load(f)
+
+    def save_plugin(self, d):
+        with open(self.path(PLUGIN), "w", encoding="utf-8") as f:
+            json.dump(d, f, indent=2, ensure_ascii=False)
+
+    def test_plugin_version_mismatch(self):
+        d = self.plugin()
+        d["version"] = "9.9"
+        self.save_plugin(d)
+        self.assert_fails(self.run_check(terms=NONE), PLUGIN, "version mismatch")
+
+    def test_plugin_without_version(self):
+        d = self.plugin()
+        del d["version"]
+        self.save_plugin(d)
+        self.assert_fails(self.run_check(terms=NONE), PLUGIN, "no version")
+
+    def test_plugin_version_not_a_string(self):
+        d = self.plugin()
+        d["version"] = 4.1
+        self.save_plugin(d)
+        self.assert_fails(self.run_check(terms=NONE), PLUGIN, "no version")
+
+    def test_plugin_not_json(self):
+        with open(self.path(PLUGIN), "a", encoding="utf-8") as f:
+            f.write("}")
+        self.assert_fails(self.run_check(terms=NONE), PLUGIN, "not valid JSON")
+
+    def test_changelog_missing_current_version(self):
+        self.edit("CHANGELOG.md", "## 4.1", "## 4.0.9")
+        self.assert_fails(self.run_check(terms=NONE), "CHANGELOG.md", "version mismatch")
+
+    def test_changelog_older_entry_does_not_count(self):
+        """The newest entry is the first one: the current version further down does not satisfy the check."""
+        s = open(self.path("CHANGELOG.md"), encoding="utf-8").read()
+        i = s.index("\n## ")
+        open(self.path("CHANGELOG.md"), "w", encoding="utf-8").write(s[:i] + "\n## 9.0 - unreleased\n\n- x\n" + s[i:])
+        self.assert_fails(self.run_check(terms=NONE), "CHANGELOG.md", "version mismatch")
 
 
 class PrivateTest(Base):

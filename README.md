@@ -9,7 +9,7 @@ A Claude Code skill that performs rigorous adversarial verification across code,
 
 ## What it does
 
-When invoked, this skill launches a skeptical verifier agent that follows a structured protocol:
+When invoked, this skill puts the agent in the stance of a skeptical verifier that follows a structured protocol:
 
 **Intake:**
 - **Intake** — target, depth (quick, standard, deep), scope and execution mode; requests start at once with declared defaults, the target is asked only when unclear, large ones first get a cost estimate in files, domains and claims
@@ -30,13 +30,13 @@ When invoked, this skill launches a skeptical verifier agent that follows a stru
 
 **Deep Verification (Steps 3–3e):**
 - **Independently verify** each claim by tracing actual paths
-- **UX check round** — render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; one or two alternative interfaces with what each improves and costs
-- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning (when anything was tuned), numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, no real systems or personal data left behind
+- **UX** — targets checked: render, contrast (computed), legibility, targets, keyboard/controller and focus, real content, states, basic accessibility, motion, sensitive data, in every target format; a check round of the main screens, proposed with consent; one or two alternative interfaces with what each improves and costs
+- **Spike reports** — verified as analyses before a decision rests on them: explicit question, deciding measurement and decision rule fixed before the result, reproducible bench, declared sample limits, a held-out set never used for tuning (when anything was tuned), numbers that support the conclusion (good, bad and plausible-but-wrong cases), a written decision, the throwaway constraint respected (no writes to real systems), and where any personal data is and whether it should be deleted
 - **Check invariants touched** — whatever enforces each one (test, type, constraint, assertion, interlock) must run on the changed path and fail if the invariant is broken there
 - **Probe for hidden behaviors** — detect what the code doesn't advertise
 - **Apply adversarial scaffold** — suspicion modeling, attack selection, subtlety detection
 - **Stress test** — Existence Question, Scale Shift, Time Travel, Requirement Inversion
-- **Executable falsification** — with approved execution, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
+- **Executable falsification** — with approved checks, each suspicion a test can decide becomes a test: red (once ruled out as a test artifact) is a demonstrated defect, green without changes is a falsified hypothesis kept as a regression guard; run on the previous version too, both outcomes are explained (green before and after means the test does not prove the fix)
 - **Mutation probe** — on request (proposed otherwise, with scope and cost), mutates the changed lines (with the language's tool, or 3-5 hand mutations on the riskiest lines), restores the code, and types every survivor as a missing test, superfluous code or an equivalent mutant; a perfect score is suspicious until you see why the mutants died
 
 **Reporting (Steps 4–5):**
@@ -111,7 +111,7 @@ claude plugin install adversarial-verify@fullo-plugins
 claude plugin update adversarial-verify@fullo-plugins
 ```
 
-The plugin system uses git commit hashes as versions. There is no automatic update notification: run the command above periodically to stay current.
+The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.1), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Usage
 
@@ -210,12 +210,31 @@ Or ask naturally:
 - **Premature convergence** — jumps to one hypothesis
 - **Evidence cherry-picking** — selects only supporting evidence
 
+## Mutation tools by language
+
+The mutation probe uses the project's tool when it is already installed (installing one needs consent), otherwise 3-5 hand mutations. The table lists common tools and how each one restricts mutation to the changed code. Every cell comes from the tool's official documentation, read on 2026-10-21; "not documented" means the pages read do not say, not that the feature is missing. Check the current documentation before relying on a flag.
+
+| Language | Tool | Run | Only the changed code | Restrict to paths | Caveats | Source |
+|---|---|---|---|---|---|---|
+| Python | mutmut | `mutmut run` (optional pattern, e.g. `mutmut run "my_module*"`) | No diff option; between runs it retests only the changed functions | `source_paths`, `only_mutate` / `do_not_mutate` in the config, the CLI pattern | Keeps its state in `mutants/`; sources change only with `mutmut apply`; needs `fork` (on Windows only under WSL) | [docs](https://mutmut.readthedocs.io/en/latest/) |
+| Python | Cosmic Ray | `cosmic-ray init cfg.toml s.sqlite`, then `cosmic-ray exec cfg.toml s.sqlite`; report with `cr-report` | Not documented in the tutorial | `module-path`, `excluded-modules` (globs) | Mutates files in place: commit before `exec` | [tutorial](https://cosmic-ray.readthedocs.io/en/latest/tutorials/intro/index.html) |
+| JavaScript, TypeScript | StrykerJS | `npx stryker run` | No git option; line ranges per file (`--mutate "src/app.js:1-11"`); `--incremental` compares with the previous report, not with git | `-m/--mutate` globs, `!` to exclude | Incremental mode sees changes only in mutated files and tests, not dependencies, environment or snapshots; `--force` reruns everything | [configuration](https://stryker-mutator.io/docs/stryker-js/configuration/), [incremental](https://stryker-mutator.io/docs/stryker-js/incremental/) |
+| JVM | PIT (pitest) | `mvn test-compile org.pitest:pitest-maven:mutationCoverage` | Not in open-source PIT; the docs point to the Arcmutate extension (`-DextraFeatures="+GIT(from[master])"`), which needs a licence | `targetClasses` (class globs, not paths) | `-DwithHistory` for incremental analysis; the Gradle syntax for the git feature is not documented on the pages read | [Maven](https://pitest.org/quickstart/maven/), [Arcmutate git](https://docs.arcmutate.com/docs/git-integration.html) |
+| .NET | Stryker.NET | `dotnet stryker` (from the test project directory) | `--since[:<committish>]` (default `master`); `--with-baseline` (experimental) | `-m/--mutate`, repeatable, `!` to exclude, line ranges (`-m "File.cs{10..100}"`) | Needs the .NET 8+ runtime | [configuration](https://stryker-mutator.io/docs/stryker-net/configuration/) |
+| PHP | Infection | `vendor/bin/infection` | Lines: `--git-diff-lines --git-diff-base=main`; files: `--git-diff-filter=AM --git-diff-base=<ref>` | Positional paths (`infection src/Service/ src/Entity/`); `--filter` is deprecated since 0.34.0 | Needs coverage (Xdebug, phpdbg, or `--coverage=<dir>` with `--skip-initial-tests`); stops if a test fails | [options](https://infection.github.io/guide/command-line-options.html), [usage](https://infection.github.io/guide/usage.html) |
+| Rust | cargo-mutants | `cargo mutants` | `--in-diff <file>` (output of `git diff`): mutants overlapping the changed hunks | `-f/--file`, `-e/--exclude` globs; `examine_globs` / `exclude_globs` in `.cargo/mutants.toml` | Copies the tree to a temporary directory (`--in-place` disables it); a diff of tests only yields no mutants; not a substitute for a periodic full run | [in-diff](https://mutants.rs/in-diff.html), [files](https://mutants.rs/skip_files.html), [build dirs](https://mutants.rs/build-dirs.html) |
+| Go | Gremlins | `gremlins unleash` | `--diff "origin/main"` (`-D`, a branch or commit); in CI fetch the full history | No path argument documented; `--exclude-files/-E` (regular expressions) | `--integration` runs the whole suite per mutant and is much slower | [unleash](https://gremlins.dev/latest/usage/commands/unleash/) |
+| Go | go-mutesting (avito-tech fork) | `go-mutesting ./pkg/...` | No git option | Positional files, directories, packages; `exclude_dirs` | Its built-in exec replaces the original file with the mutant; the README does not explain the restore | [README](https://github.com/avito-tech/go-mutesting) |
+| Ruby | mutant | `mutant run --use rspec --usage opensource 'Namespace*'` | `--since <git-ref>`: subjects (methods) overlapping a hunk of `git diff <ref>` | Subject expressions (`'Person#adult?'`, `'Ns*'`), `--require` | Free only for open source; commercial use needs a paid subscription; `--since` misses indirect effects, so the docs recommend a periodic full run | [README](https://github.com/mbj/mutant), [incremental](https://github.com/mbj/mutant/blob/main/docs/incremental.md) |
+
+Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on Gradle, PIT on Kotlin, a git filter for Cosmic Ray, and whether mutmut, StrykerJS, Stryker.NET, Infection, Gremlins and mutant mutate in place or on a copy. Whatever the tool, the skill mutates a separate copy of the repository, unless you approve mutating your working copy, and confirms at the end that your working copy is unchanged.
+
 ## Repository checks
 
 `scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else. Running the eval facts (`scripts/check_facts.py`, the unit tests of the checks, and the pre-commit hook when a commit touches the evals) also needs `rustc` and `node` 22.6 or later:
 
 - **evals.json**: valid, the same four keys in every case, integer ids 1..n in file order, no empty prompt or assertion, and `[substance]`/`[format]` tags followed by text on every assertion from eval 21 on.
-- **Version**: SKILL.md's frontmatter and every skill badge in the README agree.
+- **Version**: SKILL.md's frontmatter, every skill badge in the README, the `version` in `.claude-plugin/plugin.json` and the newest entry of `CHANGELOG.md` agree.
 - **Private names**: none of the configured terms appears in any tracked file's content or name. Matching ignores case, accents and how the parts of a term are joined (space, hyphen, underscore, line break, or nothing), and also covers JSON escapes and files that are not UTF-8. A term matches anywhere, also inside other words (`name` finds `NameLabs`, `name2026`, `names`). Prefix a term with `=` to match it only as a whole word, for common words that would otherwise cause false positives. Terms shorter than 4 characters give a warning. Put the list in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated). The list is never committed, and any output line containing a term is masked. Not caught: a one-word term written as two words (a space or line break in the middle), UTF-16 files without a byte-order mark, and, for `=` terms, forms glued to other letters or digits.
 - **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
 - **Tables**: every Markdown table row, with or without outer pipes, has as many cells as its header.
@@ -236,15 +255,15 @@ Optionally integrates with a multi-agent trust scoring system:
 
 - Each demonstrated defect: **-1 trust** to the agent that wrote it (preventive measures and falsified hypotheses don't count)
 - Each false positive: **-1 trust** to the verifier
-- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the developer
+- Every 3 clean reviews (no demonstrated defect): **+1 trust** to the author
 
 Track trust in `.claude/agent-trust.json`:
 
 ```json
 {
   "agents": {
-    "dev": { "trust": 7, "clean_commits": 0 },
-    "test": { "trust": 7, "clean_commits": 0 }
+    "dev": { "trust": 7, "clean_reviews": 0 },
+    "test": { "trust": 7, "clean_reviews": 0 }
   }
 }
 ```

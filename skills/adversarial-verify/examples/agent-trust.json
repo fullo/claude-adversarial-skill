@@ -1,8 +1,8 @@
 {
   "agents": {
-    "plan": { "trust": 7, "clean_commits": 0 },
-    "dev": { "trust": 7, "clean_commits": 0 },
-    "test": { "trust": 7, "clean_commits": 0 }
+    "plan": { "trust": 7, "clean_reviews": 0 },
+    "dev": { "trust": 7, "clean_reviews": 0 },
+    "test": { "trust": 7, "clean_reviews": 0 }
   },
   "control_rules": {
     "trust_gte_7": { "reviewers": 1, "label": "standard review" },
