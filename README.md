@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v4.1-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v4.2-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -105,13 +105,23 @@ claude plugin marketplace add fullo/claude-plugins-marketplace
 claude plugin install adversarial-verify@fullo-plugins
 ```
 
+The skill is a folder, not one file. `SKILL.md` holds the core of the method and is read at every verification; three files in `references/` hold the parts that only some verifications need, and the verifier reads one only when its condition holds:
+
+| File | Read when |
+|------|-----------|
+| `references/pre-code.md` | the artifact proposes work not yet done, or is a spike or prototype report |
+| `references/ux.md` | UX is in the target |
+| `references/execution.md` | the user approved a run (tests, the mutation probe) |
+
+Copy the whole folder: `SKILL.md` alone would send the verifier to files that are not there.
+
 ## Update
 
 ```bash
 claude plugin update adversarial-verify@fullo-plugins
 ```
 
-The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.1), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.2), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Usage
 
@@ -229,6 +239,8 @@ The mutation probe uses the project's tool when it is already installed (install
 
 Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on Gradle, PIT on Kotlin, a git filter for Cosmic Ray, and whether mutmut, StrykerJS, Stryker.NET, Infection, Gremlins and mutant mutate in place or on a copy. Whatever the tool, the skill mutates a separate copy of the repository, unless you approve mutating your working copy, and confirms at the end that your working copy is unchanged.
 
+**Where the probe runs.** With the probe, or a run of a large test suite, the verifier suggests keeping the copy the run works on in a memory-backed filesystem (e.g. tmpfs, a RAM disk): faster runs when writes are what slows them down, and fewer writes to the disk. The user accepts or refuses; creating one needs its own consent, the copy must fit in the free memory, and a test whose subject is the storage itself is run on disk before its result is relied on. How each tool is told where to work (its temporary or sandbox directory) is in its documentation; the table above does not cover it.
+
 ## Repository checks
 
 `scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else. Running the eval facts (`scripts/check_facts.py`, the unit tests of the checks, and the pre-commit hook when a commit touches the evals) also needs `rustc` and `node` 22.6 or later:
@@ -236,8 +248,9 @@ Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on 
 - **evals.json**: valid, the same four keys in every case, integer ids 1..n in file order, no empty prompt or assertion, and `[substance]`/`[format]` tags followed by text on every assertion from eval 21 on.
 - **Version**: SKILL.md's frontmatter, every skill badge in the README, the `version` in `.claude-plugin/plugin.json` and the newest entry of `CHANGELOG.md` agree.
 - **Private names**: none of the configured terms appears in any tracked file's content or name. Matching ignores case, accents and how the parts of a term are joined (space, hyphen, underscore, line break, or nothing), and also covers JSON escapes and files that are not UTF-8. A term matches anywhere, also inside other words (`name` finds `NameLabs`, `name2026`, `names`). Prefix a term with `=` to match it only as a whole word, for common words that would otherwise cause false positives. Terms shorter than 4 characters give a warning. Put the list in the untracked file `.check-private-terms` (one term per line, `#` for comments) or in `CHECK_PRIVATE_TERMS` (comma-separated). The list is never committed, and any output line containing a term is masked. Not caught: a one-word term written as two words (a space or line break in the middle), UTF-16 files without a byte-order mark, and, for `=` terms, forms glued to other letters or digits.
-- **Neutral wording**: technology-bound terms in SKILL.md and README.md are reported as warnings.
-- **Tables**: every Markdown table row, with or without outer pipes, has as many cells as its header.
+- **Neutral wording**: technology-bound terms in SKILL.md, its reference files and README.md are reported as warnings.
+- **Tables**: every Markdown table row in the same files, with or without outer pipes, has as many cells as its header.
+- **Reference files**: every `references/<name>.md` named in SKILL.md or in a reference file exists, and every file in `references/` is named in SKILL.md.
 - **Eval facts**: every eval from 29 on whose prompt carries a `(Facts: …)` block has a file in `skills/adversarial-verify/evals/facts/` that reproduces those facts (what can be computed from what the prompt shows), or a reason in `facts/NOT_COMPUTABLE`; each fact file carries the sha256 of the prompt of every eval it covers, so editing such a prompt fails until the facts are checked again. `scripts/check_facts.py` runs the files and fails if a stated fact is false, if a file has no assertion outside comments, or if a needed toolchain (`rustc`, `node` 22.6 or later) is missing; TypeScript files run with their types stripped, not type-checked. Fact files are code: review them before committing.
 
 ```bash

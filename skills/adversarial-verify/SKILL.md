@@ -17,7 +17,7 @@ license: MIT
 compatibility: Uses a version control system (e.g. git, Mercurial) for diff analysis; plans, analyses and mock-ups need none
 metadata:
   author: fullo
-  version: "4.1"
+  version: "4.2"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, verify this plan, verify this spike, check the UX, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
@@ -39,6 +39,18 @@ This skill combines five research-backed techniques:
 - **Hidden Behavior Probing** — detect behaviors the code doesn't advertise
 - **Modular Adversarial Scaffold** — systematic decomposition of the adversarial process
 - **Stress Techniques** — hypothesis-driven resilience testing inspired by Chaos Engineering
+
+## Reference files
+
+Three parts of the method are in separate files of this skill's folder. Read a file when its condition holds, before the step that needs it, and not otherwise: an unread file costs nothing, a file read without need costs context.
+
+| File | Read it when | It holds |
+|------|--------------|----------|
+| [references/pre-code.md](references/pre-code.md) | the artifact proposes work not yet done (a plan, a spec, an ADR, an analysis that recommends work), or it is the report of a spike, a prototype or an experiment | Step 1c, the spike checklist of Step 3, the PRE-CODE VALIDATION section of the report |
+| [references/ux.md](references/ux.md) | UX is in the target | the UX targets of Step 3, the UX check round, the alternative interfaces |
+| [references/execution.md](references/execution.md) | the user approved a run: before running or writing any test, and before the mutation probe | the rules of Step 3e and of the mutation probe, where the runs happen (a memory-backed filesystem), the EXECUTED TESTS and MUTATION PROBE sections of the report |
+
+If a file cannot be read, say so at the top of the report and name the step that was done without it; do not rebuild its rules from memory.
 
 ## Intake (before Step 0)
 
@@ -163,33 +175,7 @@ At quick depth, rank the claims now (Step 3c, attack selection: blast radius × 
 
 ## Step 1c: PRE-CODE VALIDATION (any artifact that proposes work not yet done)
 
-A plan, a spec, an ADR or an analysis that recommends work can be verified before anyone writes code, and that is when a wrong assumption is cheapest. Classify every claim of it by the evidence behind it (at quick depth, only the top 3 highest-risk claims, ranked as in Step 3c):
-
-| Class | Meaning | What to suggest |
-|-------|---------|-----------------|
-| **Evidenced** | the evidence already exists: code, tests, a recorded response, a measurement, recorded user evidence (research notes, test sessions) or an already approved mock-up, that you can cite. A result someone only reports counts once you have read the result itself (the output, the log, the measurement); a spike's result counts once it passes the spike checklist (Step 3, Analysis) | nothing; cite it |
-| **Technical assumption** | it depends on something nobody has observed yet: an external API, a library, performance, a file format, a device | a **spike** before the code |
-| **User-expectation assumption** | it depends on what the users want, expect or will understand | a **mock-up** before the code (below) |
-
-The class feeds the confidence: an assumption of either kind is a claim only a run or the users can decide, so it scores at most 79 (Run-only constraint, Step 4) until its spike or mock-up is done. An assumption the plan presents as settled fact goes in FAIL as a preventive measure, with its open question as the scenario; one the plan already marks as open stays only in PRE-CODE VALIDATION.
-
-**A spike** is a small, throwaway experiment that answers one question. Each suggested spike states:
-1. **The question**, one per spike (e.g. "does the API honour `updated_since`?").
-2. **The measurement that decides it**: what will be run or read, and which result answers yes or no.
-3. **The decision rule**, with all three branches: the result that means do, the result that means don't, and the result that means postpone, with the conditions that would reopen it.
-4. **The throwaway constraint**: no production code, and no writes to real systems (no real orders, payments, messages or records). A spike that needs a real system uses read-only calls, test credentials, a sandbox or recorded responses. A proposed spike that writes to a real system is a demonstrated defect of the plan, in FAIL.
-
-Typical adversarial questions for a spike on an external system: does it silently ignore a parameter it does not support? Does the documentation match the real responses? What are the limits of quantity, page size, rate and format? What does it return when nothing matches?
-
-Design each suggested spike so that its report will pass the spike checklist (Step 3, Analysis): declared sample, held-out data when anything is tuned, reproducible bench. A spike that could run now (e.g. a read-only call with test credentials) is also a row of PROPOSED EXECUTABLE CHECKS. The verifier runs it only with approved checks, and writes one only with consent to write (Execution and consent).
-
-**A mock-up** (a picture of the proposed interface for users, not a test double) answers what the users expect before anyone builds it. The verifier suggests one; it does not make it. Each suggested mock-up states:
-1. **The question** the users must answer (e.g. "do managers need the totals per status, or only the list?").
-2. **The form** that fits the software: images, a static page, a clickable prototype, screens of a native app or a game, sample output of a command-line tool.
-3. **Today next to Proposed**: the current screen or output beside the new one, so the change is visible, when a current one exists.
-4. **Alternatives A and B** when the choice is open, with what each one favours.
-5. **Real content and states**: long names, empty lists, many rows, errors, a translation longer than the original.
-6. **Who approves it, and the link**: the mock-up is approved by the users or their representative before development, and the link between the request, the mock-up and the change is written down.
+It applies before anyone writes code, when a wrong assumption is cheapest. When the artifact proposes work not yet done, **read [references/pre-code.md](references/pre-code.md) before going on** and apply its Step 1c: it classifies every claim as evidenced, technical assumption or user-expectation assumption, says what a suggested spike and a suggested mock-up must state, and holds the PRE-CODE VALIDATION section of the report. Skip this step for every other artifact.
 
 ## Step 2: ADVERSARIAL QUESTIONS
 
@@ -264,33 +250,9 @@ For each project invariant found in Step 0b, decide whether the artifact touches
 
 **Analysis:** Hallucinated facts, stale references, logical leaps, missing context, one-sided evidence, scope creep.
 
-**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. Check each point that applies (a held-out set and sample limits only when something was sampled or tuned), and report the ones that fail, typed as in the Finding format (tuning on the evaluation data is a demonstrated defect of the report; a missing seed is a preventive measure):
-- **The question** is explicit, one per spike, and the result answers that question, not a neighbouring one.
-- **The deciding measurement and the decision rule were fixed before the result** (Step 1c): which number answers yes or no, and what means do, don't or postpone. A threshold chosen after seeing the result is not a test.
-- **The bench is reproducible**: data, seed, versions of tools and libraries, machine, and the exact command or steps.
-- **The sample's limits are declared**: how much data, from where and when, confounding variables, synthetic or hand-picked data.
-- **A held-out set**: data kept aside for the evaluation and never used to tune thresholds, rules or prompts. A result measured on the data it was tuned on is not evidence of how it generalises.
-- **The numbers support the conclusion**: good and bad cases shown, not just an average; the errors that look plausible but are wrong are counted, since they are the costly ones.
-- **The decision is written** and follows the rule fixed before the spike, if there was one: do, don't, or postpone. A postponement names the conditions that would reopen it.
-- **The throwaway constraint held**: no spike code went into production, and the spike did not write to a real system. Code that should survive is rewritten for production, not promoted. If it used personal data, say where that data is now and whether it should be deleted.
+**Spike and prototype reports** (Analysis): a spike is an analysis, so verify it before a decision rests on it. **Read [references/pre-code.md](references/pre-code.md)** and apply its spike checklist: the question, the measurement and decision rule fixed before the result, a reproducible bench, the sample's limits, a held-out set, numbers that support the conclusion, a written decision, the throwaway constraint. A spike report that recommends work is also checked by Step 1c, in the same file.
 
-A spike report that recommends work ("build it") is also checked by Step 1c: the checklist verifies the evidence, Step 1c classifies what the recommendation still assumes.
-
-**UX:** adapt each point to the kind of interface (web, native app, game, command-line or terminal); WCAG 2.2 is the reference where it applies. Check, in every target format (sizes, input methods, themes):
-- **Render**: the layout holds in each format; nothing is cut off or off screen; navigation stays reachable.
-- **Contrast**: text at least 4.5:1 (3:1 for large text), graphics and the boundaries of controls at least 3:1, in every theme including dark mode. Compute the ratio from the actual colours; do not estimate it. A computed failure is a demonstrated defect when the artifact shows those values apply (no later rule, theme or fallback overrides them); otherwise it is a preventive measure until the rendered check.
-- **Legibility**: text size for the viewing distance, line length, heading hierarchy; zoom to 200% and reflow at 320 px wide without loss of content, where the platform has them.
-- **Targets**: the size of what is touched or clicked, against the project's threshold or WCAG 2.5.8.
-- **Keyboard, controller and focus**: everything reachable with each supported input, the focus visible from the viewing distance, the order logical.
-- **Real content**: long names, translations longer than the original, empty values, many items.
-- **States**: empty, loading, error, success; error messages shown where they are seen, next to what caused them (their wording is Documentation).
-- **Basic accessibility**: labels on fields, text alternatives for images, an accessible name for icon-only buttons.
-- **Motion and perceived speed**: reduced-motion preferences respected; time to the first useful content on a slow network or device.
-- **Sensitive data**: no secrets or personal data visible on screen, in screenshots or recordings.
-
-**UX check round.** Suggest a check of the main screens in the project's target formats, using its interface tests if it has any. It is a run, so it is proposed under Execution and consent, with the screens, formats and inputs it covers. A measured fact (a width, a colour pair) can be computed by reasoning; how the screen really renders cannot.
-
-**Alternative interfaces.** For each weak point found, suggest one or two alternatives with a short comparison: what each improves, what it makes worse, and its cost. The verifier describes the alternatives in the Fix of the FAIL row; when a choice between them is open, it suggests a mock-up as in Step 1c, listed in the same Fix.
+**UX:** when UX is in the target, **read [references/ux.md](references/ux.md) before verifying**: the checks to make in every target format (render, contrast computed from the actual colours, legibility, targets, keyboard or controller and focus, real content, states, basic accessibility, motion, sensitive data), the UX check round and the alternative interfaces.
 
 **Agent meta-verification** (when reviewing AI agent output, per [AuditBench](https://alignment.anthropic.com/2026/auditbench/)): Sycophantic deference, hidden agenda, anchoring bias, confabulated confidence, premature convergence, evidence cherry-picking.
 
@@ -348,31 +310,17 @@ The cycle connects all three reasoning modes: abduction generates the hypothesis
 
 When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test, at any depth, for the claims that depth verifies. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
 
-1. **Hypothesis first.** State the suspected defect and the observable effect before writing the test.
-2. **Test that reproduces it.** The test exercises the suspected path and asserts the suspected effect, with an expected value taken from the spec or the ground truth, not from the code under test. Writing it needs consent to write (Execution and consent, rule 2).
-3. **Run it on the current version.**
-   - **Red**: check first that the red is not a test-environment artifact or a wrong expectation in the test (Step 2b, *false red*; Step 4). If the expectation was wrong, fix the test, run it again and report the discarded run too. Otherwise the defect is **demonstrated**. Propose the fix, or apply it if changing the code was approved, then run the test again: it must turn green.
-   - **Green with no change**: the hypothesis is **falsified**. Say so, keep the test as a regression guard, and propose no fix. It is fully falsified only if the test could have failed (Finding format, *Falsified hypothesis, in full*); otherwise it is conditionally falsified.
-4. **Fix only what a test showed broken.** A suspicion no test confirmed gets no fix; call any safeguard a preventive measure.
-5. **Both outcomes when a test is run on the previous version** (the parent commit, or the fix reverted). Running on the parent is covered by consent to run there, in a separate copy of the repository (a separate worktree or export of that version); checking it out, or reverting the fix, in the user's working copy is writing and needs its own consent. Read the four cells:
-   - red before, green after: the test covers the defect and proves the fix;
-   - green before and after: the test does not prove the fix, and the defect could come back with no test failing. A claim that the fix works, resting on this test, cannot score above 79. Propose a test that is red before the fix;
-   - red after, whatever before: the fix does not work, or broke something; go back to rule 3.
-
-Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the result, and the finding type. The verdict goes in its own table (FAIL or FALSIFIED HYPOTHESES), and an approved proposed check points to its EXECUTED TESTS row in its Status.
+**Before running or writing any test, read [references/execution.md](references/execution.md)**: the rules of the cycle (hypothesis first, a test whose expected value comes from the spec, what red and green mean on the current and on the previous version) and the EXECUTED TESTS section of the report.
 
 ### Mutation probe (on request, any domain where tests cover the code)
 
-Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check), at any depth. Otherwise propose it in PROPOSED EXECUTABLE CHECKS, stating its scope (the changed lines), its cost, and that the code is mutated and then restored, since it writes and is slow.
+Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check), at any depth. Otherwise propose it in PROPOSED EXECUTABLE CHECKS, stating its scope (the changed lines), its cost in observable terms (lines in scope, number of mutants, which tests run for each), and that the code is mutated and then restored, since it writes and is slow.
 
-1. **Cost first.** State the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Approval of the probe on a scope approves that size; wait for confirmation only when the request named no scope or the probe would go beyond it. Unattended (Intake rule 7): run only if the instructions approved the probe and its scope; otherwise report the cost and leave it proposed.
-2. **Scope: the changed lines**, when the tool allows it.
-3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
-4. **Mutate a separate copy** of the repository and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
-5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
-6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, in the section of the domain whose code the mutated lines belong to (the Tests domain is not added to the target for it), each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
-7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
-8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
+**Before running it, read the rules of the probe in [references/execution.md](references/execution.md)**, with the MUTATION PROBE section of the report.
+
+### Where the runs happen
+
+With the proposal of the mutation probe, or of a run of a large test suite, suggest keeping the copy the run works on in a memory-backed filesystem (e.g. tmpfs, a RAM disk): the runs are faster when writes are what slows them down, and the disk is spared most of those writes. Put the suggestion in the Cost and side effects of the proposed check, with what it needs: the user's consent to create or mount one, separate from the approval of the run, and enough free memory for the copy with its build output (compare the two when you know them). It holds a separate copy, never the user's working copy, and is removed at the end. The user accepts or refuses it; a refusal changes nothing else. The other rules apply once the run is approved: [references/execution.md](references/execution.md) (*Where the runs happen*).
 
 ## Step 4: EVIDENCE-BASED REPORTING
 
@@ -436,9 +384,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 ...
 
 ## PRE-CODE VALIDATION (artifacts that propose work not yet done; omit otherwise)
-[With many claims, list evidenced ones by number only]
-| # | Claim | Class | Confidence | Evidence; or spike (question, measurement, decision rule); or mock-up (question, form, alternatives, approver) |
-|---|-------|-------|------------|--------------------------------------------------------------|
+[Table and what goes in it: references/pre-code.md]
 
 ## FAILURE CATEGORIES IDENTIFIED
 | Category | Instances | Files affected |
@@ -461,14 +407,10 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 |---|-----------|-------|------|----------|----------|------|------------|-----|
 
 ## EXECUTED TESTS (Step 3e and mutation probe, only with approved checks)
-| # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
-|---|-----------|------|--------|--------|--------------|
+[Table: references/execution.md]
 
 ## MUTATION PROBE (only when the user asked for it)
-[Scope, tool or hand mutations, mutants generated, killed, survived, skipped or timed out, score and what it excludes]
-| # | File:Line | Mutator | Outcome | Reason | Test that would kill it |
-|---|-----------|---------|---------|--------|------------------------|
-[Outcome: missing test, superfluous code, equivalent, or not measured. Missing tests and superfluous code also go in FAIL]
+[Summary line and table: references/execution.md]
 
 ## STRESS TEST RESULTS
 [At quick depth write "Skipped (quick depth)" instead of the table; when no claim passed, "None: no claim passed"]
