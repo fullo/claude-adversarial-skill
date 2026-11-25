@@ -1,0 +1,1 @@
+case,mode,run,date,model,effort,skill_commit,total_tokens,peak_context_tokens,wall_seconds,defects,found,hidden,hypothesis_only,missed,fail_rows,citations_checked,citations_wrong_line,citations_unverifiable,unmatched_fail_rows,false_positives_after_blind_review,rows_discarded_by_coordinator,notes
