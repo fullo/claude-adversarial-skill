@@ -7,6 +7,10 @@ DIR is the output of build.py. Modes: A (one agent), B (a coordinator that launc
 F (the coordinator taken apart in steps, protocol/coordinator-flat.md). Creates
 RUNS/<case>-<mode>-<run>/ with tree/, skill/, out/ and one prompt file per agent to launch.
 The answer keys are never copied: a run folder holds nothing a verifier must not see.
+
+With --relative the prompts name tree/, skill/ and out/ relative to the run folder, which is
+then the directory the session must start in: use it when the folders are prepared on one
+machine and run on another (the absolute paths would be wrong there).
 """
 
 import argparse
@@ -55,6 +59,7 @@ def main():
     ap.add_argument("--mode", required=True, choices=["A", "B", "F"])
     ap.add_argument("--run", required=True, type=int)
     ap.add_argument("--runs", required=True)
+    ap.add_argument("--relative", action="store_true", help="relative paths in the prompts")
     a = ap.parse_args()
     run = os.path.join(os.path.abspath(a.runs), f"{a.case}-{a.mode}-{a.run}")
     if os.path.exists(run):
@@ -64,8 +69,9 @@ def main():
     shutil.copytree(os.path.join(a.bench, "base", "skills", "adversarial-verify"), skill)
     os.makedirs(out)
     files = "\n".join(files_of(tree, D.SCOPES[a.case]))
-    fill = lambda t: (t.replace("{TREE}", tree).replace("{SKILL}", skill).replace("{OUT}", out)
-                      .replace("{RUN}", run).replace("{FILES}", files))
+    names = ("tree", "skill", "out", ".") if a.relative else (tree, skill, out, run)
+    fill = lambda t: (t.replace("{TREE}", names[0]).replace("{SKILL}", names[1]).replace("{OUT}", names[2])
+                      .replace("{RUN}", names[3]).replace("{FILES}", files))
     proto = {"A": "single.md", "B": "coordinator.md", "F": "coordinator-flat.md"}[a.mode]
     src = os.path.join(HERE, "protocol", proto)
     if a.mode == "B":
