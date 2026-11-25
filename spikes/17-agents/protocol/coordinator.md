@@ -31,8 +31,9 @@ nothing. I accept the cost: do not stop to ask. Read nothing outside {TREE}, {SK
 Launch your agents on the sonnet model at medium effort. If you cannot launch agents here,
 do not do the verification yourself: write what happened to {OUT}/CANNOT_LAUNCH.txt and stop.
 
-Save every brief to {OUT}/briefs/ and every return to {OUT}/returns/, as you sent and
-received them. Write the final report to {OUT}/report.md, citing every location as path:line
+Save every brief to {OUT}/briefs/ as you sent it. Every agent writes its own return to
+{OUT}/returns/<agent>.md and answers you with that path only: read the return from the file,
+never copy it out yourself. Write the final report to {OUT}/report.md, citing every location as path:line
 with the path relative to {TREE}. Then write {OUT}/log.md: each agent you launched (role,
 files, rows returned, rows discarded) and every point where you departed from the protocol.
 ```
@@ -66,10 +67,14 @@ nothing outside {TREE} and {SKILL}.
 Return only these sections of the skill's Output Format, as tables, with path:line relative
 to {TREE} and the quoted line in every row: DECOMPOSED CLAIMS, PASS, FAIL, HYPOTHESES,
 HIDDEN BEHAVIORS DETECTED, FAILURE CATEGORIES IDENTIFIED. No summary, no recommendation.
+Write them to {OUT}/returns/{DOMAIN}.md and answer with that path only.
 ```
 
 The brief does not repeat the skill's rules and does not say what the coordinator expects
-to find.
+to find. The briefs of the independent verifier and of the category agent end in the same
+way: the agent writes its return to {OUT}/returns/ and answers with the path. (On the tuning
+case, a coordinator that copied a long return into a file by itself was stopped by the
+model's safeguards, `reasoning_extraction`, and wrote no report.)
 
 ## What the coordinator does with a return
 
