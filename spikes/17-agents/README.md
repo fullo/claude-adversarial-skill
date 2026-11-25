@@ -53,6 +53,13 @@ Con `--profile` la chiave dice anche quali difetti sono già presi dai controlli
 
 Uguali nei due modi: skill al commit di base, modello, effort, strumenti, profondità standard, solo ragionamento, formato del report.
 
+### Modello ed effort (decisione dell'utente del 25 novembre 2026)
+
+- **Modello:** Sonnet, ultima versione, per ogni agente lanciato: l'agente solo del modo A, il coordinatore e i suoi agenti nel modo B. In `runs.csv` va l'identificativo completo del modello che l'ambiente riporta, non il nome breve.
+- **Effort:** medio. «Alto se necessario» non si decide esecuzione per esecuzione, perché il confronto fra i modi non reggerebbe: si decide una volta, sul caso `tuning`. Se lì un modo non arriva a un report completo nel formato della skill, l'effort sale ad alto per **tutti e due** i modi, prima delle esecuzioni che contano, e lo si scrive qui.
+- **Un altro modello** è una serie di esecuzioni nuova, mai una riga in mezzo a questa.
+- **Chi lancia non coordina.** La sessione che ha costruito il banco conosce la chiave delle risposte: lancia gli agenti e calcola il punteggio, ma il coordinatore del modo B è un agente lanciato, che della chiave non sa niente.
+
 ## Misure
 
 | Misura | Da dove |
@@ -103,6 +110,6 @@ Chi verifica riceve `/tmp/bench/<caso>` e la cartella della skill di `/tmp/bench
 ## Cosa manca per partire
 
 1. Confermare N e le tre soglie del criterio.
-2. Decidere chi lancia le sessioni e con quale modello.
-3. Provare il protocollo B sul caso `tuning` finché regge, poi non toccarlo più.
+2. Una prova sul caso `tuning`, nei due modi, per sapere tre cose che oggi non si sanno: se in questo ambiente un agente lanciato può lanciarne altri (serve al coordinatore), che cosa riporta l'ambiente su token e contesto di ogni agente, e se l'effort medio basta.
+3. Mettere a punto il protocollo B sul caso `tuning` finché regge, poi non toccarlo più.
 4. Trovare chi giudica alla cieca le righe FAIL senza difetto noto.

@@ -8,7 +8,8 @@ One agent, one context, the skill as published at the base commit. Nothing else.
 - The agent can read the case tree (`DIR/<case>`) and the skill's folder at the base commit
   (`DIR/base/skills/adversarial-verify`). It cannot read `DIR/keys`, `DIR/base` outside the
   skill's folder, or this repository.
-- Model, effort and tools are the same in both modes and are written in `results/runs.csv`.
+- Model: Sonnet, latest version. Effort: medium (README, "Modello ed effort"). The same in
+  both modes; the full model id the harness reports goes in `results/runs.csv`.
 
 ## Prompt
 

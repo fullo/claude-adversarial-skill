@@ -6,6 +6,14 @@ spike says "do", the protocol is written again for the skill (issue #18).
 The same skill, model, effort, tools, case trees and final report format as mode A. What
 changes is who reads what.
 
+## Who runs what
+
+Every agent of this mode, the coordinator included, is a launched agent on Sonnet (latest
+version) at medium effort: the same as the single agent of mode A. The session that launches
+the runs knows the answer key, so it never acts as the coordinator: it starts the coordinator
+with the prompt below and scores what comes back. The coordinator needs to launch agents of
+its own; whether the environment allows that is checked once, on the tuning case.
+
 ## Roles
 
 - **Coordinator.** Does the intake, lists the files in scope, splits the work, writes the
