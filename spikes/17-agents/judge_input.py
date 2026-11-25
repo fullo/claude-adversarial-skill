@@ -33,6 +33,8 @@ def main():
     rows = []
     for report in sorted(glob.glob(os.path.join(a.runs, f"{a.case}-*", "out", "report.md"))):
         run = os.path.basename(os.path.dirname(os.path.dirname(report)))
+        if run.endswith(".failed"):
+            continue  # a run that fell over and was launched again
         tree = os.path.join(os.path.dirname(os.path.dirname(report)), "tree")
         r = S.score(open(report, encoding="utf-8").read(), key, tree)
         rows += [(run, u["text"]) for u in r["unmatched_fail_rows_full"]]
