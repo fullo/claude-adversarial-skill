@@ -24,9 +24,11 @@ Errors make the exit code non-zero; warnings are printed but do not block.
      --strict it fails. Not caught: a one-word term written as two words (space or
      line break in the middle), UTF-16 files without a BOM; with =, also forms
      glued to other letters or digits.
-  4. Neutral wording: technology-bound terms in SKILL.md and README.md are warnings
-     (they may appear in a list of varied examples). evals.json is excluded.
-  5. Markdown tables in SKILL.md and README.md, with or without outer pipes: every
+  4. Neutral wording: technology-bound terms in SKILL.md, its reference files and
+     README.md are warnings (they may appear in a list of varied examples).
+     evals.json is excluded.
+  5. Markdown tables in SKILL.md, its reference files and README.md, with or
+     without outer pipes: every
      row has as many cells as the header (escaped pipes and pipes inside inline
      code do not count; fenced code blocks are skipped).
   6. Eval facts: every eval from FACTS_FROM on whose prompt states facts ("(Facts")
@@ -34,6 +36,12 @@ Errors make the exit code non-zero; warnings are printed but do not block.
      "<id>: <reason>" in facts/NOT_COMPUTABLE, not both; every fact file belongs to
      an existing eval and carries the sha256 of that eval's prompt, so a prompt
      edited after its facts were checked fails until they are checked again.
+  7. Reference files: SKILL.md keeps the method's core and names the files of
+     references/ that hold the rest. Every "references/<name>.md" named in SKILL.md
+     or in a reference file exists, and every .md file in references/ is named in
+     SKILL.md: a file nobody names is never read, a name with no file sends the
+     reader nowhere. The folder is read as it is on disk, tracked or not, since
+     copying the skill's folder ships every file in it.
 
 Files checked: the files tracked by git (all files outside .git if git is not
 available). With --staged, exactly the content staged for the next commit.
@@ -55,6 +63,8 @@ import unicodedata
 
 SKILL = "skills/adversarial-verify/SKILL.md"
 EVALS = "skills/adversarial-verify/evals/evals.json"
+REFS_DIR = "skills/adversarial-verify/references"
+REF_RE = re.compile(r"references/([A-Za-z0-9_.-]+\.md)\b")
 README = "README.md"
 PLUGIN = ".claude-plugin/plugin.json"
 CHANGELOG = "CHANGELOG.md"
@@ -115,9 +125,21 @@ def decode(data):
 def read_text(root, rel, rep=None):
     with open(os.path.join(root, rel), "rb") as f:
         text, enc = decode(f.read())
-    if enc != "utf-8" and rep is not None and rel in (SKILL, README, EVALS):
+    if enc != "utf-8" and rep is not None and (rel in (SKILL, README, EVALS) or rel.startswith(REFS_DIR + "/")):
         rep.error(rel, f"not UTF-8 (read as {enc})")
     return text
+
+
+def reference_files(root):
+    """The .md files of the skill's references/ folder, as paths relative to root."""
+    d = os.path.join(root, REFS_DIR)
+    names = sorted(os.listdir(d)) if os.path.isdir(d) else []
+    return [f"{REFS_DIR}/{n}" for n in names if n.endswith(".md")]
+
+
+def skill_docs(root):
+    """The texts a verifier reads (SKILL.md and its reference files), then the README."""
+    return [SKILL] + reference_files(root) + [README]
 
 
 def list_files(root):
@@ -306,7 +328,7 @@ def check_private(root, files, terms, rep, strict):
 def check_neutral(root, rep):
     rep.checked.append("neutral wording")
     patterns = [re.compile(t) for t in STACK_TERMS]
-    for rel in (SKILL, README):
+    for rel in skill_docs(root):
         for ln, line in enumerate(read_text(root, rel).splitlines(), 1):
             for p in patterns:
                 m = p.search(line)
@@ -330,7 +352,7 @@ def count_cells(line):
 
 def check_tables(root, rep):
     rep.checked.append("tables")
-    for rel in (SKILL, README):
+    for rel in skill_docs(root):
         lines = read_text(root, rel).splitlines()
         fence = None
         i = 0
@@ -427,6 +449,7 @@ def run_checks(root, files, terms, rep, strict):
     check_neutral(root, rep)
     check_tables(root, rep)
     check_facts(root, rep)
+    check_references(root, rep)
 
 
 # 6 ---------------------------------------------------------------------------
@@ -476,6 +499,25 @@ def check_facts(root, rep):
             continue
         if "(Facts" in str(e.get("prompt", "")) and e["id"] not in with_file and e["id"] not in reasons:
             rep.error(f"{EVALS} id {e['id']}", "states facts but has no fact file and no reason in facts/NOT_COMPUTABLE")
+
+
+# 7 ---------------------------------------------------------------------------
+
+def check_references(root, rep):
+    rep.checked.append("reference files")
+    refs = reference_files(root)
+    existing = {os.path.basename(r) for r in refs}
+    named_in_skill = set()
+    for rel in [SKILL] + refs:
+        text = read_text(root, rel, rep)
+        for ln, line in enumerate(text.splitlines(), 1):
+            for name in REF_RE.findall(line):
+                if rel == SKILL:
+                    named_in_skill.add(name)
+                if name not in existing:
+                    rep.error(f"{rel}:{ln}", f"names references/{name}, which does not exist")
+    for name in sorted(existing - named_in_skill):
+        rep.error(f"{REFS_DIR}/{name}", "reference file never named in SKILL.md: nothing tells the verifier to read it")
 
 
 def print_report(rep, terms, staged):

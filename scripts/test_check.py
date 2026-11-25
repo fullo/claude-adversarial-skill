@@ -447,6 +447,65 @@ class TablesTest(Base):
                 self.assert_passes(self.run_check(terms=NONE))
 
 
+REFS = os.path.join("skills", "adversarial-verify", "references")
+
+
+class ReferencesTest(Base):
+    def ref(self, name):
+        return os.path.join(REFS, name)
+
+    def test_the_skill_has_reference_files_and_names_each_one(self):
+        names = sorted(n for n in os.listdir(self.path(REFS)) if n.endswith(".md"))
+        self.assertTrue(names, "no reference files: the test would prove nothing")
+        skill = open(self.path(SKILL), encoding="utf-8").read()
+        for n in names:
+            self.assertIn("references/" + n, skill)
+
+    def test_name_without_a_file(self):
+        self.append(SKILL, "Read references/nosuchfile.md before going on.")
+        self.assert_fails(self.run_check(terms=NONE), "references/nosuchfile.md", "does not exist")
+
+    def test_name_without_a_file_inside_a_reference_file(self):
+        self.append(self.ref("ux.md"), "See `references/nosuchfile.md`.")
+        self.assert_fails(self.run_check(terms=NONE), "ux.md", "references/nosuchfile.md", "does not exist")
+
+    def test_file_nobody_names(self):
+        with open(self.path(self.ref("orphan.md")), "w", encoding="utf-8") as f:
+            f.write("# Orphan\n\nNobody points here.\n")
+        self.assert_fails(self.run_check(terms=NONE), "orphan.md", "never named in SKILL.md")
+
+    def test_file_named_only_by_another_reference_file_is_still_unnamed(self):
+        with open(self.path(self.ref("orphan.md")), "w", encoding="utf-8") as f:
+            f.write("# Orphan\n")
+        self.append(self.ref("ux.md"), "See `references/orphan.md`.")
+        self.assert_fails(self.run_check(terms=NONE), "orphan.md", "never named in SKILL.md")
+
+    def test_removed_reference_file(self):
+        os.remove(self.path(self.ref("ux.md")))
+        self.assert_fails(self.run_check(terms=NONE), "references/ux.md", "does not exist")
+
+    def test_broken_table_in_a_reference_file(self):
+        self.append(self.ref("ux.md"), "\n| A | B | C |\n|---|---|---|\n| 1 | 2 |\n")
+        self.assert_fails(self.run_check(terms=NONE), "ux.md", "table row")
+
+    def test_stack_term_in_a_reference_file_warns(self):
+        self.append(self.ref("ux.md"), "Add a NOT NULL column.")
+        r = self.run_check(terms=NONE)
+        self.assert_passes(r)
+        self.assertIn("WARNING", r.stdout)
+        self.assertIn("ux.md", r.stdout)
+
+    def test_staged_content_is_what_is_checked(self):
+        git = lambda *a: subprocess.run(["git", "-C", self.tmp, "-c", "user.name=t", "-c", "user.email=t@t", *a],
+                                        check=True, capture_output=True)
+        git("init", "-q"); git("add", "-A"); git("commit", "-q", "-m", "base")
+        with open(self.path(self.ref("orphan.md")), "w", encoding="utf-8") as f:
+            f.write("# Orphan\n")
+        self.assert_passes(self.run_check("--staged", terms=NONE))  # not staged: not part of the commit
+        git("add", "-A")
+        self.assert_fails(self.run_check("--staged", terms=NONE), "orphan.md", "never named in SKILL.md")
+
+
 FACTS = os.path.join("skills", "adversarial-verify", "evals", "facts")
 
 

@@ -2,6 +2,10 @@
 
 The newest version comes first. The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below; `scripts/check.py` fails if they differ.
 
+## Unreleased
+
+- **SKILL.md split into a core and three reference files.** The parts that only some verifications need moved, word for word, to `skills/adversarial-verify/references/`: `pre-code.md` (Step 1c and the spike checklist), `ux.md` (the UX targets, the check round, the alternative interfaces) and `execution.md` (the rules of Step 3e and of the mutation probe), each with its section of the report. SKILL.md names each file at the step that needs it, with the condition for reading it, and keeps what a proposal needs when nothing is run. The text read at every verification goes from 57.3 kB to 46.4 kB; a verification that needs all three files reads 62.5 kB. No rule changed. `scripts/check.py` now covers the reference files (neutral wording, tables) and fails on a named file that does not exist or a file nobody names.
+
 ## 4.1 - 2026-10-21
 
 Validation before code, spike reports and UX (phase C, PR #26; release, #14).
