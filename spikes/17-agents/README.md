@@ -17,7 +17,9 @@ Una sola domanda. Il banco non dice quale protocollo multi-agente sia il miglior
 | `build.py` | Costruisce gli alberi dei casi dal commit di base e rifiuta ogni difetto che il suo testimone non dimostra. |
 | `score.py`, `test_score.py` | Punteggio meccanico di un report contro la chiave, con i suoi test. |
 | `protocol/single.md`, `protocol/coordinator.md` | I due modi, con i prompt. |
-| `results/runs.csv` | Una riga per esecuzione. |
+| `protocol/coordinator-flat.md`, `lookup.py` | Modo F: il coordinatore smontato in passi, per un ambiente dove un agente non può lanciarne altri. Scritto, non eseguito. |
+| `prepare.py` | Prepara la cartella di una esecuzione: albero, skill e prompt già riempiti, mai la chiave. |
+| `results/runs.csv`, `results/pilot.md` | Una riga per esecuzione; l'esito della prova sul caso `tuning`. |
 
 ## I casi
 
@@ -107,13 +109,14 @@ Servono git, python3, rustc e node.
 ```bash
 python3 spikes/17-agents/build.py --out /tmp/bench --profile   # alberi e chiavi; si ferma se un testimone non regge
 python3 -m unittest discover -s spikes/17-agents -p 'test_score.py'
-python3 spikes/17-agents/score.py --tree /tmp/bench/L --key /tmp/bench/keys/L.json report.md
+python3 spikes/17-agents/prepare.py --bench /tmp/bench --case L --mode A --run 1 --runs /tmp/runs
+# la sessione che verifica parte in /tmp/runs/L-A-1 con il prompt che trova lì
+python3 spikes/17-agents/score.py --tree /tmp/bench/L --key /tmp/bench/keys/L.json /tmp/runs/L-A-1/out/report.md
 ```
 
-Chi verifica riceve `/tmp/bench/<caso>` e la cartella della skill di `/tmp/bench/base`. Mai `/tmp/bench/keys`, mai questa cartella.
+Chi verifica lavora nella cartella della sua esecuzione. Mai `/tmp/bench/keys`, mai questa cartella.
 
-## Cosa manca per partire
+## A che punto è
 
-1. Una prova sul caso `tuning`, nei due modi, per sapere tre cose che oggi non si sanno: se in questo ambiente un agente lanciato può lanciarne altri (serve al coordinatore), che cosa riporta l'ambiente su token e contesto di ogni agente, e se l'effort medio basta.
-2. Mettere a punto il protocollo B sul caso `tuning` finché regge, poi non toccarlo più.
-3. Le 18 esecuzioni che contano, poi il giudizio alla cieca.
+- La prova sul caso `tuning` è fatta: esito in `results/pilot.md`. Nell'ambiente dove il banco è nato il modo B non parte, i report non si scrivono su file e i token riportati non misurano il lavoro.
+- La serie che conta si fa in locale, con Claude Code. Lì, prima: il protocollo B sul caso `tuning` finché regge, poi non si tocca più. Poi le 18 esecuzioni e il giudizio alla cieca.

@@ -19,7 +19,8 @@ Everything here is mechanical, and fixed before any run:
    within QUOTE_WINDOW lines of the cited line (`verified`); if it is elsewhere in the file
    the line is wrong (`wrong_line`); if it is nowhere, or the file does not exist, the
    citation is `unverifiable`. Quotes are compared after collapsing white space; a quote cut
-   with "..." or "…" is checked piece by piece.
+   with "..." or "…" is checked piece by piece. When the Quote cell mixes code spans with a
+   comment (`code`: what is wrong with it), only the code spans are the quote.
 4. Unmatched findings. FAIL rows that match no known defect are listed, not judged: the base
    repository may hold real defects that are not in the key. Whether each one is a false
    positive is decided by a person who does not know which mode produced the report.
@@ -100,16 +101,21 @@ def findings(text):
         k = kind(header)
         if k is None:
             continue
-        loc_col = next((h for h in header if h.lower().startswith("file") or h.lower() == "location"), None)
-        quote_col = next((h for h in header if h.lower().startswith("quote") or "(quote)" in h.lower()), None)
         for r in rows:
-            whole = " | ".join(r.values())
-            m = LOCATION.search(r.get(loc_col, "")) if loc_col else LOCATION.search(whole)
-            out.append({"kind": k, "file": m.group(1) if m else None,
-                        "line": int(m.group(2)) if m and m.group(2) else None,
-                        "last": int(m.group(3)) if m and m.group(3) else None,
-                        "quote": r.get(quote_col, "") if quote_col else "", "text": whole})
+            out.append(finding_of(header, r, k))
     return out
+
+
+def finding_of(header, r, k):
+    """One table row as a finding: where it points, what it quotes."""
+    loc_col = next((h for h in header if h.lower().startswith("file") or h.lower() == "location"), None)
+    quote_col = next((h for h in header if h.lower().startswith("quote") or "(quote)" in h.lower()), None)
+    whole = " | ".join(r.values())
+    m = LOCATION.search(r.get(loc_col, "")) if loc_col else LOCATION.search(whole)
+    return {"kind": k, "file": m.group(1) if m else None,
+            "line": int(m.group(2)) if m and m.group(2) else None,
+            "last": int(m.group(3)) if m and m.group(3) else None,
+            "quote": r.get(quote_col, "") if quote_col else "", "text": whole}
 
 
 def same_file(cited, known):
@@ -145,7 +151,9 @@ def squash(s):
 
 def citation(f, tree):
     """'verified', 'wrong_line', 'unverifiable' or None (nothing to check)."""
-    quote = f["quote"].strip().strip("`").strip()
+    raw = f["quote"].strip()
+    spans = [s for s in re.findall(r"`([^`]+)`", raw) if len(squash(s)) >= MIN_PIECE]
+    quote = " ... ".join(spans) if spans else raw.strip("`").strip()
     quote = re.sub(r"^[\"“']|[\"”']$", "", quote).replace("`", "")
     if not f["file"] or f["line"] is None or not quote:
         return None

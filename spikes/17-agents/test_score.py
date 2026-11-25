@@ -25,7 +25,9 @@ HIDDEN = "| # | Location | Advertised | Actual | Type (if a problem) | Confidenc
 HYP = "| # | Observation | Hypothesis | Alternative | Test to confirm |\n|---|---|---|---|---|\n"
 
 
-class ScoreTest(unittest.TestCase):
+class Tree(unittest.TestCase):
+    """A small case tree to score against."""
+
     def setUp(self):
         self.tree = tempfile.mkdtemp()
         os.makedirs(os.path.join(self.tree, "scripts"))
@@ -39,6 +41,8 @@ class ScoreTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tree, ignore_errors=True)
 
+
+class ScoreTest(Tree):
     def run_score(self, report):
         return S.score(report, KEY, self.tree)
 
@@ -107,6 +111,11 @@ class ScoreTest(unittest.TestCase):
         self.assertEqual(self.run_score(row.format("separator"))["citations_verified"], 1)
         self.assertEqual(self.run_score(row.format("something invented"))["citations_unverifiable"], 1)
 
+    def test_in_a_quote_cell_with_code_and_a_comment_only_the_code_is_the_quote(self):
+        row = FAIL + "| 1 | scripts/a.py:40 | `{}`: only the first badge is compared, the docstring says every | Demonstrated defect | high | s | Deductive | 85 | f |\n"
+        self.assertEqual(self.run_score(row.format("for b in badges[:1]:"))["citations_verified"], 1)
+        self.assertEqual(self.run_score(row.format("for b in all_the_badges:"))["citations_unverifiable"], 1)
+
     def test_an_escaped_pipe_and_a_pipe_in_code_stay_in_their_cell(self):
         r = self.run_score(FAIL + "| 1 | scripts/b.py:2 | `if a | b:` | Demonstrated defect | high | a \\| b | Deductive | 85 | f |\n")
         self.assertEqual(r["citations_verified"], 1)
@@ -120,6 +129,32 @@ class ScoreTest(unittest.TestCase):
         r = self.run_score(FAIL + "| 1 | scripts/b.py:30 | `one` | Preventive measure | low | naming | Inductive | 60 | rename |\n")
         self.assertEqual([u["file"] for u in r["unmatched_fail_rows"]], ["scripts/b.py"])
         self.assertNotIn("false_positives", r)
+
+
+class LookupTest(Tree):
+    """lookup.py: the rows whose quote is not at their line are dropped, the others stay as they are."""
+
+    def test_rows_with_a_wrong_or_invented_quote_are_dropped_and_counted(self):
+        import lookup as L
+        text = "Intro.\n\n" + FAIL + (
+            "| 1 | scripts/a.py:40 | `for b in badges[:1]:` | Demonstrated defect | high | s | Deductive | 85 | f |\n"
+            "| 2 | scripts/a.py:10 | `for b in badges[:1]:` | Demonstrated defect | high | s | Deductive | 85 | f |\n"
+            "| 3 | scripts/a.py:10 | `for b in every_badge:` | Demonstrated defect | high | s | Deductive | 85 | f |\n"
+            "| 4 | scripts/a.py | `x = 1` | Preventive measure | low | s | Inductive | 60 | f |\n") + "\nAfter.\n"
+        out, st = L.check(text, self.tree)
+        self.assertEqual((st["rows"], st["verified"], st["not_checkable"], st["discarded"]), (4, 1, 1, 2))
+        self.assertIn("| 1 | scripts/a.py:40 |", out)
+        self.assertIn("| 4 | scripts/a.py |", out)
+        self.assertNotIn("| 2 |", out)
+        self.assertNotIn("every_badge", out)
+        self.assertTrue(out.startswith("Intro.") and out.rstrip().endswith("After."))
+        self.assertEqual([d["why"] for d in st["discarded_rows"]], ["wrong_line", "unverifiable"])
+
+    def test_a_table_that_is_not_about_locations_is_left_alone(self):
+        import lookup as L
+        text = "| Category | Instances |\n|---|---|\n| stale state | 2 |\n"
+        out, st = L.check(text, self.tree)
+        self.assertEqual((out, st["rows"], st["discarded"]), (text, 0, 0))
 
 
 if __name__ == "__main__":
