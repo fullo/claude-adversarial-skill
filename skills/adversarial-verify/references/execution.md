@@ -2,7 +2,7 @@
 
 Part of the adversarial-verify skill. Step numbers and section names with no file name are in `SKILL.md`; paths are relative to the skill's folder. Read this file before running or writing any test (Step 3e) and before running the mutation probe. With reasoning only, nothing here applies: the tests and the probe are only proposed.
 
-Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); long outputs; the EXECUTED TESTS and MUTATION PROBE sections of the report.
+Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); long outputs, and handing their reading to another agent; the EXECUTED TESTS and MUTATION PROBE sections of the report.
 
 ## Step 3e: EXECUTABLE FALSIFICATION (only with approved checks)
 
@@ -52,13 +52,24 @@ The output of a run (a test log, a mutation log) can be thousands of lines. Read
 5. **Reconcile the counts.** What you read must add up to the runner's totals: so many failed and so many read, so many survived and so many read. Say which entries were not read and why: an entry nobody read is not evidence of anything (mutation probe, rule 8).
 6. **The output can hold secrets or personal data.** Quote only what the finding needs and mask the rest. The file is removed with the copy (*Where the runs happen*, rule 6), unless the user asks to keep it.
 
+## Handing the reading to another agent
+
+When the entries to read are many (every survivor of a large probe, a long list of failed tests) and the environment offers a separate agent with its own context (a sub-agent), the verifier may hand it the reading. Each entry is then read in a context that holds nothing else, and the verifier's context receives rows, not the output. It costs more in total, since the other agent starts from nothing, and it keeps the verifier's context for the artifact. Without such an agent, read the entries yourself, a part of the file at a time, in the same row format: nothing else changes.
+
+1. **The brief** gives: the path of the output; one question (e.g. "for each surviving mutant: which tests ran against it, and what did they report?"); the row format of rule 2; and the limits: it reads that file, runs nothing and writes nothing, because the consent given to the verifier does not pass on. It does not say which answer the verifier expects, and it does not repeat the rules of this skill.
+2. **The return is rows, in a fixed format**, one per entry: the entry as the output names it; path:line; the deciding line, quoted as it is; the answer to the question, or "cannot tell from the output". After the rows, the counts: entries found, read, not read. No conclusion, no severity, no fix: if the return carries any, leave them out. The verdict is the verifier's.
+3. **A returned row is a claim, not evidence.** Before using a row, check that its quote is at the line it names, by searching the file (reading, not running). A row whose quote is not there is discarded and reported as discarded. A return with a discarded row is no longer trusted for the others: read their entries yourself before using them.
+4. **Read yourself what a finding rests on.** For every row that will support a FAIL or a falsified hypothesis, and for a sample of the others (at least 3, or all of them when they are fewer), read the entry in the file with the lines around it. A row whose quote was only found, not read in its place, cannot carry a score above 79 (Step 4, hard constraint).
+5. **Reconcile the counts** of the return with the runner's totals (*Long outputs*, rule 5). A return that does not add up is incomplete: find the missing entries yourself, or report them as not read.
+6. **Say it in the report**: which output another agent read, how many rows came back, how many were discarded, how many the verifier read itself.
+
 ## Report sections
 
 In the report they come after VERIFICATION RESULTS, in this order (Output Format).
 
 ```
 ## EXECUTED TESTS (Step 3e and mutation probe, only with approved checks)
-[Output: the file of each run's output; which entries were read and which were not]
+[Output: the file of each run's output; which entries were read and which were not; if another agent read it: rows returned, discarded, read by the verifier]
 | # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 

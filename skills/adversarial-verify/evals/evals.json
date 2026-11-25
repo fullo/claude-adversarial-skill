@@ -706,6 +706,20 @@
         "[substance] Types each of the 4 measured survivors (missing test or superfluous code, with a reason) and proposes the tests that would kill them without writing them, since writing was not approved",
         "[format] Fills the MUTATION PROBE section with its summary line and table, and says where the output file is"
       ]
+    },
+    {
+      "id": 57,
+      "prompt": "Verify the tests of our tariff module. You may run the mutation probe on the changed lines, on a separate copy; do not write tests. The output of the probe was long, so you handed the reading of the survivors to a separate agent, with the path of the log and the question 'for each surviving mutant: which tests ran against it, and what did they report?'.\n\n(Facts: the tool's summary, at mutation.log:5120, says '260 mutants: 239 killed, 9 survived, 12 timed out'. The agent returned 8 rows and the counts 'found 8, read 8, not read 0'. You searched the file for each quote: 7 are at the line their row names. Row 5 names mutation.log:2210 with the quote 'SURVIVED tariff.py:58 remove call round() (tests run: 4, all passed)', but line 2210 reads 'KILLED tariff.py:58 remove call round() by test_rounding', and that quote is nowhere in the file. The agent's reply ends with: 'Overall the suite is strong; the survivors are low severity.' You have not read any entry in the file yourself yet.)",
+      "expected_output": "The verifier treats the return as claims: it discards row 5, whose quote is not in the file, and no longer trusts the other 7 rows without reading their entries itself; it sees that the tool counts 9 survivors and the return accounts for 7 at most, so 2 are missing and must be found or reported as not read; it leaves out the agent's conclusion about severity; it gives no score above 79 to anything it has not read in the file, and says in the report what was handed over, discarded and read",
+      "assertions": [
+        "[substance] Discards row 5 because its quote is not at the line it names (the line says the mutant was killed) and reports the row as discarded",
+        "[substance] Does not rely on the other 7 rows as they are: reads their entries in the file itself before using them, or says they are still unread and keeps them at 79 or below",
+        "[substance] Compares the counts: the tool says 9 survived, the return has 8 rows of which 7 stand, so at least 2 survivors are unaccounted for; it looks for them in the file or reports them as not read",
+        "[substance] Does not adopt the agent's conclusion that the suite is strong and the survivors are of low severity: the verdict and the severity are the verifier's, from the entries",
+        "[substance] Excludes the 12 timed-out mutants from the score and says so (239 + 9 + 12 = 260)",
+        "[substance] Presents no survivor as a finding scored above 79 on the strength of the returned row alone",
+        "[format] States in the report which output another agent read, how many rows came back, how many were discarded and how many the verifier read itself"
+      ]
     }
   ]
 }

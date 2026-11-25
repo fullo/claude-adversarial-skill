@@ -5,6 +5,7 @@ The newest version comes first. The version is the same in the skill's frontmatt
 ## Unreleased
 
 - **Long outputs** (`references/execution.md`). The output of every approved run goes to a file; the verifier reads the exit status and the runner's summary first, then only the entries a question needs, found by searching the file; every result is cited as path:line with the line quoted; what was read must add up to the runner's totals, and what nobody read is not evidence. Eval 56.
+- **Handing the reading of a long output to another agent** (`references/execution.md`), where the environment offers one. The brief gives the file, one question, the row format and the limits (read only), not the expected answer. The return is rows in a fixed format (entry, path:line, quote, answer) and the counts, with no conclusion. A returned row is a claim: its quote is looked up in the file, a row whose quote is not there is discarded and the rest of that return is read by the verifier, the rows a finding rests on are read by the verifier, and a row only looked up cannot carry a score above 79. Eval 57. This is a part of #18, written before the spike of #17.
 
 ## 4.2 - 2026-11-25
 
