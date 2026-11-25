@@ -19,6 +19,7 @@ Una sola domanda. Il banco non dice quale protocollo multi-agente sia il miglior
 | `protocol/single.md`, `protocol/coordinator.md` | I due modi, con i prompt. |
 | `protocol/coordinator-flat.md`, `lookup.py` | Modo F: il coordinatore smontato in passi, per un ambiente dove un agente non può lanciarne altri. Scritto, non eseguito. |
 | `prepare.py` | Prepara la cartella di una esecuzione: albero, skill e prompt già riempiti, mai la chiave. |
+| `protocol/launcher.md`, `judge_input.py` | Le istruzioni per la sessione che lancia la serie in locale, e l'ingresso del giudizio alla cieca. |
 | `results/runs.csv`, `results/pilot.md` | Una riga per esecuzione; l'esito della prova sul caso `tuning`. |
 
 ## I casi
@@ -82,7 +83,7 @@ Fissato prima della prima esecuzione che conta: N e le tre soglie sono confermat
 - **Fare**, se valgono tutte:
   - B trova, sommando casi ed esecuzioni, almeno tanti difetti quanti A;
   - sul caso `L` il contesto massimo del coordinatore è al più il **70%** di quello dell'agente solo;
-  - i token totali di B sono al più **2,5 volte** quelli di A;
+  - i token totali di B sono al più **2,5 volte** quelli di A. Si misura con il costo totale che la sessione riporta, perché comprende i sotto-agenti mentre il conteggio dei token copre solo la sessione principale; stesso modello nei due modi;
   - citazioni non verificabili e falsi positivi di B non superano quelli di A.
 - **Non fare**, se B trova meno difetti di A per più della differenza fra la migliore e la peggiore esecuzione di A, oppure ha più falsi positivi.
 - **Rimandare** in ogni altro caso. Si riapre con più casi o più esecuzioni.

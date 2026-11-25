@@ -212,6 +212,7 @@ def score(report, key, tree):
         "citations_checked": sum(1 for c in cites if c), "citations_verified": cites.count("verified"),
         "citations_wrong_line": cites.count("wrong_line"), "citations_unverifiable": cites.count("unverifiable"),
         "unmatched_fail_rows": [{"file": f["file"], "line": f["line"], "text": f["text"][:300]} for f in unmatched],
+        "unmatched_fail_rows_full": [{"file": f["file"], "line": f["line"], "text": f["text"]} for f in unmatched],
     }
 
 

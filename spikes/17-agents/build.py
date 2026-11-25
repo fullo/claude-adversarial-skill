@@ -17,11 +17,13 @@ Run it from a clone that has the base commit. Requires git, python3, and rustc a
 """
 
 import argparse
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tarfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -33,19 +35,22 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 
 def export(dst):
     os.makedirs(dst)
-    tar = subprocess.run(["git", "-C", REPO, "archive", D.BASE], capture_output=True, check=True).stdout
-    subprocess.run(["tar", "-x", "-C", dst], input=tar, check=True)
+    # as committed: no line-ending conversion, whatever the machine's git settings are
+    tar = subprocess.run(["git", "-C", REPO, "-c", "core.autocrlf=false", "-c", "core.eol=lf", "archive",
+                          "--format=tar", D.BASE], capture_output=True, check=True).stdout
+    with tarfile.open(fileobj=io.BytesIO(tar)) as t:
+        t.extractall(dst)
     shutil.rmtree(os.path.join(dst, "spikes"), ignore_errors=True)  # the bench is never part of a case
 
 
 def apply(tree, defect):
     """Apply one defect; return the 1-based first and last line of the inserted text."""
     path = os.path.join(tree, defect["file"])
-    text = open(path, encoding="utf-8").read()
+    text = open(path, encoding="utf-8", newline="").read()  # newline="": the bytes stay as they are
     if text.count(defect["old"]) != 1:
         sys.exit(f"{defect['id']}: 'old' occurs {text.count(defect['old'])} times in {defect['file']}")
     start = text.index(defect["old"])
-    open(path, "w", encoding="utf-8").write(text.replace(defect["old"], defect["new"]))
+    open(path, "w", encoding="utf-8", newline="").write(text.replace(defect["old"], defect["new"]))
     first = text.count("\n", 0, start) + 1
     return first, first + defect["new"].rstrip("\n").count("\n")
 
@@ -127,7 +132,7 @@ def main():
                         "keywords": d["keywords"], **({"caught_by": profile[d["id"]]} if args.profile else {})})
         # a later defect in the same file can move an earlier one: recompute the lines on the final tree
         for k in key:
-            text = open(os.path.join(tree, k["file"]), encoding="utf-8").read()
+            text = open(os.path.join(tree, k["file"]), encoding="utf-8", newline="").read()
             new = by_id[k["id"]]["new"]
             if text.count(new) != 1:
                 problems.append(f"{case}/{k['id']}: the inserted text occurs {text.count(new)} times in the case tree")

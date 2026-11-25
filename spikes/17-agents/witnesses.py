@@ -38,10 +38,10 @@ class Copy:
         return os.path.join(self.root, rel)
 
     def read(self, rel):
-        return open(self.path(rel), encoding="utf-8").read()
+        return open(self.path(rel), encoding="utf-8", newline="").read()
 
     def write(self, rel, text):
-        open(self.path(rel), "w", encoding="utf-8").write(text)
+        open(self.path(rel), "w", encoding="utf-8", newline="").write(text)
 
     def append(self, rel, text):
         self.write(rel, self.read(rel) + "\n" + text + "\n")
@@ -105,6 +105,11 @@ def S4(tree):
 
 
 def M1(tree):
+    if shutil.which("sh") is None:
+        # no shell to run the hook with (plain Windows): read the command line the hook would run
+        hook = open(os.path.join(tree, "scripts/pre-commit"), encoding="utf-8").read()
+        line = next(l for l in hook.splitlines() if "scripts/check.py" in l and not l.lstrip().startswith("#"))
+        return "--strict" not in line
     with Copy(tree) as c:
         git = lambda *a: subprocess.run(["git", "-C", c.root, "-c", "user.name=t", "-c", "user.email=t@example.com", *a],
                                         check=True, capture_output=True)

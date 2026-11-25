@@ -69,7 +69,7 @@ def main():
     shutil.copytree(os.path.join(a.bench, "base", "skills", "adversarial-verify"), skill)
     os.makedirs(out)
     files = "\n".join(files_of(tree, D.SCOPES[a.case]))
-    names = ("tree", "skill", "out", ".") if a.relative else (tree, skill, out, run)
+    names = ("./tree", "./skill", "./out", ".") if a.relative else (tree, skill, out, run)
     fill = lambda t: (t.replace("{TREE}", names[0]).replace("{SKILL}", names[1]).replace("{OUT}", names[2])
                       .replace("{RUN}", names[3]).replace("{FILES}", files))
     proto = {"A": "single.md", "B": "coordinator.md", "F": "coordinator-flat.md"}[a.mode]
