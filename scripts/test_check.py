@@ -211,7 +211,10 @@ class VersionTest(Base):
         self.assert_fails(self.run_check(terms=NONE), PLUGIN, "not valid JSON")
 
     def test_changelog_missing_current_version(self):
-        self.edit("CHANGELOG.md", "## 4.1", "## 4.0.9")
+        s = open(self.path("CHANGELOG.md"), encoding="utf-8").read()
+        m = re.search(r"^## +[0-9][0-9.]*", s, re.M)  # the newest entry, whatever the current version is
+        self.assertIsNotNone(m)
+        self.edit("CHANGELOG.md", m.group(0), "## 0.0.9")
         self.assert_fails(self.run_check(terms=NONE), "CHANGELOG.md", "version mismatch")
 
     def test_changelog_older_entry_does_not_count(self):
