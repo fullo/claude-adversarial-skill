@@ -17,7 +17,7 @@ license: MIT
 compatibility: Uses a version control system (e.g. git, Mercurial) for diff analysis; plans, analyses and mock-ups need none
 metadata:
   author: fullo
-  version: "4.2"
+  version: "4.3"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, verify this plan, verify this spike, check the UX, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"

@@ -1,6 +1,6 @@
 {
   "name": "adversarial-verify",
-  "version": "4.2",
+  "version": "4.3",
   "description": "Adversarial verification of code, architecture, data, documentation, tests, analysis and UX: Chain-of-Verification with typed findings (demonstrated defect, preventive measure, falsified hypothesis), project invariants, evidence-based confidence, consent before running anything, and validation of plans with spikes and mock-ups before code",
   "author": {
     "name": "Francesco Fullone — Daruma Consulting"
