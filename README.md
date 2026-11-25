@@ -1,4 +1,4 @@
-[![Skill Version](https://img.shields.io/badge/skill-v4.1-blue)](skills/adversarial-verify/SKILL.md)
+[![Skill Version](https://img.shields.io/badge/skill-v4.2-blue)](skills/adversarial-verify/SKILL.md)
 [![Skills](https://img.shields.io/badge/skills-1-green)](skills/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/format-agentskills.io-purple)](https://agentskills.io/)
@@ -121,7 +121,7 @@ Copy the whole folder: `SKILL.md` alone would send the verifier to files that ar
 claude plugin update adversarial-verify@fullo-plugins
 ```
 
-The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.1), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
+The plugin declares its version in `.claude-plugin/plugin.json` (currently 4.2), the same number as the skill's frontmatter and the badge above. An installed copy stays on that version until a release raises it. There is no automatic update notification: run the command above periodically to stay current. What changed in each version is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Usage
 
