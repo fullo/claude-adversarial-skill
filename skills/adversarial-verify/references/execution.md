@@ -2,7 +2,7 @@
 
 Part of the adversarial-verify skill. Step numbers and section names with no file name are in `SKILL.md`; paths are relative to the skill's folder. Read this file before running or writing any test (Step 3e) and before running the mutation probe. With reasoning only, nothing here applies: the tests and the probe are only proposed.
 
-Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); the EXECUTED TESTS and MUTATION PROBE sections of the report.
+Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); long outputs, and handing their reading to another agent; the EXECUTED TESTS and MUTATION PROBE sections of the report.
 
 ## Step 3e: EXECUTABLE FALSIFICATION (only with approved checks)
 
@@ -41,12 +41,35 @@ The mutation probe and a large test suite write a lot: a copy of the repository,
 5. **It is a difference from production.** A memory-backed filesystem can behave unlike the storage the software really runs on: data that is never really flushed, other limits on size, names, permissions or locks, no slow or full disk. When a test's subject is the storage itself (durability, flushing, locking, a full disk, the speed of reads and writes), its result there falls under the test-environment constraint (Step 4): say so, and run that test on disk before relying on it. A timing measured there is not evidence of production speed.
 6. **Clean up, and report what was done.** At the end remove the copy and unmount what the verification mounted, and confirm it. The report says where each run happened (EXECUTED TESTS, *Ran on*; MUTATION PROBE, the summary line). Do not report a speed-up that was not measured.
 
+## Long outputs
+
+The output of a run (a test log, a mutation log) can be thousands of lines. Read whole, it fills the verifier's context with lines that decide nothing, and leaves less room for the artifact under verification. What the report needs from it is short: the outcome, and the lines that prove it.
+
+1. **Send the output of every run to a file**, next to the copy the run works on, never in the user's working copy. It is part of the approved run, not a separate write. Record for each run the command, the exit status and the path of the file.
+2. **Read the short part first**: the exit status, the runner's own summary, the totals. They say whether anything else needs reading.
+3. **Then read only what a question needs**, by searching the file: the failed tests, the survivors, the sample of kills (mutation probe, rule 7), the entries a finding will cite. Read each of those entries in full, with the lines around it. Do not read the rest to be sure, and do not copy the output into the report.
+4. **Quote with a location.** Every result taken from the output is cited as path:line, with the deciding line quoted as it is (Step 4, hard constraint), so that anyone can find it again.
+5. **Reconcile the counts.** What you read must add up to the runner's totals: so many failed and so many read, so many survived and so many read. Say which entries were not read and why: an entry nobody read is not evidence of anything (mutation probe, rule 8).
+6. **The output can hold secrets or personal data.** Quote only what the finding needs and mask the rest. The file is removed with the copy (*Where the runs happen*, rule 6), unless the user asks to keep it.
+
+## Handing the reading to another agent
+
+When the entries to read are many (every survivor of a large probe, a long list of failed tests) and the environment offers a separate agent with its own context (a sub-agent), the verifier may hand it the reading. Each entry is then read in a context that holds nothing else, and the verifier's context receives rows, not the output. It costs more in total, since the other agent starts from nothing, and it keeps the verifier's context for the artifact. Without such an agent, read the entries yourself, a part of the file at a time, in the same row format: nothing else changes.
+
+1. **The brief** gives: the path of the output; one question (e.g. "for each surviving mutant: which tests ran against it, and what did they report?"); the row format of rule 2; and the limits: it reads that file, runs nothing and writes nothing, because the consent given to the verifier does not pass on. It does not say which answer the verifier expects, and it does not repeat the rules of this skill.
+2. **The return is rows, in a fixed format**, one per entry: the entry as the output names it; path:line; the deciding line, quoted as it is; the answer to the question, or "cannot tell from the output". After the rows, the counts: entries found, read, not read. No conclusion, no severity, no fix: if the return carries any, leave them out. The verdict is the verifier's.
+3. **A returned row is a claim, not evidence.** Before using a row, check that its quote is at the line it names, by searching the file (reading, not running). A row whose quote is not there is discarded and reported as discarded. A return with a discarded row is no longer trusted for the others: read their entries yourself before using them.
+4. **Read yourself what a finding rests on.** For every row that will support a FAIL or a falsified hypothesis, and for a sample of the others (at least 3, or all of them when they are fewer), read the entry in the file with the lines around it. A row whose quote was only found, not read in its place, cannot carry a score above 79 (Step 4, hard constraint).
+5. **Reconcile the counts** of the return with the runner's totals (*Long outputs*, rule 5). A return that does not add up is incomplete: find the missing entries yourself, or report them as not read.
+6. **Say it in the report**: which output another agent read, how many rows came back, how many were discarded, how many the verifier read itself.
+
 ## Report sections
 
 In the report they come after VERIFICATION RESULTS, in this order (Output Format).
 
 ```
 ## EXECUTED TESTS (Step 3e and mutation probe, only with approved checks)
+[Output: the file of each run's output; which entries were read and which were not; if another agent read it: rows returned, discarded, read by the verifier]
 | # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 
