@@ -48,7 +48,7 @@ Three parts of the method are in separate files of this skill's folder. Read a f
 |------|--------------|----------|
 | [references/pre-code.md](references/pre-code.md) | the artifact proposes work not yet done (a plan, a spec, an ADR, an analysis that recommends work), or it is the report of a spike, a prototype or an experiment | Step 1c, the spike checklist of Step 3, the PRE-CODE VALIDATION section of the report |
 | [references/ux.md](references/ux.md) | UX is in the target | the UX targets of Step 3, the UX check round, the alternative interfaces |
-| [references/execution.md](references/execution.md) | the user approved a run: before running or writing any test, and before the mutation probe | the rules of Step 3e and of the mutation probe, the EXECUTED TESTS and MUTATION PROBE sections of the report |
+| [references/execution.md](references/execution.md) | the user approved a run: before running or writing any test, and before the mutation probe | the rules of Step 3e and of the mutation probe, where the runs happen (a memory-backed filesystem), the EXECUTED TESTS and MUTATION PROBE sections of the report |
 
 If a file cannot be read, say so at the top of the report and name the step that was done without it; do not rebuild its rules from memory.
 
@@ -317,6 +317,10 @@ When the user has approved running (and, where needed, writing) tests, turn each
 Measures whether the tests protect the changed code, not only whether they execute it. It runs only when the user asked for mutation (in the request or as an approved check), at any depth. Otherwise propose it in PROPOSED EXECUTABLE CHECKS, stating its scope (the changed lines), its cost in observable terms (lines in scope, number of mutants, which tests run for each), and that the code is mutated and then restored, since it writes and is slow.
 
 **Before running it, read the rules of the probe in [references/execution.md](references/execution.md)**, with the MUTATION PROBE section of the report.
+
+### Where the runs happen
+
+With the proposal of the mutation probe, or of a run of a large test suite, suggest keeping the copy the run works on in a memory-backed filesystem (e.g. tmpfs, a RAM disk): the runs are faster when writes are what slows them down, and the disk is spared most of those writes. Put the suggestion in the Cost and side effects of the proposed check, with what it needs: the user's consent to create or mount one, separate from the approval of the run, and enough free memory for the copy with its build output (compare the two when you know them). It holds a separate copy, never the user's working copy, and is removed at the end. The user accepts or refuses it; a refusal changes nothing else. The other rules apply once the run is approved: [references/execution.md](references/execution.md) (*Where the runs happen*).
 
 ## Step 4: EVIDENCE-BASED REPORTING
 

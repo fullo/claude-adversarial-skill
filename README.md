@@ -239,6 +239,8 @@ The mutation probe uses the project's tool when it is already installed (install
 
 Not confirmed on the pages read: PIT's `scmMutationCoverage` goal, Arcmutate on Gradle, PIT on Kotlin, a git filter for Cosmic Ray, and whether mutmut, StrykerJS, Stryker.NET, Infection, Gremlins and mutant mutate in place or on a copy. Whatever the tool, the skill mutates a separate copy of the repository, unless you approve mutating your working copy, and confirms at the end that your working copy is unchanged.
 
+**Where the probe runs.** With the probe, or a run of a large test suite, the verifier suggests keeping the copy the run works on in a memory-backed filesystem (e.g. tmpfs, a RAM disk): faster runs when writes are what slows them down, and fewer writes to the disk. The user accepts or refuses; creating one needs its own consent, the copy must fit in the free memory, and a test whose subject is the storage itself is run on disk before its result is relied on. How each tool is told where to work (its temporary or sandbox directory) is in its documentation; the table above does not cover it.
+
 ## Repository checks
 
 `scripts/check.py` enforces the repository's own invariants before a commit. It needs `python3` 3.8 or later and nothing else. Running the eval facts (`scripts/check_facts.py`, the unit tests of the checks, and the pre-commit hook when a commit touches the evals) also needs `rustc` and `node` 22.6 or later:

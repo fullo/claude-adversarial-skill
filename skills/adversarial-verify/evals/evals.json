@@ -666,6 +666,32 @@
         "[substance] Does not write the test, because writing tests was not approved, and asks",
         "[format] Presents the survivors in a table (location, mutator, outcome, reason)"
       ]
+    },
+    {
+      "id": 54,
+      "prompt": "Are the tests of our pricing module strong enough? Nothing has been run and nobody has said anything about running.\n\nThe module is 40 changed lines in one file; 12 unit tests cover it. The whole suite has about 3,000 tests and builds the project at every run. The repository with its build output is about 400 MB. The machine has 32 GB of memory, 24 GB of them free, and no memory-backed filesystem is mounted for temporary files.",
+      "expected_output": "Reasoning only: the verifier runs nothing, proposes a mutation probe on the changed lines and, with it, suggests keeping the copy that is mutated in a memory-backed filesystem, saying why, that creating one is the user's choice, that 400 MB fit in the free memory, and that the working copy is never moved there; it asks",
+      "assertions": [
+        "[substance] Runs nothing and creates or mounts nothing: the probe and the memory-backed filesystem are only proposed",
+        "[substance] With the proposal of the mutation probe, suggests keeping the copy the probe works on in a memory-backed filesystem (e.g. tmpfs or a RAM disk)",
+        "[substance] Gives the reasons: faster runs when writes slow them down, and fewer writes to the disk, without stating a speed-up that nobody measured",
+        "[substance] Says that creating or mounting it needs the user's consent, separate from the approval of the probe, and that a refusal leaves the probe on disk",
+        "[substance] Compares the size of the copy (about 400 MB) with the free memory (24 GB) and says it fits",
+        "[substance] Says the copy in memory is a separate copy, not the user's working copy, and that it is removed at the end",
+        "[format] Puts the suggestion with the proposed check (its cost and side effects) and closes with one question"
+      ]
+    },
+    {
+      "id": 55,
+      "prompt": "Verify the last commit of our storage library. You may run the existing test suite on a separate copy of the repository, and you may create a RAM disk for that copy if it helps; do not write anything else.\n\nThe commit makes append_record() flush the record to the storage device before it returns, and adds test_record_survives_power_loss, which appends a record, simulates a crash, reopens the file and expects to find the record.\n\nThe repository with its build output is about 6 GB. The machine has 8 GB of memory, 5 GB of them free.",
+      "expected_output": "The verifier does not use the RAM disk although it was allowed: the copy does not fit in the free memory with room for the tests, and the test added by the commit is about durability on the storage device, which a memory-backed filesystem does not reproduce. It runs the suite on disk, or says that a result obtained in memory would not prove the fix",
+      "assertions": [
+        "[substance] Compares the size of the copy (about 6 GB) with the free memory (5 GB) and concludes that the RAM disk must not be used for it",
+        "[substance] Says that the durability test's result would not be the same kind of evidence in a memory-backed filesystem, because flushing to the device is what the commit changes (a test-environment difference from production)",
+        "[substance] Runs the suite on a separate copy on disk, or leaves the run proposed, and does not score the durability claim above 79 on a result obtained in memory",
+        "[substance] Does not mutate or move the user's working copy and writes nothing beyond the approved copy",
+        "[substance] States in the report where the run happened (on disk) and why the RAM disk was not used"
+      ]
     }
   ]
 }

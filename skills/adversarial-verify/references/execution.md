@@ -2,7 +2,7 @@
 
 Part of the adversarial-verify skill. Step numbers and section names with no file name are in `SKILL.md`; paths are relative to the skill's folder. Read this file before running or writing any test (Step 3e) and before running the mutation probe. With reasoning only, nothing here applies: the tests and the probe are only proposed.
 
-Contents: the rules of Step 3e; the rules of the mutation probe; the EXECUTED TESTS and MUTATION PROBE sections of the report.
+Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); the EXECUTED TESTS and MUTATION PROBE sections of the report.
 
 ## Step 3e: EXECUTABLE FALSIFICATION (only with approved checks)
 
@@ -24,11 +24,22 @@ Record every test in EXECUTED TESTS: the hypothesis, the test, where it ran, the
 1. **Cost first.** State the cost in observable terms: lines in scope, number of mutants, and which tests run for each. Approval of the probe on a scope approves that size; wait for confirmation only when the request named no scope or the probe would go beyond it. Unattended (Intake rule 7): run only if the instructions approved the probe and its scope; otherwise report the cost and leave it proposed.
 2. **Scope: the changed lines**, when the tool allows it.
 3. **Tool or hand mutations.** Use the project's mutation tool for its language if it is already installed; installing one needs consent. Otherwise apply 3-5 mutations by hand on the highest-risk changed lines (Step 3c: blast radius × probability), such as a flipped comparison, a changed boundary constant or a removed call, and run only the tests that cover each one.
-4. **Mutate a separate copy** of the repository and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
+4. **Mutate a separate copy** of the repository (where to keep it: *Where the runs happen*, below) and restore it after every mutant; mutating the user's working copy needs its own consent. Confirm at the end that the user's working copy is unchanged (Execution and consent: mutating is writing, covered only by the approval of the probe).
 5. **Read every survivor.** First check that the tests covering it actually ran (not skipped, excluded or run with another configuration): if they did not, the mutant is **not measured**, not a survivor (test-environment constraint, Step 4). Each measured survivor is a **missing test** (no test checks that behavior) or **superfluous code** (nothing depends on it); call it **equivalent** only when the mutant cannot change any observable behavior, and give the reason for each one.
 6. **Survivors are findings.** A missing test goes in FAIL as a demonstrated defect of the tests, superfluous code as a demonstrated defect of the code, in the section of the domain whose code the mutated lines belong to (the Tests domain is not added to the target for it), each with the mutant as its evidence; an equivalent mutant is not a finding. Removing superfluous code is only proposed. The test that would kill a survivor is the fix of its FAIL row, not a Step 3e hypothesis: with consent to write, write it and run it; it must be red on the mutant and green on the code. Record both runs in EXECUTED TESTS.
 7. **A perfect score is suspicious** until you have seen why the mutants died: a test runner whose output the tool cannot read, a crash in setup, or a timeout can all count as kills. Look at the log for a sample of kills.
 8. **Declare what was not measured.** Mutants skipped, timed out or not measured are excluded from the score: say how many, and that the score covers only the rest.
+
+## Where the runs happen: a memory-backed filesystem
+
+The mutation probe and a large test suite write a lot: a copy of the repository, build output, caches and temporary files, written again for every mutant or every run. Suggest keeping all of that in a memory-backed filesystem (e.g. tmpfs, a RAM disk): the runs are faster when writes are what slows them down, and the disk is spared most of those writes.
+
+1. **When to suggest it.** With the mutation probe; with any other approved run when the suite is large or writes a lot at every run (a build, a test database, many files), or when the same suite will run several times (Step 3e on two versions, a run after every fix). Suggest it once per verification, together with the run it serves.
+2. **The user decides.** Creating or mounting a memory-backed filesystem acts on the system, so it needs its own consent (Execution and consent, rule 2). A location the system already keeps in memory needs none beyond the approval of the run: check that it really is in memory before saying so. If creating one needs administrator rights, give the user the command and let them run it; the verifier does not raise its own privileges. Unattended (Intake rule 7): use one only if it already exists or the instructions approved it. After a refusal the run goes ahead on disk, with no other change.
+3. **What goes there.** The separate copy of the repository (Step 3e, rule 5; mutation probe, rule 4) with the build output, caches and temporary files of the run. Never the user's working copy, and nothing that must outlive the verification: a test written with consent, a log the report cites and the report itself are on disk before the filesystem is removed.
+4. **Size first.** What is stored there is taken from the memory the tests need. State the size of the copy with its build output next to the memory that is free, and do not suggest it when the two do not fit with room to spare. A run that exhausts memory kills tests and mutants for a reason that is not in the code: such a mutant is **not measured**, not killed (mutation probe, rules 5 and 7).
+5. **It is a difference from production.** A memory-backed filesystem can behave unlike the storage the software really runs on: data that is never really flushed, other limits on size, names, permissions or locks, no slow or full disk. When a test's subject is the storage itself (durability, flushing, locking, a full disk, the speed of reads and writes), its result there falls under the test-environment constraint (Step 4): say so, and run that test on disk before relying on it. A timing measured there is not evidence of production speed.
+6. **Clean up, and report what was done.** At the end remove the copy and unmount what the verification mounted, and confirm it. The report says where each run happened (EXECUTED TESTS, *Ran on*; MUTATION PROBE, the summary line). Do not report a speed-up that was not measured.
 
 ## Report sections
 
@@ -40,7 +51,7 @@ In the report they come after VERIFICATION RESULTS, in this order (Output Format
 |---|-----------|------|--------|--------|--------------|
 
 ## MUTATION PROBE (only when the user asked for it)
-[Scope, tool or hand mutations, mutants generated, killed, survived, skipped or timed out, score and what it excludes]
+[Scope, tool or hand mutations, where the copy was (on disk or in memory), mutants generated, killed, survived, skipped or timed out, score and what it excludes]
 | # | File:Line | Mutator | Outcome | Reason | Test that would kill it |
 |---|-----------|---------|---------|--------|------------------------|
 [Outcome: missing test, superfluous code, equivalent, or not measured. Missing tests and superfluous code also go in FAIL]
