@@ -48,7 +48,7 @@ Three parts of the method are in separate files of this skill's folder. Read a f
 |------|--------------|----------|
 | [references/pre-code.md](references/pre-code.md) | the artifact proposes work not yet done (a plan, a spec, an ADR, an analysis that recommends work), or it is the report of a spike, a prototype or an experiment | Step 1c, the spike checklist of Step 3, the PRE-CODE VALIDATION section of the report |
 | [references/ux.md](references/ux.md) | UX is in the target | the UX targets of Step 3, the UX check round, the alternative interfaces |
-| [references/execution.md](references/execution.md) | the user approved a run: before running or writing any test, and before the mutation probe | the rules of Step 3e and of the mutation probe, where the runs happen (a memory-backed filesystem), the EXECUTED TESTS and MUTATION PROBE sections of the report |
+| [references/execution.md](references/execution.md) | the user approved a run: before running or writing any test, and before the mutation probe | the rules of Step 3e and of the mutation probe, where the runs happen (a memory-backed filesystem), how to read a long output, the EXECUTED TESTS and MUTATION PROBE sections of the report |
 
 If a file cannot be read, say so at the top of the report and name the step that was done without it; do not rebuild its rules from memory.
 
@@ -310,7 +310,7 @@ The cycle connects all three reasoning modes: abduction generates the hypothesis
 
 When the user has approved running (and, where needed, writing) tests, turn each suspicion that a test can decide into a test, at any depth, for the claims that depth verifies. Without that approval, the same tests are only proposed (PROPOSED EXECUTABLE CHECKS).
 
-**Before running or writing any test, read [references/execution.md](references/execution.md)**: the rules of the cycle (hypothesis first, a test whose expected value comes from the spec, what red and green mean on the current and on the previous version) and the EXECUTED TESTS section of the report.
+**Before running or writing any test, read [references/execution.md](references/execution.md)**: the rules of the cycle (hypothesis first, a test whose expected value comes from the spec, what red and green mean on the current and on the previous version), how to read a long output, and the EXECUTED TESTS section of the report.
 
 ### Mutation probe (on request, any domain where tests cover the code)
 

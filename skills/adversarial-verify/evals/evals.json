@@ -692,6 +692,20 @@
         "[substance] Does not mutate or move the user's working copy and writes nothing beyond the approved copy",
         "[substance] States in the report where the run happened (on disk) and why the RAM disk was not used"
       ]
+    },
+    {
+      "id": 56,
+      "prompt": "Verify the tests of our tariff module. You may run the mutation probe on the changed lines (62 lines in tariff.py), on a separate copy; do not write tests.\n\n(Facts: the probe ran on a separate copy and its output went to a file, mutation.log, of 2,412 lines. The tool's summary, at line 2409: '120 mutants: 104 killed, 5 survived, 8 timed out, 3 skipped'. A search of the file for 'SURVIVED' finds 5 lines.\nLine 311: 'SURVIVED tariff.py:41 replace >= with > (tests run: 7, all passed)'.\nLine 702: 'SURVIVED tariff.py:41 replace 100 with 101 (tests run: 7, all passed)'.\nLine 1188: 'SURVIVED tariff.py:58 remove call round() (tests run: 4, all passed)'.\nLine 1630: 'SURVIVED tariff.py:73 replace + with - (tests run: 0)'.\nLine 2051: 'SURVIVED tariff.py:90 replace True with False (tests run: 3, all passed)'.\nThe code was restored and the user's working copy is unchanged.)",
+      "expected_output": "The verifier takes the outcome from the summary line and from the five entries it searched for, not from the whole log; cites each entry as mutation.log:line with its quote; sees that the mutant at log line 1630 had no test run against it, so it is not measured; reconciles the counts (104 + 5 + 8 + 3 = 120) and reports the score on the 108 measured mutants (104 killed, about 96%), with 12 excluded; types the 4 measured survivors and proposes the missing tests without writing them",
+      "assertions": [
+        "[substance] Takes the outcome from the tool's summary and from the survivors' entries, and says that the rest of the log was not read; does not reproduce the log",
+        "[substance] Cites each survivor it reports with the log's line (mutation.log:311, 702, 1188, 2051) and the quoted entry",
+        "[substance] Classifies the mutant at tariff.py:73 (log line 1630) as not measured, not as a survivor, because no test ran against it",
+        "[substance] Reconciles the counts with the tool's totals: 104 killed, 5 reported as survived, 8 timed out, 3 skipped make 120",
+        "[substance] Gives the score on the measured mutants only (104 of 108, about 96%) and says that 12 are excluded: 8 timed out, 3 skipped, 1 not measured",
+        "[substance] Types each of the 4 measured survivors (missing test or superfluous code, with a reason) and proposes the tests that would kill them without writing them, since writing was not approved",
+        "[format] Fills the MUTATION PROBE section with its summary line and table, and says where the output file is"
+      ]
     }
   ]
 }

@@ -2,6 +2,10 @@
 
 The newest version comes first. The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below; `scripts/check.py` fails if they differ.
 
+## Unreleased
+
+- **Long outputs** (`references/execution.md`). The output of every approved run goes to a file; the verifier reads the exit status and the runner's summary first, then only the entries a question needs, found by searching the file; every result is cited as path:line with the line quoted; what was read must add up to the runner's totals, and what nobody read is not evidence. Eval 56.
+
 ## 4.2 - 2026-11-25
 
 A smaller core and a memory-backed filesystem for the runs.

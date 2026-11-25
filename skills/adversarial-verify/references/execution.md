@@ -2,7 +2,7 @@
 
 Part of the adversarial-verify skill. Step numbers and section names with no file name are in `SKILL.md`; paths are relative to the skill's folder. Read this file before running or writing any test (Step 3e) and before running the mutation probe. With reasoning only, nothing here applies: the tests and the probe are only proposed.
 
-Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); the EXECUTED TESTS and MUTATION PROBE sections of the report.
+Contents: the rules of Step 3e; the rules of the mutation probe; where the runs happen (a memory-backed filesystem); long outputs; the EXECUTED TESTS and MUTATION PROBE sections of the report.
 
 ## Step 3e: EXECUTABLE FALSIFICATION (only with approved checks)
 
@@ -41,12 +41,24 @@ The mutation probe and a large test suite write a lot: a copy of the repository,
 5. **It is a difference from production.** A memory-backed filesystem can behave unlike the storage the software really runs on: data that is never really flushed, other limits on size, names, permissions or locks, no slow or full disk. When a test's subject is the storage itself (durability, flushing, locking, a full disk, the speed of reads and writes), its result there falls under the test-environment constraint (Step 4): say so, and run that test on disk before relying on it. A timing measured there is not evidence of production speed.
 6. **Clean up, and report what was done.** At the end remove the copy and unmount what the verification mounted, and confirm it. The report says where each run happened (EXECUTED TESTS, *Ran on*; MUTATION PROBE, the summary line). Do not report a speed-up that was not measured.
 
+## Long outputs
+
+The output of a run (a test log, a mutation log) can be thousands of lines. Read whole, it fills the verifier's context with lines that decide nothing, and leaves less room for the artifact under verification. What the report needs from it is short: the outcome, and the lines that prove it.
+
+1. **Send the output of every run to a file**, next to the copy the run works on, never in the user's working copy. It is part of the approved run, not a separate write. Record for each run the command, the exit status and the path of the file.
+2. **Read the short part first**: the exit status, the runner's own summary, the totals. They say whether anything else needs reading.
+3. **Then read only what a question needs**, by searching the file: the failed tests, the survivors, the sample of kills (mutation probe, rule 7), the entries a finding will cite. Read each of those entries in full, with the lines around it. Do not read the rest to be sure, and do not copy the output into the report.
+4. **Quote with a location.** Every result taken from the output is cited as path:line, with the deciding line quoted as it is (Step 4, hard constraint), so that anyone can find it again.
+5. **Reconcile the counts.** What you read must add up to the runner's totals: so many failed and so many read, so many survived and so many read. Say which entries were not read and why: an entry nobody read is not evidence of anything (mutation probe, rule 8).
+6. **The output can hold secrets or personal data.** Quote only what the finding needs and mask the rest. The file is removed with the copy (*Where the runs happen*, rule 6), unless the user asks to keep it.
+
 ## Report sections
 
 In the report they come after VERIFICATION RESULTS, in this order (Output Format).
 
 ```
 ## EXECUTED TESTS (Step 3e and mutation probe, only with approved checks)
+[Output: the file of each run's output; which entries were read and which were not]
 | # | Hypothesis or survivor | Test | Ran on (one row per run) | Result | Finding type |
 |---|-----------|------|--------|--------|--------------|
 
