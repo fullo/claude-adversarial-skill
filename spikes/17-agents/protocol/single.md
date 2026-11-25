@@ -25,7 +25,8 @@ Target: every domain the skill detects in these files. Depth: standard. Scope: t
 these files (there is no diff and no version history). Execution mode: reasoning only, run
 nothing. I accept the cost: do not stop to ask.
 
-You may read any other file of {TREE} to establish ground truth.
+You may read any other file of {TREE} to establish ground truth. Read nothing outside
+{TREE} and {SKILL}.
 
 Write the complete report, in the skill's Output Format, to {OUT}/report.md. Cite every
 location as path:line, with the path relative to {TREE}.

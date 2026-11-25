@@ -74,16 +74,20 @@ Uguali nei due modi: skill al commit di base, modello, effort, strumenti, profon
 
 ## Criterio di decisione
 
-Va fissato prima della prima esecuzione. I numeri segnati con **(da confermare)** sono proposte.
+Fissato prima della prima esecuzione che conta: N e le tre soglie sono confermati dall'utente il 25 novembre 2026. Da qui non si cambiano.
 
-- **N = 3** esecuzioni per caso e per modo **(da confermare)**: 18 esecuzioni sui casi `S`, `M`, `L`.
+- **N = 3** esecuzioni per caso e per modo: 18 esecuzioni sui casi `S`, `M`, `L`.
 - **Fare**, se valgono tutte:
   - B trova, sommando casi ed esecuzioni, almeno tanti difetti quanti A;
-  - sul caso `L` il contesto massimo del coordinatore è al più il **70%** di quello dell'agente solo **(da confermare)**;
-  - i token totali di B sono al più **2,5 volte** quelli di A **(da confermare)**;
+  - sul caso `L` il contesto massimo del coordinatore è al più il **70%** di quello dell'agente solo;
+  - i token totali di B sono al più **2,5 volte** quelli di A;
   - citazioni non verificabili e falsi positivi di B non superano quelli di A.
 - **Non fare**, se B trova meno difetti di A per più della differenza fra la migliore e la peggiore esecuzione di A, oppure ha più falsi positivi.
 - **Rimandare** in ogni altro caso. Si riapre con più casi o più esecuzioni.
+
+### Chi giudica le righe senza difetto noto
+
+Un agente (decisione dell'utente del 25 novembre 2026), stesso modello ed effort degli altri. Riceve l'albero del caso e le righe FAIL che `score.py` non ha abbinato, mescolate fra i due modi e senza dire da quale vengono; non riceve la chiave. Per ogni riga risponde: difetto vero, non è un difetto, non si può dire, con la riga del file che lo mostra. Falso positivo è solo «non è un difetto».
 
 ## Limiti
 
@@ -93,6 +97,7 @@ Va fissato prima della prima esecuzione. I numeri segnati con **(da confermare)*
 - **Difetti inseriti a mano da chi ha scritto anche il banco**, quasi tutti di una riga. Nessun difetto di architettura; quelli fra più file sono i tre di documentazione e M2.
 - **Alcuni commenti ora contraddicono il codice** (S2, M1, M4): aiutano chi verifica, in tutti e due i modi.
 - **Gli alberi non hanno storia né diff.** Si misura la verifica di un perimetro, non di una modifica.
+- **L'isolamento di un agente è un'istruzione, non una barriera.** Ogni agente lavora in una cartella sua e gli si dice di non leggere fuori; l'ambiente non lo impedisce, e sullo stesso disco c'è la chiave.
 - **Le eval di `evals.json` non sono nel banco.** La #17 le chiede; vanno valutate alla cieca e sono un lavoro a parte.
 
 ## Come si lancia
@@ -109,7 +114,6 @@ Chi verifica riceve `/tmp/bench/<caso>` e la cartella della skill di `/tmp/bench
 
 ## Cosa manca per partire
 
-1. Confermare N e le tre soglie del criterio.
-2. Una prova sul caso `tuning`, nei due modi, per sapere tre cose che oggi non si sanno: se in questo ambiente un agente lanciato può lanciarne altri (serve al coordinatore), che cosa riporta l'ambiente su token e contesto di ogni agente, e se l'effort medio basta.
-3. Mettere a punto il protocollo B sul caso `tuning` finché regge, poi non toccarlo più.
-4. Trovare chi giudica alla cieca le righe FAIL senza difetto noto.
+1. Una prova sul caso `tuning`, nei due modi, per sapere tre cose che oggi non si sanno: se in questo ambiente un agente lanciato può lanciarne altri (serve al coordinatore), che cosa riporta l'ambiente su token e contesto di ogni agente, e se l'effort medio basta.
+2. Mettere a punto il protocollo B sul caso `tuning` finché regge, poi non toccarlo più.
+3. Le 18 esecuzioni che contano, poi il giudizio alla cieca.

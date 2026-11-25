@@ -14,6 +14,29 @@ the runs knows the answer key, so it never acts as the coordinator: it starts th
 with the prompt below and scores what comes back. The coordinator needs to launch agents of
 its own; whether the environment allows that is checked once, on the tuning case.
 
+## Prompt of the coordinator
+
+The coordinator gets this prompt and, as `{RUN}/PROTOCOL.md`, this file from "Roles" on.
+
+```
+You are the coordinator described in {RUN}/PROTOCOL.md. Read it and follow it exactly.
+
+Skill: {SKILL}. Project: {TREE}. Files to verify:
+{FILES}
+
+Target: every domain the skill detects in these files. Depth: standard. Scope: the whole of
+these files (there is no diff and no version history). Execution mode: reasoning only, run
+nothing. I accept the cost: do not stop to ask. Read nothing outside {TREE}, {SKILL} and {RUN}.
+
+Launch your agents on the sonnet model at medium effort. If you cannot launch agents here,
+do not do the verification yourself: write what happened to {OUT}/CANNOT_LAUNCH.txt and stop.
+
+Save every brief to {OUT}/briefs/ and every return to {OUT}/returns/, as you sent and
+received them. Write the final report to {OUT}/report.md, citing every location as path:line
+with the path relative to {TREE}. Then write {OUT}/log.md: each agent you launched (role,
+files, rows returned, rows discarded) and every point where you departed from the protocol.
+```
+
 ## Roles
 
 - **Coordinator.** Does the intake, lists the files in scope, splits the work, writes the
@@ -37,7 +60,8 @@ Verify these files of the project in {TREE}, for the {DOMAIN} domain only:
 {FILES}
 
 Depth: standard. Scope: the whole of these files. Execution mode: reasoning only, run nothing.
-Do not stop to ask. You may read any other file of {TREE} to establish ground truth.
+Do not stop to ask. You may read any other file of {TREE} to establish ground truth. Read
+nothing outside {TREE} and {SKILL}.
 
 Return only these sections of the skill's Output Format, as tables, with path:line relative
 to {TREE} and the quoted line in every row: DECOMPOSED CLAIMS, PASS, FAIL, HYPOTHESES,
