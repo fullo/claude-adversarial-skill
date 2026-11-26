@@ -1,0 +1,401 @@
+{
+  "case": "S",
+  "defects": 4,
+  "found": 4,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "keyword",
+    "S3": "line",
+    "S4": "line"
+  },
+  "rows": 70,
+  "fail_rows": 46,
+  "citations_checked": 46,
+  "citations_verified": 45,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C5 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | medium | `35.py` and `35.rs` (or `35.py` and `035.py`) both map to id 35. Only the later one gets its prompt-sha256 checked, but scripts/check_facts.py still runs both, so a stale fact file is run and trusted. No dupli"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 463,
+      "text": "C6 | scripts/check.py:463 | `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With `\"evals\": null`, :460 yields None and iterating it raises TypeError. With `\"id\": [1]`, the set raises \"unhashable type\". Either way the run crashes before `print_report`, so che"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C8 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*\\|?\\s*:?-{3,}:?\\s*(\\|\\s*:?-{3,}:?\\s*)*\\|?\\s*$\")` (pipes escaped for this table) | Preventive measure | low | GFM accepts delimiter cells of one or two dashes. Such a table is not recognized, and its rows go unchecked without a message. Today's do"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C9 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | low | With --staged and an empty index, no check runs, not even the --strict no-terms error (:297). The exit code is 0 and the summary lists no checks. Found by all 4 domain agents and the category agent (2.5, 6.2) | D"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C10 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | high | Any file named `.check-private-terms`, at any depth and tracked or not, is skipped. A force-added or nested copy commits the whole private list while check 3 passes. Only .gitignore keeps it out. Fou"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C11 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Demonstrated defect | low | Only single-backtick code spans are recognized. In ``` ``a | b`` ``` the regex takes two empty spans and leaves `a |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C12 | scripts/check.py:151-152 | `except (OSError, subprocess.CalledProcessError):` / `pass` | Demonstrated defect | medium | When git fails (not installed, `safe.directory` refusal, nothing tracked), the script silently walks every file on disk, including `.venv`, `node_modules` and ignored files ("
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 252,
+      "text": "C13 | scripts/check.py:252-254 | `if not os.path.exists(path):` ... `with open(path, \"rb\") as f:` | Demonstrated defect | medium | If `.check-private-terms` is a folder or unreadable, `open` raises before `Report` exists, and the run crashes with a traceback. Category agent only | Deductive | 90 | U"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 67,
+      "text": "C14 | scripts/check.py:67 | `REF_RE = re.compile(r\"references/([A-Za-z0-9_.-]+\\.md)\\b\")` | Preventive measure | low | A reference name with a space, a non-ASCII letter or a subfolder is not recognized, so a broken link to it is never reported. Category agent only | Deductive | 85 | Widen the charact"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "D1 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Demonstrated defect | medium | One invalid byte switches the whole file to Latin-1. A UTF-8 `José` (`4A 6F 73 C3 A9`) becomes `JosÃ©`, which normalizes to `josa©`, so the term `jose` is missed. Also, a cp1252 `Š` (0x8A) is deco"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "D3 | scripts/check.py:255 | `terms = [l for l in decode(f.read())[0].splitlines() if not l.strip().startswith(\"#\")]` | Demonstrated defect | high | Only whole-line comments are removed. The line `acme  # client` becomes a term with parts acme/client, so `acme` alone is no longer checked, and nothing"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "D4 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | A set but empty `CHECK_PRIVATE_TERMS` (an inherited CI export) disables the existing terms file. Without --strict the run passes with no scan, and the message tells the user to create a file that already exists. With a"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D5 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A NOT_COMPUTABLE reason for an id that does not exist, is below FACTS_FROM or has no \"(Facts\", or a duplicate id, is accepted silently (last one wins). Stale reasons pile up. Found by Code, Data, Documen"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "D6 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | low | The trigger is the literal, case-sensitive \"(Facts\". A prompt that states facts as \"Facts:\" or \"(facts\" escapes the requirement. All 21 current "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 114,
+      "text": "D7 | scripts/check.py:114 | `if data.startswith((b\"\\xff\\xfe\", b\"\\xfe\\xff\")):` | Preventive measure | low | A UTF-32-LE file (`FF FE 00 00`) is decoded as UTF-16 with NULs between the letters, so its terms are missed. The \"Not caught\" list names only UTF-16 without a BOM. Found by Data and the catego"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "D8 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | `str.isdigit()` accepts `²`, which `int()` rejects, so a file `².py` crashes the run. Found by Data and the category agent (3.9, typed there as a demonstrated defect) | Deductive | 80 | `re.full"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 313,
+      "text": "D9 | scripts/check.py:313-317 | `if rel.endswith(\".json\"):` ... `except ValueError: pass` | Demonstrated defect | medium | Escapes are decoded only in files that parse as strict JSON and end in lowercase `.json`. JSONC (comments, trailing commas), `.JSON`, `.jsonl` and `.ipynb` are skipped silently,"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 166,
+      "text": "D10 | scripts/check.py:166 | `data = json.loads(read_text(root, EVALS, rep))` | Demonstrated defect | medium | `json.loads` keeps the last of duplicate keys. An eval with two `\"prompt\"` keys, or two `\"evals\"` arrays, is accepted and the earlier value dropped without a report. Category agent only | D"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 477,
+      "text": "D11 | scripts/check.py:477-480 | `m = re.search(r\"prompt-sha256:\\s*([0-9a-f]{64})\", head)` | Demonstrated defect | low | An upper-case hex hash, or a hash line after the first 2000 characters (:476), is reported as \"no 'prompt-sha256:' line\". Category agent only | Deductive | 88 | Accept `[0-9a-fA-F"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "D12 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | `## [4.3] - date` (Keep a Changelog) or `## v4.3` never match. When such a heading is on top, an older plain `## 4.2` is compared instead. Category agent onl"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 215,
+      "text": "D13 | scripts/check.py:215 | `fm = re.match(r\"\\A---\\n(.*?)\\n---\\n\", skill.replace(\"\\r\\n\", \"\\n\"), re.S)` | Demonstrated defect | low | With CR-only line ends, or a SKILL.md that ends right after the closing `---` with no newline, the result is \"no version in the frontmatter\" although the version is t"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "D14 | scripts/check.py:474 | `prompts = {e.get(\"id\"): str(e.get(\"prompt\", \"\")) for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With duplicate ids, the last prompt wins and a fact file is hashed against the wrong eval (false \"changed\" or false pass). Also `True == 1` (:463, :470"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "T1 | scripts/check.py:43-44 | `The folder is read as it is on disk, tracked or not, since` / `copying the skill's folder ships every file in it.` | Demonstrated defect | medium | With --staged, :433 sets `root = tmp` (index only), so `reference_files` (:136) never sees an untracked, unnamed `referen"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "T3 | scripts/check.py:462 | `return  # check 1 already reports it` | Demonstrated defect | low | The comment is false for `\"evals\": null` and unhashable ids, which crash the run (C6) before check 1's report is printed | Deductive | 85 | Fix C6, or correct the comment"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "T4 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | medium | Only check 3 uses the tracked list. Checks 1, 2 and 4-7 read fixed paths and on-disk listings, so in working-tree mode an untracked fact file or NOT_COMPUTABLE "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 387,
+      "text": "T5 | scripts/check.py:387 | `\"\"\"Write the staged content into tmp; return the staged file list, or None if root is not a git repository.\"\"\"` | Preventive measure | low | Any git failure (write error in tmp, `safe.directory`, unmerged entries, a path too long on Windows) returns None and is reported "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 36,
+      "text": "T6 | scripts/check.py:36-38 | `every fact file belongs to` / `an existing eval and carries the sha256 of that eval's prompt` | Preventive measure | low | The text depends on C5 (only one file per id is hash-checked). It also does not say that `_`-prefixed and other-extension files are exempt | Deduc"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 318,
+      "text": "U1 | scripts/check.py:318 | `for k, p in enumerate(pats, 1):` | Demonstrated defect | medium | `term_patterns` drops a term with no letters (:270), so the hit numbers (from `pats`) shift against the warning numbers (from `terms`, :264). With `CHECK_PRIVATE_TERMS=\"--,acme,beta\"`, a `beta` hit is repo"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 256,
+      "text": "U2 | scripts/check.py:256 | `return [t.strip() for t in terms if t.strip()]` | Preventive measure | low | `#k` counts terms after comment and blank lines are removed, not lines of `.check-private-terms`, and neither the message nor the docstring says so. Empty items in the env var (`a,,b`) shift it "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 168,
+      "text": "U3 | scripts/check.py:168 | `rep.error(EVALS, f\"not valid JSON ({e.__class__.__name__}: {e})\")` | Demonstrated defect | low | A missing evals.json is reported as \"not valid JSON (FileNotFoundError: ...)\", which sends the user to look for a syntax error. Found by UX and the category agent (3.14) | De"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 207,
+      "text": "U4 | scripts/check.py:207 | `rep.error(EVALS, \"ids are not consecutive from 1 in file order\")` | Demonstrated defect | low | The message does not say which eval breaks the sequence, and it repeats the cause of \"id is not an integer\" or \"duplicate id\". The messages name the eval by id (:190), so with"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 410,
+      "text": "U5 | scripts/check.py:410 | `where = \"[location hidden: its path contains a private term]\"` | Preventive measure | low | When the term is in a file name, nothing points to the file to rename. The privacy trade-off is intended (scripts/test_check.py:294 expects \"location hidden\") | Deductive | 80 | P"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 421,
+      "text": "U6 | scripts/check.py:421 | `ap.add_argument(\"--root\", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))` | Demonstrated defect | low | `--help` shows `--root ROOT` with no help, and the description is only the first docstring line (:418). A non-existent `--root` is not validated:"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 191,
+      "text": "U8 | scripts/check.py:191-193 | `if key in e and (not isinstance(e[key], str) or not e[key].strip()):` / `rep.error(where, f\"empty {key}\")` | Demonstrated defect | low | A prompt or expected_output of the wrong type (number, list) is reported as \"empty prompt\". Category agent only | Deductive | 90 |"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "U9 | scripts/check.py:128 | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | SKILL.md and the reference files are read with `rep` by check 2 and check 7, so a non-UTF-8 SKILL.md gives the same ERROR twice and inflates the summary count. Category agent only (5.8) | Deducti"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 458,
+      "text": "U10 | scripts/check.py:458 | `rep.checked.append(\"eval facts\")` | Demonstrated defect | low | The summary lists \"eval facts\" even when the check returned early at :462. With --staged and an empty index, the list of checks is empty but reads like a clean pass (C9). Category agent (2.6) and UX hidden "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 332,
+      "text": "U11 | scripts/check.py:332 | `for ln, line in enumerate(read_text(root, rel).splitlines(), 1):` | Demonstrated defect | low | `splitlines` also breaks on `\\x0b`, `\\x0c`, `\\x85`, U+2028 and U+2029, while check 3 counts only `\\n` (:321). The same file is numbered differently by different checks (also "
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C5 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | medium | `35.py` and `35.rs` (or `35.py` and `035.py`) both map to id 35. Only the later one gets its prompt-sha256 checked, but scripts/check_facts.py still runs both, so a stale fact file is run and trusted. No duplicate exists today. Found by Code, Data and the category agent; the Documentation agent typed it as a preventive measure | Deductive | 88 | Collect the files per id; error when an id has more than one, or when `stem != str(int(stem))`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 463,
+      "text": "C6 | scripts/check.py:463 | `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With `\"evals\": null`, :460 yields None and iterating it raises TypeError. With `\"id\": [1]`, the set raises \"unhashable type\". Either way the run crashes before `print_report`, so check 1's error is never printed. With `\"evals\": \"text\"`, every fact file is reported as an orphan (category 5.3). Found by Code, Data, Documentation and the category agent | Deductive | 88 | `if not isinstance(evals, list): return`; keep only ids with `type(id) is int`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C8 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*\\|?\\s*:?-{3,}:?\\s*(\\|\\s*:?-{3,}:?\\s*)*\\|?\\s*$\")` (pipes escaped for this table) | Preventive measure | low | GFM accepts delimiter cells of one or two dashes. Such a table is not recognized, and its rows go unchecked without a message. Today's docs use `---` | Deductive | 80 | `-+` instead of `-{3,}`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C9 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | low | With --staged and an empty index, no check runs, not even the --strict no-terms error (:297). The exit code is 0 and the summary lists no checks. Found by all 4 domain agents and the category agent (2.5, 6.2) | Deductive | 80 | Run the no-terms check anyway, or report \"nothing staged to check\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C10 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | high | Any file named `.check-private-terms`, at any depth and tracked or not, is skipped. A force-added or nested copy commits the whole private list while check 3 passes. Only .gitignore keeps it out. Found by Code, Data, Documentation and the category agent (2.2, 1.7). The category agent typed it as a demonstrated defect; it is kept as preventive because no tracked copy exists | Deductive | 80 | Make a tracked (or staged) file with that basename an ERROR"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C11 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Demonstrated defect | low | Only single-backtick code spans are recognized. In ``` ``a | b`` ``` the regex takes two empty spans and leaves `a |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C12 | scripts/check.py:151-152 | `except (OSError, subprocess.CalledProcessError):` / `pass` | Demonstrated defect | medium | When git fails (not installed, `safe.directory` refusal, nothing tracked), the script silently walks every file on disk, including `.venv`, `node_modules` and ignored files (:154-157). The summary still says \"working tree\". Category agent only (2.12, 4.5, 4.13, 6.5) | Deductive | 75 | Say in the output which file set was used; skip ignored files in the fallback"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 252,
+      "text": "C13 | scripts/check.py:252-254 | `if not os.path.exists(path):` ... `with open(path, \"rb\") as f:` | Demonstrated defect | medium | If `.check-private-terms` is a folder or unreadable, `open` raises before `Report` exists, and the run crashes with a traceback. Category agent only | Deductive | 90 | Use `os.path.isfile` and catch OSError with a clear message"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 67,
+      "text": "C14 | scripts/check.py:67 | `REF_RE = re.compile(r\"references/([A-Za-z0-9_.-]+\\.md)\\b\")` | Preventive measure | low | A reference name with a space, a non-ASCII letter or a subfolder is not recognized, so a broken link to it is never reported. Category agent only | Deductive | 85 | Widen the character class, or report unrecognized `references/` mentions"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "D1 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Demonstrated defect | medium | One invalid byte switches the whole file to Latin-1. A UTF-8 `José` (`4A 6F 73 C3 A9`) becomes `JosÃ©`, which normalizes to `josa©`, so the term `jose` is missed. Also, a cp1252 `Š` (0x8A) is decoded as a control character, and a cp1250 `ł` (0xB3) becomes `³` and then `3`. Contradicts scripts/check.py:15 and :21-22, and is absent from the \"Not caught\" list (:24-26). Found by Data; **the independent verifier confirmed it (FAIL, 85) and added the cp1252 and cp1250 cases**; category agent 4.2 adds cp1251, Shift-JIS and GBK | Deductive | 85 | Decode UTF-8 with `errors=\"surrogateescape\"`, or scan both decodings; list the remaining cases under \"Not caught\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "D3 | scripts/check.py:255 | `terms = [l for l in decode(f.read())[0].splitlines() if not l.strip().startswith(\"#\")]` | Demonstrated defect | high | Only whole-line comments are removed. The line `acme  # client` becomes a term with parts acme/client, so `acme` alone is no longer checked, and nothing reports it. Category agent only (1.6, 2.4) | Deductive | 90 | Strip ` #...` trailing comments, or reject lines that contain `#` after a term"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "D4 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | A set but empty `CHECK_PRIVATE_TERMS` (an inherited CI export) disables the existing terms file. Without --strict the run passes with no scan, and the message tells the user to create a file that already exists. With a partial env list, the file's other terms are silently skipped. Found by Code, Data, Documentation, UX and the category agent (2.14, 6.1, rated high there). Severities differ; medium is kept because the user must set the variable | Deductive | 85 | `if raw and raw.strip():`, or name the env variable as the cause in the message"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D5 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A NOT_COMPUTABLE reason for an id that does not exist, is below FACTS_FROM or has no \"(Facts\", or a duplicate id, is accepted silently (last one wins). Stale reasons pile up. Found by Code, Data, Documentation and the category agent | Deductive | 82 | Error for unknown and duplicate ids"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "D6 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | low | The trigger is the literal, case-sensitive \"(Facts\". A prompt that states facts as \"Facts:\" or \"(facts\" escapes the requirement. All 21 current instances use \"(Facts\". Found by Data and the category agent | Inductive | 70 | `re.search(r\"\\(\\s*facts?\\b\", prompt, re.I)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 114,
+      "text": "D7 | scripts/check.py:114 | `if data.startswith((b\"\\xff\\xfe\", b\"\\xfe\\xff\")):` | Preventive measure | low | A UTF-32-LE file (`FF FE 00 00`) is decoded as UTF-16 with NULs between the letters, so its terms are missed. The \"Not caught\" list names only UTF-16 without a BOM. Found by Data and the category agent; a hypothesis for Code | Deductive | 80 | Test the UTF-32 BOMs first"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "D8 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | `str.isdigit()` accepts `²`, which `int()` rejects, so a file `².py` crashes the run. Found by Data and the category agent (3.9, typed there as a demonstrated defect) | Deductive | 80 | `re.fullmatch(r\"[0-9]+\", stem)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 313,
+      "text": "D9 | scripts/check.py:313-317 | `if rel.endswith(\".json\"):` ... `except ValueError: pass` | Demonstrated defect | medium | Escapes are decoded only in files that parse as strict JSON and end in lowercase `.json`. JSONC (comments, trailing commas), `.JSON`, `.jsonl` and `.ipynb` are skipped silently, so a `\\u`-escaped term in them is missed. Contradicts scripts/check.py:20-21. Category agent only (1.8, 2.3) | Deductive | 88 | Case-insensitive extension list; on a parse failure, decode `\\uXXXX` escapes with a regex"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 166,
+      "text": "D10 | scripts/check.py:166 | `data = json.loads(read_text(root, EVALS, rep))` | Demonstrated defect | medium | `json.loads` keeps the last of duplicate keys. An eval with two `\"prompt\"` keys, or two `\"evals\"` arrays, is accepted and the earlier value dropped without a report. Category agent only | Deductive | 88 | `object_pairs_hook` that errors on duplicate keys"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 477,
+      "text": "D11 | scripts/check.py:477-480 | `m = re.search(r\"prompt-sha256:\\s*([0-9a-f]{64})\", head)` | Demonstrated defect | low | An upper-case hex hash, or a hash line after the first 2000 characters (:476), is reported as \"no 'prompt-sha256:' line\". Category agent only | Deductive | 88 | Accept `[0-9a-fA-F]`; say \"hash not found in the first 2000 characters\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "D12 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | `## [4.3] - date` (Keep a Changelog) or `## v4.3` never match. When such a heading is on top, an older plain `## 4.2` is compared instead. Category agent only | Deductive | 80 | Accept an optional `[` and `v`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 215,
+      "text": "D13 | scripts/check.py:215 | `fm = re.match(r\"\\A---\\n(.*?)\\n---\\n\", skill.replace(\"\\r\\n\", \"\\n\"), re.S)` | Demonstrated defect | low | With CR-only line ends, or a SKILL.md that ends right after the closing `---` with no newline, the result is \"no version in the frontmatter\" although the version is there. Category agent only | Deductive | 88 | Normalize `\\r`, and accept `\\n---(\\n|\\Z)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "D14 | scripts/check.py:474 | `prompts = {e.get(\"id\"): str(e.get(\"prompt\", \"\")) for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With duplicate ids, the last prompt wins and a fact file is hashed against the wrong eval (false \"changed\" or false pass). Also `True == 1` (:463, :470). The run relies on check 1 reporting duplicates and bools. Category agent only | Deductive | 85 | Skip check 6 for ids check 1 rejected"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "T1 | scripts/check.py:43-44 | `The folder is read as it is on disk, tracked or not, since` / `copying the skill's folder ships every file in it.` | Demonstrated defect | medium | With --staged, :433 sets `root = tmp` (index only), so `reference_files` (:136) never sees an untracked, unnamed `references/orphan.md`. The pre-commit hook (scripts/pre-commit:9 `\"$py\" -I \"$root/scripts/check.py\" --strict --staged --root \"$root\" || exit 1`) passes it. scripts/test_check.py:507 `self.assert_passes(self.run_check(\"--staged\", terms=NONE))  # not staged: not part of the commit` shows that this is intended, so the text is what is wrong. Found by Documentation, Data and the category agent; **the independent verifier confirmed it (PASS in working-tree mode, FAIL with --staged, 85)** | Deductive | 88 | \"In the working tree the folder is read as it is on disk, tracked or not; with --staged, only what is staged\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "T3 | scripts/check.py:462 | `return  # check 1 already reports it` | Demonstrated defect | low | The comment is false for `\"evals\": null` and unhashable ids, which crash the run (C6) before check 1's report is printed | Deductive | 85 | Fix C6, or correct the comment"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "T4 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | medium | Only check 3 uses the tracked list. Checks 1, 2 and 4-7 read fixed paths and on-disk listings, so in working-tree mode an untracked fact file or NOT_COMPUTABLE edit (:464-465) passes check 6, and the commit then fails or ships without it. The fallback also applies when nothing is tracked, not only when git is missing (:149-158). Category agent 6.4 and Documentation hidden behavior 5 | Deductive | 85 | \"Private terms are checked in the files tracked by git; the other checks read the files on disk\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 387,
+      "text": "T5 | scripts/check.py:387 | `\"\"\"Write the staged content into tmp; return the staged file list, or None if root is not a git repository.\"\"\"` | Preventive measure | low | Any git failure (write error in tmp, `safe.directory`, unmerged entries, a path too long on Windows) returns None and is reported by :431 as \"not a git repository (or git is not available)\". Found by Documentation and the category agent (1.16) | Deductive | 75 | Include git's stderr in the message"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 36,
+      "text": "T6 | scripts/check.py:36-38 | `every fact file belongs to` / `an existing eval and carries the sha256 of that eval's prompt` | Preventive measure | low | The text depends on C5 (only one file per id is hash-checked). It also does not say that `_`-prefixed and other-extension files are exempt | Deductive | 82 | Fix C5; mention the exemption"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 318,
+      "text": "U1 | scripts/check.py:318 | `for k, p in enumerate(pats, 1):` | Demonstrated defect | medium | `term_patterns` drops a term with no letters (:270), so the hit numbers (from `pats`) shift against the warning numbers (from `terms`, :264). With `CHECK_PRIVATE_TERMS=\"--,acme,beta\"`, a `beta` hit is reported as \"private term #2\", which the user reads as `acme`. Found by UX and the category agent (5.1) | Deductive | 88 | Return `(k, pattern)` pairs and print that `k`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 256,
+      "text": "U2 | scripts/check.py:256 | `return [t.strip() for t in terms if t.strip()]` | Preventive measure | low | `#k` counts terms after comment and blank lines are removed, not lines of `.check-private-terms`, and neither the message nor the docstring says so. Empty items in the env var (`a,,b`) shift it too. Found by UX and the category agent (5.2) | Deductive | 80 | Print \"term #k (line L of .check-private-terms)\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 168,
+      "text": "U3 | scripts/check.py:168 | `rep.error(EVALS, f\"not valid JSON ({e.__class__.__name__}: {e})\")` | Demonstrated defect | low | A missing evals.json is reported as \"not valid JSON (FileNotFoundError: ...)\", which sends the user to look for a syntax error. Found by UX and the category agent (3.14) | Deductive | 85 | Split `except OSError` from `except ValueError`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 207,
+      "text": "U4 | scripts/check.py:207 | `rep.error(EVALS, \"ids are not consecutive from 1 in file order\")` | Demonstrated defect | low | The message does not say which eval breaks the sequence, and it repeats the cause of \"id is not an integer\" or \"duplicate id\". The messages name the eval by id (:190), so with duplicates they do not say which of the two is meant (category 5.6) | Deductive | 85 | Name the first position where `ids[n-1] != n`; keep `#n` in messages"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 410,
+      "text": "U5 | scripts/check.py:410 | `where = \"[location hidden: its path contains a private term]\"` | Preventive measure | low | When the term is in a file name, nothing points to the file to rename. The privacy trade-off is intended (scripts/test_check.py:294 expects \"location hidden\") | Deductive | 80 | Print the path with the matched span replaced"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 421,
+      "text": "U6 | scripts/check.py:421 | `ap.add_argument(\"--root\", default=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))` | Demonstrated defect | low | `--help` shows `--root ROOT` with no help, and the description is only the first docstring line (:418). A non-existent `--root` is not validated: check 1 reports \"not valid JSON\" and check 2 then crashes (category 3.17) | Deductive | 85 | Add a help text; `description=__doc__` with `RawDescriptionHelpFormatter`; check that `--root` exists"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 191,
+      "text": "U8 | scripts/check.py:191-193 | `if key in e and (not isinstance(e[key], str) or not e[key].strip()):` / `rep.error(where, f\"empty {key}\")` | Demonstrated defect | low | A prompt or expected_output of the wrong type (number, list) is reported as \"empty prompt\". Category agent only | Deductive | 90 | \"prompt is not a string\" for the type case"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "U9 | scripts/check.py:128 | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | SKILL.md and the reference files are read with `rep` by check 2 and check 7, so a non-UTF-8 SKILL.md gives the same ERROR twice and inflates the summary count. Category agent only (5.8) | Deductive | 90 | Report each file's encoding once"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 458,
+      "text": "U10 | scripts/check.py:458 | `rep.checked.append(\"eval facts\")` | Demonstrated defect | low | The summary lists \"eval facts\" even when the check returned early at :462. With --staged and an empty index, the list of checks is empty but reads like a clean pass (C9). Category agent (2.6) and UX hidden behavior 5 | Deductive | 85 | Append to `checked` only after the check completes, or mark it \"skipped\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 332,
+      "text": "U11 | scripts/check.py:332 | `for ln, line in enumerate(read_text(root, rel).splitlines(), 1):` | Demonstrated defect | low | `splitlines` also breaks on `\\x0b`, `\\x0c`, `\\x85`, U+2028 and U+2029, while check 3 counts only `\\n` (:321). The same file is numbered differently by different checks (also :356, :486, :513), and CR-only files report every term hit at line 1. Category agent (4.10, 5.9-5.12); a hypothesis for UX and Data | Deductive | 85 | Number lines the same way everywhere (`split(\"\\n\")` after normalizing CR)"
+    }
+  ]
+}

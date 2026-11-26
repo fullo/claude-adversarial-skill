@@ -1,0 +1,121 @@
+{
+  "case": "S",
+  "defects": 4,
+  "found": 4,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "keyword",
+    "S3": "line",
+    "S4": "line"
+  },
+  "rows": 30,
+  "fail_rows": 16,
+  "citations_checked": 20,
+  "citations_verified": 17,
+  "citations_wrong_line": 2,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "4 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE:` / `continue` | Preventive measure | High | Nothing refuses a tracked or staged terms list. `git add -f .check-private-terms` (or any file of that name in any subdirectory) is in `files`, is skipped silently, and no other check "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "8 | scripts/check.py:341, 369 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}…` / `and \"|\" in lines[i] + lines[i - 1]` | Preventive measure | Low | A paragraph line with an inline pipe followed by `---` (a setext heading or thematic break): `---` matches DELIM, the header has 2 cells and the delimiter has "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "9 | scripts/check.py:341 | `-{3,}` | Preventive measure | Low | GFM accepts delimiter cells of one hyphen (`|-|-|`). Such a table is never detected, so its rows are never counted (silent gap in I8). Turns into a defect when a contributor writes a compact delimiter | Deductive | 75 | `-{1,}` (the GFM"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 527,
+      "text": "16 | scripts/check.py:527 | `print(f\"checked ({scope}): … — {len(rep.errors)} error(s)…\")` | Preventive measure | Low | `—` (U+2014) printed to a stdout whose encoding lacks it (Windows with output piped or captured and a code page such as cp932) → `UnicodeEncodeError` after all checks: traceback, n"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "14 | scripts/check.py:46-47 | `Files checked: the files tracked by git (all files outside .git if git is not available).` | Demonstrated defect | Low | True for check 3 only. Checks 1, 2, 4, 5 read fixed paths, and checks 6 and 7 list directories on disk (scripts/check.py:136, 465). An untracked `fa"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "10 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | Low | Detection is a case-sensitive literal. A new eval written `(facts: …)` or `Facts:` without the parenthesis states facts, needs no file or reason, and passes. Today every fact-stating eval uses `(Facts`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 490,
+      "text": "11 | scripts/check.py:490-494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | A reason for a nonexistent eval (`99: …`), for an eval below 29, or for an eval with no `(Facts`, is accepted silently. A duplicated id overwrites without notice. Stale reasons pile up after evals ar"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "12 | scripts/check.py:247-256 | `if raw is not None:` / `terms = raw.split(\",\")` … `if not l.strip().startswith(\"#\")` | Preventive measure | Low | (a) `CHECK_PRIVATE_TERMS=\"\"` exported in a shell or CI overrides an existing `.check-private-terms`, so without `--strict` the check degrades to a warnin"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 409,
+      "text": "15 | scripts/check.py:409-412 | `where = \"[location hidden: its path contains a private term]\"` | Preventive measure | Low | A blocked commit says only that *some* file has a private term in its path (or message), with no handle to find it. Under `--strict --staged` in a GUI git client the user has "
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "4 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE:` / `continue` | Preventive measure | High | Nothing refuses a tracked or staged terms list. `git add -f .check-private-terms` (or any file of that name in any subdirectory) is in `files`, is skipped silently, and no other check looks at it, so the hook (scripts/pre-commit:9) passes and the commit publishes every private term at once. Likelihood: low (needs `-f` or a copy in a subfolder), impact: total. Invariant I4, category missing completeness | Deductive | 90 | Instead of skipping: `if os.path.basename(rel) == TERMS_FILE: rep.error(rel, \"the private-terms list is tracked or staged: remove it from the index (git rm --cached)\"); continue`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "8 | scripts/check.py:341, 369 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}…` / `and \"|\" in lines[i] + lines[i - 1]` | Preventive measure | Low | A paragraph line with an inline pipe followed by `---` (a setext heading or thematic break): `---` matches DELIM, the header has 2 cells and the delimiter has 1, so the error \"table delimiter has 1 cells\" appears on valid Markdown and blocks the commit (false positive). Not triggered by the current files | Deductive | 78 | Require the delimiter to contain a `|`, or at least 2 cells when the header has more than 1, before treating it as a table"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "9 | scripts/check.py:341 | `-{3,}` | Preventive measure | Low | GFM accepts delimiter cells of one hyphen (`|-|-|`). Such a table is never detected, so its rows are never counted (silent gap in I8). Turns into a defect when a contributor writes a compact delimiter | Deductive | 75 | `-{1,}` (the GFM rule; the spec citation is from memory: confirm it)"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 527,
+      "text": "16 | scripts/check.py:527 | `print(f\"checked ({scope}): … — {len(rep.errors)} error(s)…\")` | Preventive measure | Low | `—` (U+2014) printed to a stdout whose encoding lacks it (Windows with output piped or captured and a code page such as cp932) → `UnicodeEncodeError` after all checks: traceback, no summary. Unconfirmed: Hypothesis H2 | Abductive | 45 | Use `-` in the summary, or `sys.stdout.reconfigure(errors=\"replace\")` at start"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "14 | scripts/check.py:46-47 | `Files checked: the files tracked by git (all files outside .git if git is not available).` | Demonstrated defect | Low | True for check 3 only. Checks 1, 2, 4, 5 read fixed paths, and checks 6 and 7 list directories on disk (scripts/check.py:136, 465). An untracked `facts/58.py` satisfies check 6 in working-tree mode. The docstring says this for references (scripts/check.py:43-44) but not for facts | Deductive | 85 | \"Check 3 scans the files tracked by git (…). The other checks read their fixed files and folders as they are on disk (with --staged: as staged).\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "10 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | Low | Detection is a case-sensitive literal. A new eval written `(facts: …)` or `Facts:` without the parenthesis states facts, needs no file or reason, and passes. Today every fact-stating eval uses `(Facts` (evals.json `(Facts` at lines 324…712) | Deductive | 85 | `re.search(r\"\\(\\s*facts\\b\", prompt, re.I)`, plus a warning for `Facts:` outside parentheses"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 490,
+      "text": "11 | scripts/check.py:490-494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | A reason for a nonexistent eval (`99: …`), for an eval below 29, or for an eval with no `(Facts`, is accepted silently. A duplicated id overwrites without notice. Stale reasons pile up after evals are renumbered or edited | Deductive | 85 | Error on a duplicate id. Error (or warning) when the id is not an eval ≥ FACTS_FROM whose prompt states facts"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "12 | scripts/check.py:247-256 | `if raw is not None:` / `terms = raw.split(\",\")` … `if not l.strip().startswith(\"#\")` | Preventive measure | Low | (a) `CHECK_PRIVATE_TERMS=\"\"` exported in a shell or CI overrides an existing `.check-private-terms`, so without `--strict` the check degrades to a warning (HB2). (b) An inline comment `Name # client` becomes the term `name client`, which needs a 1-character join and no longer finds `Name` alone. Nothing reports either | Deductive | 85 | (a) treat an empty or blank env var as unset, or say in the warning which source was used; (b) document \"whole-line comments only\", or strip ` #…` suffixes"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 409,
+      "text": "15 | scripts/check.py:409-412 | `where = \"[location hidden: its path contains a private term]\"` | Preventive measure | Low | A blocked commit says only that *some* file has a private term in its path (or message), with no handle to find it. Under `--strict --staged` in a GUI git client the user has to search the whole tree by hand. Turns into a defect when the repo has many files | Deductive | 70 | Alternative A: print the index of the file in `git ls-files` order (`file #123 of the tracked list`). Improves: findable with `git ls-files | sed -n 123p`. Worse: indices shift between runs. Cost: 2 lines. Alternative B: print the sha256 prefix of the path. Improves: stable. Worse: needs a helper to look it up. Cost: ~5 lines. Recommend A"
+    }
+  ]
+}

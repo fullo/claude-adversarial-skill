@@ -1,0 +1,339 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "line",
+    "M4": "line"
+  },
+  "rows": 76,
+  "fail_rows": 48,
+  "citations_checked": 48,
+  "citations_verified": 47,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 463,
+      "text": "7 | scripts/check.py:463 | `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With `\"evals\": null`, `.get(\"evals\", [])` returns None and this line raises TypeError. That contradicts scripts/check.py:462 `return  # check 1 already reports it`, because check 1's "
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "9 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | low | Both checkers run from the working tree (also scripts/pre-commit:9), not from the staged copy. An unstaged edit to a checker changes the verdict on the staged content, and"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "10 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | With 38.py and 38.rs side by side, one overwrites the other, so only one hash is checked while both files run. | Deductive | 85 | Report two fact files for one eval as an error"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "13 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | medium | There is no timeout, so a looping fact file blocks the commit forever. Output is decoded with the locale codec, which can raise UnicodeDecodeError on cp1252. | Abdu"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "14 | scripts/check.py:316 | `except ValueError:` | Preventive measure | low | A .json file that is not valid JSON skips the escape-decoded scan silently, so a `\\u`-escaped term goes unreported (category agent). | Deductive | 75 | Report a warning, or decode the string literals with a regex"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "17 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | The stem \"²\" passes isdigit() but `int()` raises ValueError, which gives a traceback (Data and the category agent). | Deductive | 85 | `stem.isascii() and stem.isdigit()`"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 83,
+      "text": "18 | scripts/check_facts.py:83 | `files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith(\"_\"))` | Preventive measure | low | A wrong `--root` raises a FileNotFoundError traceback. So does a non-UTF-8 fact file, at scripts/check_facts.py:43 `text = open(path, encoding=\"u"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "2 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Demonstrated defect | medium | Because of Code FAIL 1, this test is green without rustc or node (a false green). It is red with Node older than 22.6 (a false red). | Deductive | 85 | Assert that no line s"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 72,
+      "text": "4 | scripts/test_check.py:72 | `for t in (T1, T2, T2.replace(\" \", \"\")):` | Demonstrated defect | medium | The leak check looks for only two forms of T2. Hyphen, underscore, newline and double-space forms would pass if printed (category agent). | Deductive | 85 | Search with the same normalized patte"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "5 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | low | assert_passes never calls assert_no_leak (only assert_fails does, at scripts/test_check.py:62 `self.assert_no_leak(r)`), so passing runs with terms are never leak-checked. | Deductive | 85 | Call `self.assert_n"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 302,
+      "text": "6 | scripts/test_check.py:302 | `self.assert_fails(self.run_check(terms=T1), \"notes16.txt\")` | Preventive measure | low | Any error that names the file satisfies it, and scripts/test_check.py:316 `\"plugin.json\")` has the same flaw. | Deductive | 85 | Also assert \"private term #1\" or \"after decoding "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "7 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | low | A traceback satisfies it. The same line is repeated at :584, :592, :601 and :612. | Deductive | 85 | Also assert the FAIL message"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "8 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink privilege this errors instead of being skipped. | Deductive | 80 | `try/except OSError: self.skipTest(...)`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "9 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | low | There is no skipUnless(git) guard, so the test errors on machines without git (category agent). | Deductive | 85 | Add the guard th"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 31,
+      "text": "10 | scripts/test_check.py:31 | `self.tmp = tempfile.mkdtemp()` | Preventive measure | medium | The temp copy is not a git repository, so non-git tests take the os.walk fallback (scripts/check.py:149-152), which production does not use. The copy also leaves out files such as LICENSE (scripts/test_ch"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 51,
+      "text": "13 | scripts/check_facts.py:51 | `return bool(ASSERTS[ext].search(STRIP[ext].sub(\" \", text)))` | Preventive measure | medium | The .rs and .ts strip paths have no test. | Deductive | 85 | Add .rs and .ts files whose only assertion is inside a comment or string"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 498,
+      "text": "14 | scripts/check.py:498 | `if not isinstance(e, dict) or type(e.get(\"id\")) is not int or e[\"id\"] < FACTS_FROM:` | Preventive measure | low | The FACTS_FROM = 29 boundary (scripts/check.py:77) is not pinned: moving it changes no test. | Deductive | 85 | Tests for eval 28 (passes) and eval 29 (fails"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 271,
+      "text": "16 | scripts/check.py:271 | `if rep is not None and sum(len(p) for p in parts) < 4:` | Preventive measure | low | Missing boundary tests: only a 3-character term is tested. scripts/check.py:321 (the reported line number), scripts/check.py:195 (empty assertions), scripts/check.py:128 (non-UTF-8 key f"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "1 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A NOT_COMPUTABLE id is never checked for being an existing eval or for uniqueness. A stale `NN: reason` silently exempts a future eval NN. | Deductive | 85 | Report unknown and duplicate ids"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "2 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Preventive measure | medium | One invalid byte switches the whole file to Latin-1. Then `ó` becomes `Ã³` and normalizes to `a3`, so an accented term is missed. | Deductive | 80 | Decode per sequence (`errors=\"replace\"`)"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "3 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | medium | A file with this name at any depth, force-added, is exempt from both scans. The private list could be committed with no error, against scripts/check.py:423. Reported by Data, Code, Documentation and "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "4 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | low | The marker is case- and form-sensitive: `(facts` slips through. | Deductive | 75 | `re.search(r\"\\(\\s*facts\\b\", prompt, re.I)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 476,
+      "text": "5 | scripts/check.py:476 | `head = read_text(root, f\"{FACTS_DIR}/{name}\")[:2000]` | Preventive measure | low | The hash must be lowercase hex within the first 2000 characters. An uppercase hash gets the misleading message \"no 'prompt-sha256:' line\". | Deductive | 82 | Accept `re.I`, or document the "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "3 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | low | With `--staged` the folder is the staged copy, and scripts/test_check.py:508 relies on that. | Deductive | 85 | Add \"(with --staged: as staged)\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "4 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | low | The fallback also happens when git fails or tracks nothing (scripts/check.py:149-151). | Deductive | 85 | Reword"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | low | The test uses `terms=T1` (substring), so detection does flag it. The comment describes an earlier default. Reported by Tests and Documentation. |"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "6 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Demonstrated defect | low | The file also tests check_facts.py (scripts/test_check.py:571-617), and check 4 has no failing case: it only warns. | Deductive | 82 | M"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 168,
+      "text": "7 | scripts/check.py:168 | `rep.error(EVALS, f\"not valid JSON ({e.__class__.__name__}: {e})\")` | Demonstrated defect | low | A missing evals.json (OSError) is reported as \"not valid JSON\" (category agent). | Deductive | 90 | Distinguish OSError"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 295,
+      "text": "8 | scripts/check.py:295 | `msg = (f\"no private terms configured (set CHECK_PRIVATE_TERMS or create {TERMS_FILE}); \"` | Demonstrated defect | low | With CHECK_PRIVATE_TERMS set but empty, the existing file is ignored, and the message tells the user to create a file that already exists (category agen"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 8,
+      "text": "— | scripts/check_facts.py:8, scripts/check.py:10, scripts/check.py:16, scripts/check.py:22, scripts/check.py:399, scripts/check.py:462 | (see Code) | — | — | These are false statements whose defect is counted in Code FAIL 1, 5, 3, 2, 2 and 7. | — | — | Fixed by the code fix"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 463,
+      "text": "7 | scripts/check.py:463 | `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` | Demonstrated defect | low | With `\"evals\": null`, `.get(\"evals\", [])` returns None and this line raises TypeError. That contradicts scripts/check.py:462 `return  # check 1 already reports it`, because check 1's report is lost to the traceback. | Deductive | 88 | `if not isinstance(evals, list): return`"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "9 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | low | Both checkers run from the working tree (also scripts/pre-commit:9), not from the staged copy. An unstaged edit to a checker changes the verdict on the staged content, and a staged change to a checker is not what runs. This contradicts scripts/pre-commit:2. | Deductive | 85 | Run `$tmp/scripts/check.py` and `$tmp/scripts/check_facts.py`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "10 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | With 38.py and 38.rs side by side, one overwrites the other, so only one hash is checked while both files run. | Deductive | 85 | Report two fact files for one eval as an error"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "13 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | medium | There is no timeout, so a looping fact file blocks the commit forever. Output is decoded with the locale codec, which can raise UnicodeDecodeError on cp1252. | Abductive | 65 | `timeout=`, plus `encoding=\"utf-8\", errors=\"replace\"`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "14 | scripts/check.py:316 | `except ValueError:` | Preventive measure | low | A .json file that is not valid JSON skips the escape-decoded scan silently, so a `\\u`-escaped term goes unreported (category agent). | Deductive | 75 | Report a warning, or decode the string literals with a regex"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "17 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | The stem \"²\" passes isdigit() but `int()` raises ValueError, which gives a traceback (Data and the category agent). | Deductive | 85 | `stem.isascii() and stem.isdigit()`"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 83,
+      "text": "18 | scripts/check_facts.py:83 | `files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith(\"_\"))` | Preventive measure | low | A wrong `--root` raises a FileNotFoundError traceback. So does a non-UTF-8 fact file, at scripts/check_facts.py:43 `text = open(path, encoding=\"utf-8\").read()`, which aborts the run before the summary (category agent). | Deductive | 85 | Catch the error and report it as FAIL"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "2 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Demonstrated defect | medium | Because of Code FAIL 1, this test is green without rustc or node (a false green). It is red with Node older than 22.6 (a false red). | Deductive | 85 | Assert that no line starts with \"skip\", or use skipUnless on the toolchains"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 72,
+      "text": "4 | scripts/test_check.py:72 | `for t in (T1, T2, T2.replace(\" \", \"\")):` | Demonstrated defect | medium | The leak check looks for only two forms of T2. Hyphen, underscore, newline and double-space forms would pass if printed (category agent). | Deductive | 85 | Search with the same normalized pattern as check.py, with `*`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "5 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | low | assert_passes never calls assert_no_leak (only assert_fails does, at scripts/test_check.py:62 `self.assert_no_leak(r)`), so passing runs with terms are never leak-checked. | Deductive | 85 | Call `self.assert_no_leak(r)` in assert_passes"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 302,
+      "text": "6 | scripts/test_check.py:302 | `self.assert_fails(self.run_check(terms=T1), \"notes16.txt\")` | Preventive measure | low | Any error that names the file satisfies it, and scripts/test_check.py:316 `\"plugin.json\")` has the same flaw. | Deductive | 85 | Also assert \"private term #1\" or \"after decoding JSON escapes\""
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "7 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | low | A traceback satisfies it. The same line is repeated at :584, :592, :601 and :612. | Deductive | 85 | Also assert the FAIL message"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "8 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink privilege this errors instead of being skipped. | Deductive | 80 | `try/except OSError: self.skipTest(...)`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "9 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | low | There is no skipUnless(git) guard, so the test errors on machines without git (category agent). | Deductive | 85 | Add the guard that StagedTest uses"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 31,
+      "text": "10 | scripts/test_check.py:31 | `self.tmp = tempfile.mkdtemp()` | Preventive measure | medium | The temp copy is not a git repository, so non-git tests take the os.walk fallback (scripts/check.py:149-152), which production does not use. The copy also leaves out files such as LICENSE (scripts/test_check.py:32). | Deductive | 85 | `git init` plus `add` in the fixture"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 51,
+      "text": "13 | scripts/check_facts.py:51 | `return bool(ASSERTS[ext].search(STRIP[ext].sub(\" \", text)))` | Preventive measure | medium | The .rs and .ts strip paths have no test. | Deductive | 85 | Add .rs and .ts files whose only assertion is inside a comment or string"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 498,
+      "text": "14 | scripts/check.py:498 | `if not isinstance(e, dict) or type(e.get(\"id\")) is not int or e[\"id\"] < FACTS_FROM:` | Preventive measure | low | The FACTS_FROM = 29 boundary (scripts/check.py:77) is not pinned: moving it changes no test. | Deductive | 85 | Tests for eval 28 (passes) and eval 29 (fails)"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 271,
+      "text": "16 | scripts/check.py:271 | `if rep is not None and sum(len(p) for p in parts) < 4:` | Preventive measure | low | Missing boundary tests: only a 3-character term is tested. scripts/check.py:321 (the reported line number), scripts/check.py:195 (empty assertions), scripts/check.py:128 (non-UTF-8 key files) and scripts/check.py:436 (empty index) have no test either (category agent). | Deductive | 85 | One test per boundary"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "1 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A NOT_COMPUTABLE id is never checked for being an existing eval or for uniqueness. A stale `NN: reason` silently exempts a future eval NN. | Deductive | 85 | Report unknown and duplicate ids"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "2 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Preventive measure | medium | One invalid byte switches the whole file to Latin-1. Then `ó` becomes `Ã³` and normalizes to `a3`, so an accented term is missed. | Deductive | 80 | Decode per sequence (`errors=\"replace\"`)"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "3 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | medium | A file with this name at any depth, force-added, is exempt from both scans. The private list could be committed with no error, against scripts/check.py:423. Reported by Data, Code, Documentation and the category agent. | Deductive | 82 | Raise an error when a tracked or staged file has this name"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "4 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | low | The marker is case- and form-sensitive: `(facts` slips through. | Deductive | 75 | `re.search(r\"\\(\\s*facts\\b\", prompt, re.I)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 476,
+      "text": "5 | scripts/check.py:476 | `head = read_text(root, f\"{FACTS_DIR}/{name}\")[:2000]` | Preventive measure | low | The hash must be lowercase hex within the first 2000 characters. An uppercase hash gets the misleading message \"no 'prompt-sha256:' line\". | Deductive | 82 | Accept `re.I`, or document the format"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "3 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | low | With `--staged` the folder is the staged copy, and scripts/test_check.py:508 relies on that. | Deductive | 85 | Add \"(with --staged: as staged)\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "4 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | low | The fallback also happens when git fails or tracks nothing (scripts/check.py:149-151). | Deductive | 85 | Reword"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | low | The test uses `terms=T1` (substring), so detection does flag it. The comment describes an earlier default. Reported by Tests and Documentation. | Deductive | 88 | Reword, or make it the `=` case"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "6 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Demonstrated defect | low | The file also tests check_facts.py (scripts/test_check.py:571-617), and check 4 has no failing case: it only warns. | Deductive | 82 | Mention both"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 168,
+      "text": "7 | scripts/check.py:168 | `rep.error(EVALS, f\"not valid JSON ({e.__class__.__name__}: {e})\")` | Demonstrated defect | low | A missing evals.json (OSError) is reported as \"not valid JSON\" (category agent). | Deductive | 90 | Distinguish OSError"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 295,
+      "text": "8 | scripts/check.py:295 | `msg = (f\"no private terms configured (set CHECK_PRIVATE_TERMS or create {TERMS_FILE}); \"` | Demonstrated defect | low | With CHECK_PRIVATE_TERMS set but empty, the existing file is ignored, and the message tells the user to create a file that already exists (category agent). | Deductive | 80 | Name the env var as the cause"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 8,
+      "text": "— | scripts/check_facts.py:8, scripts/check.py:10, scripts/check.py:16, scripts/check.py:22, scripts/check.py:399, scripts/check.py:462 | (see Code) | — | — | These are false statements whose defect is counted in Code FAIL 1, 5, 3, 2, 2 and 7. | — | — | Fixed by the code fix"
+    }
+  ]
+}

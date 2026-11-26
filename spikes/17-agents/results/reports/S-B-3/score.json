@@ -1,0 +1,401 @@
+{
+  "case": "S",
+  "defects": 4,
+  "found": 4,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line"
+  },
+  "rows": 57,
+  "fail_rows": 50,
+  "citations_checked": 49,
+  "citations_verified": 47,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 2,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "K3 | scripts/check.py:214 | `skill = read_text(root, SKILL, rep)` | Demonstrated defect | medium | The reads at :214, :217, :227 (only `ValueError` caught, :228), :237, :332, :356 and :512 have no OSError handling, and `main` has `try/finally` with no except (:426-440). A missing SKILL.md, README.md"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 460,
+      "text": "K4 | scripts/check.py:460 | `evals = json.loads(read_text(root, EVALS)).get(\"evals\", [])` | Demonstrated defect | low | With `\"evals\": null` or a number, the set comprehension at :463 `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` raises a TypeError that is not caught (:461). Check 1's "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "K5 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | `str.isdigit()` accepts `²`, which `int()` rejects, so a file named `².py` crashes the run. [Code F9, Verifier 5] | Deductive | 85 | `re.fullmatch(r\"[0-9]+\", stem)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 476,
+      "text": "K6 | scripts/check.py:476 | `head = read_text(root, f\"{FACTS_DIR}/{name}\")[:2000]` | Preventive measure | low | No except around this read, nor around the NOT_COMPUTABLE read at :486. A directory or unreadable `40.py` ends the run with no report. [Category 16] | Deductive | 80 | Catch OSError and re"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 254,
+      "text": "K7 | scripts/check.py:254 | `with open(path, \"rb\") as f:` | Preventive measure | low | load_terms runs at :423, before the try. A `.check-private-terms` that is a directory or unreadable ends the run with no report. [Category 17] | Deductive | 80 | Catch OSError and report it"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "K8 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Preventive measure | medium | One invalid byte sends a UTF-8 file to Latin-1. `josé` becomes `josÃ©`, so an accented term is missed. This is not in the \"Not caught\" list (:24-26). [Code F8] | Deductive | 80 | Also scan a UTF-8 "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "K11 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")` | Preventive measure | low | GFM tables whose delimiter has 1-2 dashes are not recognized and are never checked. None in the tree today. [Code H12, Doc B6, Data F10] | Deductive | 75 | `-+`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "K12 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Demonstrated defect | low | A double-backtick span ``` ``a |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 356,
+      "text": "K13 | scripts/check.py:356 | `lines = read_text(root, rel).splitlines()` | Preventive measure | low | `splitlines()` also breaks on \\x85, |  |  | "
+    },
+    {
+      "file": null,
+      "line": null,
+      "text": "and other characters, so a row splits into false cell-count errors and line numbers disagree with :321. The same applies at :332, :486 and :513. [Category 14] | Deductive | 80 | `split(\"\\n\")` after normalizing CRLF |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 137,
+      "text": "K15 | scripts/check.py:137 | `return [f\"{REFS_DIR}/{n}\" for n in names if n.endswith(\".md\")]` | Preventive measure | low | `.MD` files and subfolders of references/ are never checked by checks 4, 5 and 7, contrary to \"every .md file\" (:42). [Category 3] | Deductive | 85 | Case-insensitive extension;"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 67,
+      "text": "K16 | scripts/check.py:67 | `REF_RE = re.compile(r\"references/([A-Za-z0-9_.-]+\\.md)\\b\")` | Preventive measure | low | Names with non-ASCII letters, spaces, `%20` or subfolders are not recognized. A broken link escapes, and a named file is reported as \"never named\". [Category 4] | Deductive | 80 | Wi"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 440,
+      "text": "K17 | scripts/check.py:440 | `shutil.rmtree(tmp, ignore_errors=True)` | Preventive measure | low | A failed cleanup (locked files on Windows) is silent and leaves the staged content in the shared temp folder. [Category 9] | Deductive | 85 | Warn when the directory still exists"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "K18 | scripts/check.py:469 | `if ext in FACT_EXTS and not stem.startswith(\"_\"):` | Preventive measure | low | `41.PY`, `41.js` and `41.py.bak` are ignored silently. The author sees only \"no fact file\". Helpers starting with `_` carry no hash, so editing one does not invalidate the facts that import "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 525,
+      "text": "K19 | scripts/check.py:525 | `print(line)` | Preventive measure | medium | Assumes stdout can encode every path and message. A pipe with a legacy code page raises UnicodeEncodeError partway through the report. Under the hook's `-I` (scripts/pre-commit:9) the user cannot override this. [Category 12; "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "D2 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | medium | `35.py` + `35.ts`, or `035.py` + `35.py`: the later name overwrites the earlier one, so only one file's prompt-sha256 is checked (:475-482). scripts/check_facts.py still runs both. No such pair exists today. *"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D3 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for a non-existent eval, or a duplicate id line, is accepted silently, while orphan fact files are errors (:471). [Code F10, Data F12] | Deductive | 80 | Report unknown and duplicate ids"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 166,
+      "text": "D4 | scripts/check.py:166 | `data = json.loads(read_text(root, EVALS, rep))` | Preventive measure | low | Duplicate keys collapse (last wins), so `\"prompt\"` given twice passes the exact-keys check and the sha256 binding uses the last value. [Data F13] | Deductive | 80 | `object_pairs_hook` that reje"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "D5 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | high | Any file named `.check-private-terms`, at any depth and tracked or not, is skipped without a message. Nothing enforces the \"never committed\" of :423. A `git add -f` publishes the whole private list an"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "D6 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | An exported but empty `CHECK_PRIVATE_TERMS` shadows `.check-private-terms`, and the message at :295 then tells the user to create a file that already exists. Without `--strict` this is only a warning. [Data F6, UX F6, "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 313,
+      "text": "D7 | scripts/check.py:313 | `if rel.endswith(\".json\"):` | Preventive measure | medium | Only lowercase `.json` gets the decoded pass. A term written with escapes in `.ipynb`, `.jsonl` or `.JSON` passes. [Category 1] | Deductive | 85 | Try a JSON decode for every JSON-like extension"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "D8 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | A newest heading `## [1.3.0]` or `## v1.3.0` is skipped and an older entry is compared: a false pass, or a mismatch naming the wrong entry. [Category 5] | Ded"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "M1 | scripts/check.py:43-44 | `The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.` | Demonstrated defect | medium | With `--staged`, `root = tmp` (:433), so references/ is read from the checkout-index copy, which has no untracked files. The "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "M3 | scripts/check.py:46-47 | `Files checked: the files tracked by git (all files outside .git if git is not available).` | Demonstrated defect | low | The fallback also applies when git works but nothing is tracked or root is not a repository (:149-152). The tracked-file list applies only to check "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 387,
+      "text": "M6 | scripts/check.py:387 | `\"\"\"Write the staged content into tmp; return the staged file list, or None if root is not a git repository.\"\"\"` | Demonstrated defect | low | None is returned on any git failure (:392), not only \"not a repository\". [Category 7] | Deductive | 90 | Reword"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 431,
+      "text": "M7 | scripts/check.py:431 | `rep.error(\"--staged\", \"not a git repository (or git is not available)\")` | Demonstrated defect | low | Shown for any git failure (index.lock, tmp not writable). git's stderr is discarded (:390-391), so the user gets the wrong cause. [Category 18] | Deductive | 85 | Inclu"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 480,
+      "text": "M9 | scripts/check.py:480 | `rep.error(f\"{FACTS_DIR}/{name}\", f\"no 'prompt-sha256:' line binding it to eval {i}'s prompt\")` | Preventive measure | low | Also shown for uppercase hex, or for a line beyond the first 2000 characters (:476-477). [Category 20] | Deductive | 80 | Case-insensitive hex; sta"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 305,
+      "text": "M11 | scripts/check.py:305 | `rep.error(rel, f\"private term #{k} in the file name\")` | Preventive measure | low | :304 matches the whole path, so a term in a directory name is reported as \"in the file name\". [Category 22] | Deductive | 75 | \"in the path\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 269,
+      "text": "M12 | scripts/check.py:269 | `rep.error(\"private terms\", f\"term #{k} has no letters or digits and cannot be checked\")` | Preventive measure | low | `#k` counts terms after comment and blank lines were dropped (:255-256), so it is not the file's line number. [Category 25, UX hidden 7] | Deductive | 7"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 129,
+      "text": "M13 | scripts/check.py:129 | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | SKILL.md is read with `rep` at :214 and :512, so a non-UTF-8 SKILL.md is reported twice and the error count is inflated. [Category 24 (resent: line corrected from :128), Code H10] | Deductive | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 293,
+      "text": "U1 | scripts/check.py:293 | `rep.checked.append(\"private terms\")` | Demonstrated defect | medium | With no terms and no `--strict`, the summary says `checked ...: ..., private terms, ... — 0 error(s)`, though nothing was scanned. Someone who reads only the summary believes the scan ran. [UX F2] | De"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "U2 | scripts/check.py:462 | `return  # check 1 already reports it` | Demonstrated defect | low | \"eval facts\" is already appended (:458), so the summary lists check 6 as done when it was skipped. Check 1's error keeps the run red. [Category 10, UX hidden 9] | Deductive | 85 | Append after the parse"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 303,
+      "text": "U3 | scripts/check.py:303 | `for k, p in enumerate(pats, 1):` | Demonstrated defect | low | A term with no letters is dropped (:268-270), so the numbers of later terms shift. \"private term #1\" then points at the wrong configured term, and the number is the only pointer the user gets. Same at :318. ["
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "U4 | scripts/check.py:436 | `if files or not args.staged:` | Demonstrated defect | low | With an empty index, no check runs and the output is `checked (staged content):  — 0 error(s)` with exit 0, `--strict` included. An empty state that looks like a clean pass. [UX F4, Doc B5, Code H4] | Deductive "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 418,
+      "text": "U5 | scripts/check.py:418 | `ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])` | Preventive measure | low | `--help` shows no configuration (environment variable, file, `=` prefix), and `--root` has no help text. [UX F5] | Deductive | 80 | An epilog with the configuration"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 319,
+      "text": "U6 | scripts/check.py:319 | `m = p.search(body)` | Preventive measure | low | Only the first occurrence per term per file is reported, so the user needs one run per occurrence. The decoded JSON scan runs only when the raw text had no match. [UX F7, Data HB9] | Deductive | 80 | `finditer`, or report "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 321,
+      "text": "U8 | scripts/check.py:321 | `rep.error(f\"{rel}:{body.count(chr(10), 0, m.start()) + 1}\", f\"private term #{k} of the configured list\")` | Preventive measure | low | Only `\\n` is counted, so a CR-only file always reports line 1. [UX F9, Data Y3] | Deductive | 80 | Normalize line endings first"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "K3 | scripts/check.py:214 | `skill = read_text(root, SKILL, rep)` | Demonstrated defect | medium | The reads at :214, :217, :227 (only `ValueError` caught, :228), :237, :332, :356 and :512 have no OSError handling, and `main` has `try/finally` with no except (:426-440). A missing SKILL.md, README.md, CHANGELOG.md or plugin.json (a typo in `--root`, a staged deletion) gives a traceback. Errors already collected are never printed and checks 3-7 do not run. The exit code is still non-zero. **Independent verifier: FAIL (90), confirmed.** [Code F6, Data F8, UX F1, Verifier 4] | Deductive | 85 | Catch OSError for each required read and turn it into `rep.error(rel, \"missing or unreadable\")`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 460,
+      "text": "K4 | scripts/check.py:460 | `evals = json.loads(read_text(root, EVALS)).get(\"evals\", [])` | Demonstrated defect | low | With `\"evals\": null` or a number, the set comprehension at :463 `ids = {e.get(\"id\") for e in evals if isinstance(e, dict)}` raises a TypeError that is not caught (:461). Check 1's error is lost with the report. [Data F9, Category 15] | Deductive | 85 | `if not isinstance(evals, list): return`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "K5 | scripts/check.py:470 | `if not stem.isdigit() or int(stem) not in ids:` | Preventive measure | low | `str.isdigit()` accepts `²`, which `int()` rejects, so a file named `².py` crashes the run. [Code F9, Verifier 5] | Deductive | 85 | `re.fullmatch(r\"[0-9]+\", stem)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 476,
+      "text": "K6 | scripts/check.py:476 | `head = read_text(root, f\"{FACTS_DIR}/{name}\")[:2000]` | Preventive measure | low | No except around this read, nor around the NOT_COMPUTABLE read at :486. A directory or unreadable `40.py` ends the run with no report. [Category 16] | Deductive | 80 | Catch OSError and report it"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 254,
+      "text": "K7 | scripts/check.py:254 | `with open(path, \"rb\") as f:` | Preventive measure | low | load_terms runs at :423, before the try. A `.check-private-terms` that is a directory or unreadable ends the run with no report. [Category 17] | Deductive | 80 | Catch OSError and report it"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 122,
+      "text": "K8 | scripts/check.py:122 | `return data.decode(\"latin-1\"), \"latin-1\"` | Preventive measure | medium | One invalid byte sends a UTF-8 file to Latin-1. `josé` becomes `josÃ©`, so an accented term is missed. This is not in the \"Not caught\" list (:24-26). [Code F8] | Deductive | 80 | Also scan a UTF-8 `errors=\"replace\"` decoding"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "K11 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")` | Preventive measure | low | GFM tables whose delimiter has 1-2 dashes are not recognized and are never checked. None in the tree today. [Code H12, Doc B6, Data F10] | Deductive | 75 | `-+`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "K12 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Demonstrated defect | low | A double-backtick span ``` ``a |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 356,
+      "text": "K13 | scripts/check.py:356 | `lines = read_text(root, rel).splitlines()` | Preventive measure | low | `splitlines()` also breaks on \\x85, |  |  | "
+    },
+    {
+      "file": null,
+      "line": null,
+      "text": "and other characters, so a row splits into false cell-count errors and line numbers disagree with :321. The same applies at :332, :486 and :513. [Category 14] | Deductive | 80 | `split(\"\\n\")` after normalizing CRLF |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 137,
+      "text": "K15 | scripts/check.py:137 | `return [f\"{REFS_DIR}/{n}\" for n in names if n.endswith(\".md\")]` | Preventive measure | low | `.MD` files and subfolders of references/ are never checked by checks 4, 5 and 7, contrary to \"every .md file\" (:42). [Category 3] | Deductive | 85 | Case-insensitive extension; report subfolders"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 67,
+      "text": "K16 | scripts/check.py:67 | `REF_RE = re.compile(r\"references/([A-Za-z0-9_.-]+\\.md)\\b\")` | Preventive measure | low | Names with non-ASCII letters, spaces, `%20` or subfolders are not recognized. A broken link escapes, and a named file is reported as \"never named\". [Category 4] | Deductive | 80 | Widen the pattern"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 440,
+      "text": "K17 | scripts/check.py:440 | `shutil.rmtree(tmp, ignore_errors=True)` | Preventive measure | low | A failed cleanup (locked files on Windows) is silent and leaves the staged content in the shared temp folder. [Category 9] | Deductive | 85 | Warn when the directory still exists"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "K18 | scripts/check.py:469 | `if ext in FACT_EXTS and not stem.startswith(\"_\"):` | Preventive measure | low | `41.PY`, `41.js` and `41.py.bak` are ignored silently. The author sees only \"no fact file\". Helpers starting with `_` carry no hash, so editing one does not invalidate the facts that import it. [Code H11, Category 11] | Deductive | 80 | Report unexpected entries"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 525,
+      "text": "K19 | scripts/check.py:525 | `print(line)` | Preventive measure | medium | Assumes stdout can encode every path and message. A pipe with a legacy code page raises UnicodeEncodeError partway through the report. Under the hook's `-I` (scripts/pre-commit:9) the user cannot override this. [Category 12; see also H2] | Deductive | 70 | `sys.stdout.reconfigure(errors=\"replace\")`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "D2 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | medium | `35.py` + `35.ts`, or `035.py` + `35.py`: the later name overwrites the earlier one, so only one file's prompt-sha256 is checked (:475-482). scripts/check_facts.py still runs both. No such pair exists today. **Independent verifier: FAIL (90), confirmed.** [Code F5 (as preventive), Doc F6, Data F4, Verifier 5] | Deductive | 85 | A list per id; error when an id has more than one file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D3 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for a non-existent eval, or a duplicate id line, is accepted silently, while orphan fact files are errors (:471). [Code F10, Data F12] | Deductive | 80 | Report unknown and duplicate ids"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 166,
+      "text": "D4 | scripts/check.py:166 | `data = json.loads(read_text(root, EVALS, rep))` | Preventive measure | low | Duplicate keys collapse (last wins), so `\"prompt\"` given twice passes the exact-keys check and the sha256 binding uses the last value. [Data F13] | Deductive | 80 | `object_pairs_hook` that rejects duplicates"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "D5 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | high | Any file named `.check-private-terms`, at any depth and tracked or not, is skipped without a message. Nothing enforces the \"never committed\" of :423. A `git add -f` publishes the whole private list and the check passes. .gitignore:1 covers only unforced adds. Likelihood low. [Data F5, Doc F12, Category 8] | Deductive | 75 | Error when a tracked or staged file has that name"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "D6 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | An exported but empty `CHECK_PRIVATE_TERMS` shadows `.check-private-terms`, and the message at :295 then tells the user to create a file that already exists. Without `--strict` this is only a warning. [Data F6, UX F6, Doc B1, Code H2] | Deductive | 75 | Treat an empty variable as unset, or name the source used"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 313,
+      "text": "D7 | scripts/check.py:313 | `if rel.endswith(\".json\"):` | Preventive measure | medium | Only lowercase `.json` gets the decoded pass. A term written with escapes in `.ipynb`, `.jsonl` or `.JSON` passes. [Category 1] | Deductive | 85 | Try a JSON decode for every JSON-like extension"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "D8 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | A newest heading `## [1.3.0]` or `## v1.3.0` is skipped and an older entry is compared: a false pass, or a mismatch naming the wrong entry. [Category 5] | Deductive | 80 | Accept `[`/`v` prefixes, or error on an unparsed heading above the first match"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "M1 | scripts/check.py:43-44 | `The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.` | Demonstrated defect | medium | With `--staged`, `root = tmp` (:433), so references/ is read from the checkout-index copy, which has no untracked files. The pre-commit hook always uses `--staged` (scripts/pre-commit:9), so an untracked, unnamed references/x.md passes the commit check. [Doc F7] | Deductive | 85 | Read args.root's references/ in staged mode too, or reword"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "M3 | scripts/check.py:46-47 | `Files checked: the files tracked by git (all files outside .git if git is not available).` | Demonstrated defect | low | The fallback also applies when git works but nothing is tracked or root is not a repository (:149-152). The tracked-file list applies only to check 3: checks 4-7 read fixed paths from disk. [Doc F11, Code H5/HY4] | Deductive | 85 | Reword"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 387,
+      "text": "M6 | scripts/check.py:387 | `\"\"\"Write the staged content into tmp; return the staged file list, or None if root is not a git repository.\"\"\"` | Demonstrated defect | low | None is returned on any git failure (:392), not only \"not a repository\". [Category 7] | Deductive | 90 | Reword"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 431,
+      "text": "M7 | scripts/check.py:431 | `rep.error(\"--staged\", \"not a git repository (or git is not available)\")` | Demonstrated defect | low | Shown for any git failure (index.lock, tmp not writable). git's stderr is discarded (:390-391), so the user gets the wrong cause. [Category 18] | Deductive | 85 | Include git's stderr"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 480,
+      "text": "M9 | scripts/check.py:480 | `rep.error(f\"{FACTS_DIR}/{name}\", f\"no 'prompt-sha256:' line binding it to eval {i}'s prompt\")` | Preventive measure | low | Also shown for uppercase hex, or for a line beyond the first 2000 characters (:476-477). [Category 20] | Deductive | 80 | Case-insensitive hex; state the limit"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 305,
+      "text": "M11 | scripts/check.py:305 | `rep.error(rel, f\"private term #{k} in the file name\")` | Preventive measure | low | :304 matches the whole path, so a term in a directory name is reported as \"in the file name\". [Category 22] | Deductive | 75 | \"in the path\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 269,
+      "text": "M12 | scripts/check.py:269 | `rep.error(\"private terms\", f\"term #{k} has no letters or digits and cannot be checked\")` | Preventive measure | low | `#k` counts terms after comment and blank lines were dropped (:255-256), so it is not the file's line number. [Category 25, UX hidden 7] | Deductive | 70 | Report the source line"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 129,
+      "text": "M13 | scripts/check.py:129 | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | SKILL.md is read with `rep` at :214 and :512, so a non-UTF-8 SKILL.md is reported twice and the error count is inflated. [Category 24 (resent: line corrected from :128), Code H10] | Deductive | 85 | Report each file once"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 293,
+      "text": "U1 | scripts/check.py:293 | `rep.checked.append(\"private terms\")` | Demonstrated defect | medium | With no terms and no `--strict`, the summary says `checked ...: ..., private terms, ... — 0 error(s)`, though nothing was scanned. Someone who reads only the summary believes the scan ran. [UX F2] | Deductive | 85 | Append after the early return, or mark it \"NOT checked\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "U2 | scripts/check.py:462 | `return  # check 1 already reports it` | Demonstrated defect | low | \"eval facts\" is already appended (:458), so the summary lists check 6 as done when it was skipped. Check 1's error keeps the run red. [Category 10, UX hidden 9] | Deductive | 85 | Append after the parse"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 303,
+      "text": "U3 | scripts/check.py:303 | `for k, p in enumerate(pats, 1):` | Demonstrated defect | low | A term with no letters is dropped (:268-270), so the numbers of later terms shift. \"private term #1\" then points at the wrong configured term, and the number is the only pointer the user gets. Same at :318. [UX F3] | Deductive | 85 | Carry the original index"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "U4 | scripts/check.py:436 | `if files or not args.staged:` | Demonstrated defect | low | With an empty index, no check runs and the output is `checked (staged content):  — 0 error(s)` with exit 0, `--strict` included. An empty state that looks like a clean pass. [UX F4, Doc B5, Code H4] | Deductive | 80 | Print \"nothing staged: no check run\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 418,
+      "text": "U5 | scripts/check.py:418 | `ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])` | Preventive measure | low | `--help` shows no configuration (environment variable, file, `=` prefix), and `--root` has no help text. [UX F5] | Deductive | 80 | An epilog with the configuration"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 319,
+      "text": "U6 | scripts/check.py:319 | `m = p.search(body)` | Preventive measure | low | Only the first occurrence per term per file is reported, so the user needs one run per occurrence. The decoded JSON scan runs only when the raw text had no match. [UX F7, Data HB9] | Deductive | 80 | `finditer`, or report a count"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 321,
+      "text": "U8 | scripts/check.py:321 | `rep.error(f\"{rel}:{body.count(chr(10), 0, m.start()) + 1}\", f\"private term #{k} of the configured list\")` | Preventive measure | low | Only `\\n` is counted, so a CR-only file always reports line 1. [UX F9, Data Y3] | Deductive | 80 | Normalize line endings first"
+    }
+  ]
+}

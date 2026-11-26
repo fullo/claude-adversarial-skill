@@ -1,0 +1,157 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 12,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 44,
+  "fail_rows": 26,
+  "citations_checked": 32,
+  "citations_verified": 23,
+  "citations_wrong_line": 1,
+  "citations_unverifiable": 8,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "C7 | `scripts/check.py:214`, `:227`, `:237` | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError` | Preventive measure | low | If plugin.json, CHANGELOG.md or SKILL.md is missing or deleted in a staged commit, `open` raises `FileNotFoundError` (an `OSError`, not caught), so the"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C8 | `scripts/check.py:436` | `if files or not args.staged:` | Preventive measure | low | `--staged` in a git repo whose index is empty (e.g. right after `git init`, or `git rm -r --cached .`): `staged_tree` returns `[]`, no check runs, no error, and the summary shows `checked (staged content):  — 0"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "C9 | `scripts/check.py:42-44` | `The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.` | Demonstrated defect (docstring drift) | low | With `--staged`, the path the hook uses, `root` is the temp checkout of the index (`:433`), so an untracked "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C10 | `scripts/check.py:473` | `with_file[int(stem)] = name` | Preventive measure | low | If both `35.py` and `35.ts` exist, the later name overwrites the earlier one, so only one file's `prompt-sha256` is checked, while `check_facts.py` runs both. An edited prompt can then go unnoticed for one of t"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C11 | `scripts/check.py:500` | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | low | The rule keys on a literal marker. Evals 54, 55 (`evals.json:672`, `:686`: 400 MB vs 24 GB, 6 GB vs 5 GB) and 42 state checkable facts without `(Facts`, so a future eval written that way escapes I4."
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "T4 | `skills/adversarial-verify/evals/evals.json:612` | `\"… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped\"` | Demonstrated defect | low | At 320 px the same two labels are clipped as at 375 px ('Startseite' 61 ≤ 64, 'Gemerkt' 50 ≤ 64), as the assertion (`:615`) and `facts/"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "T5 | `skills/adversarial-verify/evals/evals.json:249` | `\"… 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect (oracle drift) | low | The current summary line is `(code, data, tes"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T6 | `scripts/test_check.py:351`, `:502-505` | `os.symlink(...)`; `ReferencesTest.test_staged_content_is_what_is_checked` without `skipUnless(git)` | Preventive measure | low | On Windows without developer mode, `os.symlink` raises `OSError` (an error, not a failure, but red); without git, `:503` ra"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "D4 | `CHANGELOG.md:3` | `the same in the skill's frontmatter, the README badge, … and the first entry below` | Demonstrated defect | low | The first entry below is `## Unreleased` (`CHANGELOG.md:5`); `check.py` compares the first **numbered** entry (`scripts/check.py:237`). A contributor following t"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "D5 | `skills/adversarial-verify/evals/facts/_parse_day.py:1` | `# Shared by facts/37.py and facts/39.py` | Demonstrated defect | low | `facts/35.py:3` also imports it; a maintainer changing `parse_day_v1` for eval 37 does not know eval 35 depends on it | Deductive | 95 | `# Shared by facts/35.py, 37"
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "D6 | `README.md:255` | `each fact file carries the sha256 of the prompt of every eval it covers` | Demonstrated defect | low | `check.py` reads one hash per file, bound to the eval named by the file's stem (`scripts/check.py:477-478`); `_parse_day.py`, which serves 4 evals, carries none and is exemp"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "C7 | `scripts/check.py:214`, `:227`, `:237` | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError` | Preventive measure | low | If plugin.json, CHANGELOG.md or SKILL.md is missing or deleted in a staged commit, `open` raises `FileNotFoundError` (an `OSError`, not caught), so the script dies with a traceback and no summary. `check_evals` catches `OSError` (`:167`), so the handling is inconsistent. Likelihood: low (only when a file is removed) | Deductive | 85 | Catch `OSError` in `check_version` and report an ERROR"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C8 | `scripts/check.py:436` | `if files or not args.staged:` | Preventive measure | low | `--staged` in a git repo whose index is empty (e.g. right after `git init`, or `git rm -r --cached .`): `staged_tree` returns `[]`, no check runs, no error, and the summary shows `checked (staged content):  — 0 error(s)` with exit 0. Likelihood: low | Deductive | 82 | Report an ERROR (or a line saying nothing was staged) when `files == []`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "C9 | `scripts/check.py:42-44` | `The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.` | Demonstrated defect (docstring drift) | low | With `--staged`, the path the hook uses, `root` is the temp checkout of the index (`:433`), so an untracked `references/x.md` is not seen. `test_staged_content_is_what_is_checked` (`scripts/test_check.py:502-510`) asserts exactly that behavior. The docstring promises the opposite | Deductive | 85 | Reword item 7: \"in the working tree, the folder as it is on disk; with --staged, as staged\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C10 | `scripts/check.py:473` | `with_file[int(stem)] = name` | Preventive measure | low | If both `35.py` and `35.ts` exist, the later name overwrites the earlier one, so only one file's `prompt-sha256` is checked, while `check_facts.py` runs both. An edited prompt can then go unnoticed for one of them. Likelihood: low (no such pair today) | Deductive | 80 | Error on a second fact file for the same id"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C11 | `scripts/check.py:500` | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | low | The rule keys on a literal marker. Evals 54, 55 (`evals.json:672`, `:686`: 400 MB vs 24 GB, 6 GB vs 5 GB) and 42 state checkable facts without `(Facts`, so a future eval written that way escapes I4. Likelihood: medium as evals are added (see stress S2) | Deductive | 80 | Document the marker as mandatory in `README.md:255`, or match `Facts` case-insensitively and also list evals ≥29 with numbers in NOT_COMPUTABLE"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "T4 | `skills/adversarial-verify/evals/evals.json:612` | `\"… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped\"` | Demonstrated defect | low | At 320 px the same two labels are clipped as at 375 px ('Startseite' 61 ≤ 64, 'Gemerkt' 50 ≤ 64), as the assertion (`:615`) and `facts/49.py:13` state. The expected output contradicts its own assertion | Deductive | 92 | \"…the same two labels are clipped with less room to spare\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "T5 | `skills/adversarial-verify/evals/evals.json:249` | `\"… 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect (oracle drift) | low | The current summary line is `(code, data, tests, UX)` / `(plans, specs, docs, analyses, mock-ups)` (`SKILL.md:439`). A strict grader marks a skill-conformant output as failing this assertion | Deductive | 90 | Quote the current line, or assert only the \"N found, M touched, K enforced\" part"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T6 | `scripts/test_check.py:351`, `:502-505` | `os.symlink(...)`; `ReferencesTest.test_staged_content_is_what_is_checked` without `skipUnless(git)` | Preventive measure | low | On Windows without developer mode, `os.symlink` raises `OSError` (an error, not a failure, but red); without git, `:503` raises. `README.md:264` documents Windows use. Likelihood: medium on Windows | Deductive | 80 | `skipUnless` guards (symlink capability, `shutil.which(\"git\")`)"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "D4 | `CHANGELOG.md:3` | `the same in the skill's frontmatter, the README badge, … and the first entry below` | Demonstrated defect | low | The first entry below is `## Unreleased` (`CHANGELOG.md:5`); `check.py` compares the first **numbered** entry (`scripts/check.py:237`). A contributor following the sentence would number \"Unreleased\" | Deductive | 85 | \"…and the first numbered entry below (Unreleased is skipped)\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "D5 | `skills/adversarial-verify/evals/facts/_parse_day.py:1` | `# Shared by facts/37.py and facts/39.py` | Demonstrated defect | low | `facts/35.py:3` also imports it; a maintainer changing `parse_day_v1` for eval 37 does not know eval 35 depends on it | Deductive | 95 | `# Shared by facts/35.py, 37.py and 39.py`"
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "D6 | `README.md:255` | `each fact file carries the sha256 of the prompt of every eval it covers` | Demonstrated defect | low | `check.py` reads one hash per file, bound to the eval named by the file's stem (`scripts/check.py:477-478`); `_parse_day.py`, which serves 4 evals, carries none and is exempt (`:469`). The sentence suggests a multi-eval binding that does not exist | Deductive | 82 | \"…each `<id>.<ext>` file carries the sha256 of eval `<id>`'s prompt; shared helpers (`_*.py`) are not bound\""
+    }
+  ]
+}

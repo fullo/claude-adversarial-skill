@@ -1,0 +1,377 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 12,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 123,
+  "fail_rows": 51,
+  "citations_checked": 95,
+  "citations_verified": 92,
+  "citations_wrong_line": 1,
+  "citations_unverifiable": 2,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C-F7 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | medium | The working-tree checker runs against the staged tree, and the same holds for check.py at scripts/pre-commit:9. A staged fix to the checker is not what runs, and an "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C-F8 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | An exported but empty CHECK_PRIVATE_TERMS silently overrides .check-private-terms. Combined with C-F2, the commit passes with a warning only. | Deductive | 80 | Treat an empty variable as unset, or report which sourc"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-F9 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | medium | A tracked `.check-private-terms` at any depth is skipped, so the list of private terms could be committed with no error. README.md:251 says it \"is never committed\". | Deductive | 80 | Exempt only "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C-F12 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | low | `--staged` with an empty index runs no check, so `--strict` passes with no terms configured. | Deductive | 80 | Run the terms check regardless | Code, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C-F13 | scripts/check.py:316-317 | `except ValueError:` / `pass` | Preventive measure | low | In a .json file that does not parse, `\\uXXXX`-escaped terms are not decoded and go unreported. | Deductive | 82 | Report invalid JSON, or decode escapes on the raw text | Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "C-F14 | scripts/check.py:128 | `if enc != \"utf-8\" and rep is not None and (rel in (SKILL, README, EVALS) or rel.startswith(REFS_DIR + \"/\")):` | Preventive measure | low | CHANGELOG.md and plugin.json, which check 2 reads, are not required to be UTF-8. | Deductive | 80 | Add PLUGIN and CHANGELOG to t"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 511,
+      "text": "C-F15 | scripts/check.py:511 | `for rel in [SKILL] + refs:` | Preventive measure | low | README.md:113-115 also names the reference files and is never checked, so a rename leaves the README stale. | Deductive | 80 | Include README.md in check 7 | Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C-F16 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Preventive measure | low | Requested ids without a file are dropped silently: `38 999` runs only 38 and exits 0. | Deductive | 85 | Error on unknown ids | Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-F17 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | `assert True`, or an assert in a function that is never called, satisfies the rule. | Deductive | 80 | Require a top-level assert, or document the limit | Cod"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C-F18 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S),` | Preventive measure | low | Raw strings and `'\"'` char literals are not handled, so assertion detection can be wrong. | Deductive | 65 | Handle raw strings and char literals | Tests, Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 64,
+      "text": "C-F19 | scripts/check_facts.py:64 | `node = shutil.which(\"node\")` | Preventive measure | low | Only presence is checked. A node older than 22.6 fails on `--experimental-strip-types` (scripts/check_facts.py:67) with a generic FAIL, not a version message. | Deductive | 75 | Check `node --version` | Do"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 1,
+      "text": "C-F21 | scripts/pre-commit:1 | `#!/bin/sh` | Preventive measure | medium | There is no .gitattributes in ./tree, so on a Windows autocrlf checkout the copied hook gets CRLF and sh fails. | Abductive | 55 | Add `scripts/pre-commit text eol=lf` | Category"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T-F4 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect (unfalsifiable) | low | `--root` equals the default root of the copied runner, so the test is green even if `--root` were ignored. | Deductive | 88 | Point `--root` at a second copy with a failing"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T-F5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (test-code drift) | low | `terms=T1` uses substring detection, so `<term>labs` is detected. The test duplicates scripts/test_check.py:331-334. | Deduc"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 516,
+      "text": "T-F6 | scripts/test_check.py:516 | `class FactsTest(Base):` | Preventive measure (missing negative tests) | medium | Searched all of scripts/test_check.py: there is no test for a missing toolchain, .rs/.ts assertion detection, \"no version badge\" or \"no version entry\", non-UTF-8 SKILL.md, the FACTS_F"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T-F7 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure (false red) | low | Unlike StagedTest (scripts/test_check.py:369), this test has no `skipUnless(shutil.which(\"git\"))`. The symlink at sc"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T-F9 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Preventive measure | low | LICENSE and any new top-level file are not copied, so test_repo_passes does not cover the whole repository. | Deductive | 70 | Copy the who"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/35.py",
+      "line": 2,
+      "text": "T-F10 | skills/adversarial-verify/evals/facts/35.py:2 | `\"\"\"Eval 35: the function as shown accepts 31 February, which the three valid-date tests do not cover.\"\"\"` | Preventive measure | low | The file asserts only the parse result. \"The three valid-date tests do not cover\" it is not checked, and eva"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/52.rs",
+      "line": 15,
+      "text": "T-F11 | skills/adversarial-verify/evals/facts/52.rs:15 | `assert_ne!(days_in_month(2024, 2), 29);` | Preventive measure | low | Implied by skills/adversarial-verify/evals/facts/52.rs:14, so it can never fail on its own. | Deductive | 90 | Drop it, or keep it as documentation | Category"
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "text": "Doc-F4 | README.md:261 | `ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # runs --strict --staged before every commit` | Demonstrated defect | medium | The hook does not pass `--strict`. Counted with C-F2. | Deductive | 92 | Same as C-F2 | all domains"
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc-F5 | README.md:46 | `- **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect | low | SKILL.md:462 also lists CHANGELOG.md, ADR/ and the agent instruction files. | Deductive | 85 | List the full Step 5 set | Documentation"
+    },
+    {
+      "file": "README.md",
+      "line": 247,
+      "text": "Doc-F6 | README.md:247 | `` It needs `python3` 3.8 or later and nothing else. `` | Demonstrated defect | low | `--staged`, which the hook always uses, needs git (scripts/check.py:389). | Deductive | 85 | \"…and git for --staged\" | Documentation, Category"
+    },
+    {
+      "file": "README.md",
+      "line": 254,
+      "text": "Doc-F7 | README.md:254 | `` and every file in `references/` is named in SKILL.md `` | Demonstrated defect | low | Only .md files are checked (scripts/check.py:137, and the docstring at scripts/check.py:40-41). | Deductive | 85 | \"every .md file\" | Documentation, Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "Doc-F8 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | low | skills/adversarial-verify/evals/facts/35.py:3 also imports it. | Deductive | 95 | \"Shared by facts/35.py, 37.py and 39.py\" | "
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 329,
+      "text": "Doc-F9 | skills/adversarial-verify/evals/evals.json:329 | `Proposes adding the new evidence to #41` | Demonstrated defect | medium | Evals 25-26 (evals.json:323-344) assert issue-tracker behaviour. The agent searched SKILL.md and references/*.md for \"issue\", \"tracker\" and \"duplicate\" and found no ru"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc-F10 | CHANGELOG.md:3 | `` The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below `` | Demonstrated defect | low | The first entry below is `## Unreleased` (CHANGELOG.md:5). The code uses the first *numbered* entry (scripts/che"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "D-F3 | skills/adversarial-verify/evals/evals.json:612 | `and that at 320 px (80 px buttons, 64 px usable) more labels are clipped` | Demonstrated defect | low | At 320 px the clipped set is still the same two labels (skills/adversarial-verify/evals/facts/49.py:13). The eval's own assertion at evals."
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "D-F4 | skills/adversarial-verify/evals/evals.json:249 | `K enforced by a mechanism that bites on the changed path (code, data) or respected` | Demonstrated defect | low | The assertion quotes an older form of the summary line. SKILL.md:439 now reads \"(code, data, tests, UX) … mock-ups\". | Deductive "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "D-F5 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Demonstrated defect | low | Evals 54 and 55 (evals.json:672, :686) state computable facts without the \"(Facts\" marker, so they have neither a fact file nor a reason and "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "D-F6 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | Only the prompt is bound. Numbers restated in expected_output and assertions drift unchecked, which is how D-F2 and D-F3 got through. | Deductive | 85 | Hash the whole eval, "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D-F7 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | Reasons for evals that do not exist, for ids below 29, for evals without facts, or duplicated ids are accepted silently. | Deductive | 82 | Validate the id | Code, Data, Documentation"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "D-F8 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | Two fact files with the same id: only the last one is hash-checked, but check_facts.py runs both. | Deductive | 82 | Error on a duplicate stem | Code, Data"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 5,
+      "text": "D-F9 | skills/adversarial-verify/evals/facts/_parse_day.py:5 | `def parse_day_v1(text):  # evals 29, 35 and 37` | Preventive measure | low | The shared helper has no prompt hash (scripts/check.py:469 skips `_` stems), so it can drift from the prompts while 35/37/39 keep valid hashes. | Deductive | 7"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C-F7 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | medium | The working-tree checker runs against the staged tree, and the same holds for check.py at scripts/pre-commit:9. A staged fix to the checker is not what runs, and an unstaged weakened checker is. | Deductive | 80 | Run the checkers from `$tmp/scripts/` | Code, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C-F8 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | medium | An exported but empty CHECK_PRIVATE_TERMS silently overrides .check-private-terms. Combined with C-F2, the commit passes with a warning only. | Deductive | 80 | Treat an empty variable as unset, or report which source was used | Code, Tests, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-F9 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | medium | A tracked `.check-private-terms` at any depth is skipped, so the list of private terms could be committed with no error. README.md:251 says it \"is never committed\". | Deductive | 80 | Exempt only the untracked root file, and error if one is tracked | Code, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C-F12 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | low | `--staged` with an empty index runs no check, so `--strict` passes with no terms configured. | Deductive | 80 | Run the terms check regardless | Code, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C-F13 | scripts/check.py:316-317 | `except ValueError:` / `pass` | Preventive measure | low | In a .json file that does not parse, `\\uXXXX`-escaped terms are not decoded and go unreported. | Deductive | 82 | Report invalid JSON, or decode escapes on the raw text | Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "C-F14 | scripts/check.py:128 | `if enc != \"utf-8\" and rep is not None and (rel in (SKILL, README, EVALS) or rel.startswith(REFS_DIR + \"/\")):` | Preventive measure | low | CHANGELOG.md and plugin.json, which check 2 reads, are not required to be UTF-8. | Deductive | 80 | Add PLUGIN and CHANGELOG to the list | Tests, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 511,
+      "text": "C-F15 | scripts/check.py:511 | `for rel in [SKILL] + refs:` | Preventive measure | low | README.md:113-115 also names the reference files and is never checked, so a rename leaves the README stale. | Deductive | 80 | Include README.md in check 7 | Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C-F16 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Preventive measure | low | Requested ids without a file are dropped silently: `38 999` runs only 38 and exits 0. | Deductive | 85 | Error on unknown ids | Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-F17 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | `assert True`, or an assert in a function that is never called, satisfies the rule. | Deductive | 80 | Require a top-level assert, or document the limit | Code, Tests, Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C-F18 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S),` | Preventive measure | low | Raw strings and `'\"'` char literals are not handled, so assertion detection can be wrong. | Deductive | 65 | Handle raw strings and char literals | Tests, Category"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 64,
+      "text": "C-F19 | scripts/check_facts.py:64 | `node = shutil.which(\"node\")` | Preventive measure | low | Only presence is checked. A node older than 22.6 fails on `--experimental-strip-types` (scripts/check_facts.py:67) with a generic FAIL, not a version message. | Deductive | 75 | Check `node --version` | Documentation, Verifier"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 1,
+      "text": "C-F21 | scripts/pre-commit:1 | `#!/bin/sh` | Preventive measure | medium | There is no .gitattributes in ./tree, so on a Windows autocrlf checkout the copied hook gets CRLF and sh fails. | Abductive | 55 | Add `scripts/pre-commit text eol=lf` | Category"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T-F4 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect (unfalsifiable) | low | `--root` equals the default root of the copied runner, so the test is green even if `--root` were ignored. | Deductive | 88 | Point `--root` at a second copy with a failing 49.py | Tests"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T-F5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (test-code drift) | low | `terms=T1` uses substring detection, so `<term>labs` is detected. The test duplicates scripts/test_check.py:331-334. | Deductive | 88 | Fix the comment and the name, or delete the test | Tests"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 516,
+      "text": "T-F6 | scripts/test_check.py:516 | `class FactsTest(Base):` | Preventive measure (missing negative tests) | medium | Searched all of scripts/test_check.py: there is no test for a missing toolchain, .rs/.ts assertion detection, \"no version badge\" or \"no version entry\", non-UTF-8 SKILL.md, the FACTS_FROM=29 boundary, or mixed fence characters. C-F1 is one regression already present. | Deductive | 82 | One failing case per message | Tests, Documentation"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T-F7 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure (false red) | low | Unlike StagedTest (scripts/test_check.py:369), this test has no `skipUnless(shutil.which(\"git\"))`. The symlink at scripts/test_check.py:351 likewise errors on Windows without the symlink privilege. | Deductive | 80 | Add the skip guards | Tests, Code, Category"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T-F9 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Preventive measure | low | LICENSE and any new top-level file are not copied, so test_repo_passes does not cover the whole repository. | Deductive | 70 | Copy the whole tree except .git | Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/35.py",
+      "line": 2,
+      "text": "T-F10 | skills/adversarial-verify/evals/facts/35.py:2 | `\"\"\"Eval 35: the function as shown accepts 31 February, which the three valid-date tests do not cover.\"\"\"` | Preventive measure | low | The file asserts only the parse result. \"The three valid-date tests do not cover\" it is not checked, and eval 36's similar fact is in NOT_COMPUTABLE. | Deductive | 80 | Reword the docstring, or move the claim to NOT_COMPUTABLE | Tests, Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/52.rs",
+      "line": 15,
+      "text": "T-F11 | skills/adversarial-verify/evals/facts/52.rs:15 | `assert_ne!(days_in_month(2024, 2), 29);` | Preventive measure | low | Implied by skills/adversarial-verify/evals/facts/52.rs:14, so it can never fail on its own. | Deductive | 90 | Drop it, or keep it as documentation | Category"
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "text": "Doc-F4 | README.md:261 | `ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # runs --strict --staged before every commit` | Demonstrated defect | medium | The hook does not pass `--strict`. Counted with C-F2. | Deductive | 92 | Same as C-F2 | all domains"
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc-F5 | README.md:46 | `- **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect | low | SKILL.md:462 also lists CHANGELOG.md, ADR/ and the agent instruction files. | Deductive | 85 | List the full Step 5 set | Documentation"
+    },
+    {
+      "file": "README.md",
+      "line": 247,
+      "text": "Doc-F6 | README.md:247 | `` It needs `python3` 3.8 or later and nothing else. `` | Demonstrated defect | low | `--staged`, which the hook always uses, needs git (scripts/check.py:389). | Deductive | 85 | \"…and git for --staged\" | Documentation, Category"
+    },
+    {
+      "file": "README.md",
+      "line": 254,
+      "text": "Doc-F7 | README.md:254 | `` and every file in `references/` is named in SKILL.md `` | Demonstrated defect | low | Only .md files are checked (scripts/check.py:137, and the docstring at scripts/check.py:40-41). | Deductive | 85 | \"every .md file\" | Documentation, Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "Doc-F8 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | low | skills/adversarial-verify/evals/facts/35.py:3 also imports it. | Deductive | 95 | \"Shared by facts/35.py, 37.py and 39.py\" | all 4 domains, Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 329,
+      "text": "Doc-F9 | skills/adversarial-verify/evals/evals.json:329 | `Proposes adding the new evidence to #41` | Demonstrated defect | medium | Evals 25-26 (evals.json:323-344) assert issue-tracker behaviour. The agent searched SKILL.md and references/*.md for \"issue\", \"tracker\" and \"duplicate\" and found no rule that specifies it. | Deductive | 80 | Add the rule to SKILL.md, or rewrite the evals | Documentation"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc-F10 | CHANGELOG.md:3 | `` The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below `` | Demonstrated defect | low | The first entry below is `## Unreleased` (CHANGELOG.md:5). The code uses the first *numbered* entry (scripts/check.py:237). | Deductive | 85 | \"the first numbered entry below\" | Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "D-F3 | skills/adversarial-verify/evals/evals.json:612 | `and that at 320 px (80 px buttons, 64 px usable) more labels are clipped` | Demonstrated defect | low | At 320 px the clipped set is still the same two labels (skills/adversarial-verify/evals/facts/49.py:13). The eval's own assertion at evals.json:615 says the others fit. | Deductive | 92 | \"the same two labels are clipped, with less margin\" | all 4 domains, Category"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "D-F4 | skills/adversarial-verify/evals/evals.json:249 | `K enforced by a mechanism that bites on the changed path (code, data) or respected` | Demonstrated defect | low | The assertion quotes an older form of the summary line. SKILL.md:439 now reads \"(code, data, tests, UX) … mock-ups\". | Deductive | 90 | Update the quoted line | Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "D-F5 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Demonstrated defect | low | Evals 54 and 55 (evals.json:672, :686) state computable facts without the \"(Facts\" marker, so they have neither a fact file nor a reason and the check never notices. | Deductive | 85 | Add the marker to those prompts, or widen the trigger | Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "D-F6 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | Only the prompt is bound. Numbers restated in expected_output and assertions drift unchecked, which is how D-F2 and D-F3 got through. | Deductive | 85 | Hash the whole eval, or assert the restated numbers in the fact files | Code, Tests, Data, Category"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "D-F7 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | Reasons for evals that do not exist, for ids below 29, for evals without facts, or duplicated ids are accepted silently. | Deductive | 82 | Validate the id | Code, Data, Documentation"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "D-F8 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | Two fact files with the same id: only the last one is hash-checked, but check_facts.py runs both. | Deductive | 82 | Error on a duplicate stem | Code, Data"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 5,
+      "text": "D-F9 | skills/adversarial-verify/evals/facts/_parse_day.py:5 | `def parse_day_v1(text):  # evals 29, 35 and 37` | Preventive measure | low | The shared helper has no prompt hash (scripts/check.py:469 skips `_` stems), so it can drift from the prompts while 35/37/39 keep valid hashes. | Deductive | 78 | Bind the helper, or inline it | Category"
+    }
+  ]
+}

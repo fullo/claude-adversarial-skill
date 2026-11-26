@@ -1,0 +1,61 @@
+{
+  "case": "S",
+  "defects": 4,
+  "found": 4,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line"
+  },
+  "rows": 22,
+  "fail_rows": 8,
+  "citations_checked": 9,
+  "citations_verified": 6,
+  "citations_wrong_line": 1,
+  "citations_unverifiable": 2,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "4 | `scripts/check.py:301-302` | `if os.path.basename(rel) == TERMS_FILE:` `continue` | Preventive measure | high (if it happens, the private list is published); likelihood low: needs `git add -f` past `.gitignore:1` | The terms file, tracked or staged, is skipped by the one check meant to catch lea"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "6 | `scripts/check.py:375` | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | low | A table row that lost every pipe ends the table. It is not counted and later rows are not checked. | Deductive | 80 | Treat a non-blank line as a row until a blank line; report "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "8 | `scripts/check.py:42-44` (Documentation) | \"The folder is read as it is on disk, tracked or not\" | Demonstrated defect (the text contradicts the code) | low | With `--staged`, `root` is the checkout of the index (`:429-433`), so an untracked or unstaged reference file is not read. `scripts/test_"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "4 | `scripts/check.py:301-302` | `if os.path.basename(rel) == TERMS_FILE:` `continue` | Preventive measure | high (if it happens, the private list is published); likelihood low: needs `git add -f` past `.gitignore:1` | The terms file, tracked or staged, is skipped by the one check meant to catch leaks, and `pre-commit --strict` passes. Breaks invariant 2. | Deductive | 80 | Skip the content scan but report an ERROR when the file is in `files` (\"private terms file is tracked\")"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "6 | `scripts/check.py:375` | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | low | A table row that lost every pipe ends the table. It is not counted and later rows are not checked. | Deductive | 80 | Treat a non-blank line as a row until a blank line; report it"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "8 | `scripts/check.py:42-44` (Documentation) | \"The folder is read as it is on disk, tracked or not\" | Demonstrated defect (the text contradicts the code) | low | With `--staged`, `root` is the checkout of the index (`:429-433`), so an untracked or unstaged reference file is not read. `scripts/test_check.py:507` expects this. | Deductive | 85 | \"Without --staged the folder is read as it is on disk; with --staged, only the staged content\""
+    }
+  ]
+}

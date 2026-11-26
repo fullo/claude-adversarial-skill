@@ -1,0 +1,30 @@
+{
+ "model_init": "claude-sonnet-5-5",
+ "models": [
+  "claude-sonnet-5-5"
+ ],
+ "is_error": false,
+ "stop_reason": "end_turn",
+ "result_events": 1,
+ "cost_usd": 0.7311785000000002,
+ "tokens": {
+  "input_tokens": 12,
+  "cache_read_input_tokens": 191585,
+  "cache_creation_input_tokens": 92309,
+  "output_tokens": 34276
+ },
+ "tokens_all": {
+  "input_tokens": 12,
+  "cache_read_input_tokens": 191585,
+  "cache_creation_input_tokens": 92309,
+  "output_tokens": 34276
+ },
+ "max_context": 96118,
+ "main_messages": 6,
+ "sub_agent_messages": 0,
+ "duration_s": 259.4,
+ "api_duration_s": 260.8,
+ "num_turns": 14,
+ "agents": 0,
+ "discarded": null
+}

@@ -1,0 +1,399 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "keyword",
+    "M1": "line",
+    "M2": "line",
+    "M3": "line",
+    "M4": "line"
+  },
+  "rows": 77,
+  "fail_rows": 53,
+  "citations_checked": 53,
+  "citations_verified": 52,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C7 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | If `38.py` and `38.rs` both exist, only one of them is hash-checked (Code F10) | Deductive | 85 | Error on a second file for the same id"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C10 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | No timeout: a looping fact file hangs the hook (Code F13) | Deductive | 80 | `timeout=` → FAIL"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C11 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Demonstrated defect | low | With a relative `--root .`, `path` is relative to the caller but the run uses cwd=FACTS, so true facts FAIL (Tests F18) | Deductive | 82 | `FACTS = os.path.abspath(."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C12 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S),` | Preventive measure | low | A char literal `'\"'` or a raw string `r#\"...\"#` mis-strips the code, hiding or inventing an assertion. Found by Code F14, Documentation H4/H5 | Deductive | 80 | Strip ch"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "C15 | scripts/check.py:255 | `terms = [l for l in decode(f.read())[0].splitlines() if not l.strip().startswith(\"#\")]` | Demonstrated defect | medium | The line `acme  # client` becomes the term `acme…client`, so `acme` is silently not checked (Category 3) | Deductive | 80 | Strip trailing `#` commen"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C16 | scripts/check.py:316 | `except ValueError:` | Demonstrated defect | medium | A `.json` that is not strict JSON (comments, trailing comma) is not decoded and gives no warning, so `\\uXXXX`-escaped terms in it are missed. This contradicts scripts/check.py:20-21 (Category 5) | Deductive | 85 | War"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C18 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 477,
+      "text": "C19 | scripts/check.py:477 | `m = re.search(r\"prompt-sha256:\\s*([0-9a-f]{64})\", head)` | Preventive measure | low | Only the first hash in the first 2000 characters is read (Category 2) | Deductive | 70 | Bind every hash line"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 114,
+      "text": "C20 | scripts/check.py:114 | `if data.startswith((b\"\\xff\\xfe\", b\"\\xfe\\xff\")):` | Preventive measure | low | UTF-32-LE decodes as UTF-16 with NULs and every term is missed, with no error (Category 6) | Deductive | 70 | Detect UTF-32 BOMs"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 49,
+      "text": "C21 | scripts/check_facts.py:49 | `return True  # let the run report the syntax error` | Preventive measure | medium | A BOM in a .py fact file may make ast.parse fail, so the file counts as asserting; whether it does depends on the version (run-only) (Category 7) | Deductive | 55 | Read with utf-8-"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 391,
+      "text": "C23 | scripts/check.py:391 | `out = subprocess.run([\"git\", \"-C\", root, \"ls-files\", \"-z\"], capture_output=True, check=True)` | Preventive measure | low | In a sparse checkout, ls-files lists files that checkout-index skipped, so they are reported unreadable or crash the run (Category 10) | Deductive "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 527,
+      "text": "C24 | scripts/check.py:527 | `print(f\"checked ({scope}): {', '.join(rep.checked)} — {len(rep.errors)} error(s), {len(rep.warnings)} warning(s)\")` | Preventive measure | low | The em dash may fail to encode on a Windows pipe with a non-UTF-8 code page (run-only) (Category 11) | Deductive | 50 | Use A"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "C25 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | `## v4.3` or `## [4.3]` is skipped and an older entry is compared (Category 21) | Deductive | 80 | Accept `v` and `[`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 216,
+      "text": "C26 | scripts/check.py:216 | `m = re.search(r'^\\s*version:\\s*\"?([0-9][0-9.]*)\"?\\s*$', fm.group(1), re.M) if fm else None` | Preventive measure | low | The first `version:` line at any indentation wins (Category 22) | Deductive | 65 | Anchor to `metadata.version`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "C27 | scripts/check.py:375 | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | low | A row with no pipe ends the table early; GFM still renders it as a row (Category 24) | Deductive | 75 | End only at a blank line or another block"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 126,
+      "text": "C29 | scripts/check.py:126 | `with open(os.path.join(root, rel), \"rb\") as f:` | Preventive measure | medium | A tracked symlink is scanned through its target, never as its committed link text (Category 26) | Deductive | 75 | `os.readlink` for links"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 465,
+      "text": "C30 | scripts/check.py:465 | `files = sorted(os.listdir(fdir)) if os.path.isdir(fdir) else []` | Preventive measure | low | Untracked fact files satisfy check 6 on a working-tree run (Category 27) | Deductive | 80 | Use the tracked file list"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C31 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | low | A set CHECK_PRIVATE_TERMS, even an empty one, silently overrides .check-private-terms. Found by Documentation HB1, Category 4 | Deductive | 88 | Merge both sources, or say which one is used"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 171,
+      "text": "T1 | scripts/test_check.py:171 | `def test_second_badge_mismatch(self):` | Demonstrated defect | medium | By trace, three tests are red on the current code: scripts/test_check.py:171-173 (C5), the two-space variant at scripts/test_check.py:286 (C4), and scripts/test_check.py:341-344 (C1). The suite "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "T4 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Preventive measure (Tests: demonstrated) | medium | Green without rustc or node while 52.rs and 53.ts never ran (C2). Found by Code F9, Tests F8, Documentation H8 | Deductive | 85 | Assert no `skip` line"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | low | The test uses `terms=T1` (substring), so it duplicates scripts/test_check.py:331 and does not exercise its stated case. Found by Tests F9, Docum"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T6 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Demonstrated defect | low | No skipUnless(git) guard, unlike scripts/test_check.py:369; without git the test errors instead of skipping (Tests F10) | Deducti"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 84,
+      "text": "T7 | scripts/test_check.py:84 | `with open(self.path(rel), \"a\", encoding=\"utf-8\") as f:` | Demonstrated defect | medium | Text mode writes `\\r\\n` on Windows: the `\\n` variant at scripts/test_check.py:286 is red on Windows and green on POSIX, so POSIX never covers CRLF files. Found by Category 12, Co"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 320,
+      "text": "T8 | scripts/test_check.py:320 | `r = self.run_check(terms_file=(\"﻿\" + f\"{T1}\\n# a comment\\n\").encode(\"utf-8\"))` | Demonstrated defect | low | Passes with or without BOM handling: U+FEFF is dropped by scripts/check.py:266 anyway (Category 15) | Deductive | 85 | Put the BOM before a term that only fa"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T9 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect | low | The script's default ROOT is already self.tmp, so a `--root` that is ignored still passes (Category 17) | Deductive | 85 | Run with a different root"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 595,
+      "text": "T10 | scripts/test_check.py:595 | `def test_runner_ignores_assertions_in_comments(self):` | Preventive measure | medium | Only the Python (AST) path is tested; the Rust/TS stripping (scripts/check_facts.py:34-39) is never exercised. Found by Tests F13, Category 19 | Deductive | 80 | Add .rs/.ts case"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T12 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | low | A crash would also pass (Tests F15) | Deductive | 80 | Assert `0 fact file(s)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 77,
+      "text": "T13 | scripts/check.py:77 | `FACTS_FROM = 29  # from here on, an eval that states facts needs a fact file or a reason` | Preventive measure | low | No test pins the 28/29 boundary (Tests F16) | Deductive | 75 | Boundary tests"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 302,
+      "text": "T14 | scripts/test_check.py:302 | `self.assert_fails(self.run_check(terms=T1), \"notes16.txt\")` | Preventive measure | low | Any error naming the file passes; the same at scripts/test_check.py:316 (Code F16) | Deductive | 85 | Also assert `private term #1`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T15 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | low | assert_no_leak runs only in assert_fails, so passing runs are never checked for leaks, contrary to scripts/test_check.py:4-5. Found by Documentation F8, Category 18 | Deductive | 75 | Call assert_no_leak in a"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T16 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink rights the test errors (false red). Found by Tests F11, Code H5 | Abductive | 65 | Skip on OSError"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 390,
+      "text": "T17 | scripts/test_check.py:390 | `shutil.rmtree(self.path(\".git\"))` | Preventive measure | low | Read-only git objects on Windows give PermissionError (Tests F12) | Abductive | 60 | An onerror handler"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 106,
+      "text": "T18 | scripts/test_check.py:106 | `open(self.path(EVALS), \"a\").write(\"{\")` | Preventive measure | low | Unclosed writes rely on CPython refcounting to flush; the same at :293, :297, :301, :383, :385, :400, :544, :559, :564, :599 (Category 13) | Deductive | 65 | Use `with`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T19 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Preventive measure | low | The fixture copies untracked files into a non-repo dir: Base tests use only the os.walk path, and results vary by machine (Category 14) | De"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 297,
+      "text": "T20 | scripts/test_check.py:297 | `open(self.path(\"notes.txt\"), \"wb\").write(f\"caf\\xe9 {T1}\\n\".encode(\"latin-1\"))` | Preventive measure | low | An ASCII term is found by any lossy decode, so the Latin-1 fallback is not shown (Category 16) | Deductive | 65 | Use a non-ASCII term"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D1 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | low | With --staged (the hook's mode), references/ is read from the index copy, so an untracked orphan is not reported. scripts/test_check.py:508 asserts that it passes (Do"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C7 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | low | If `38.py` and `38.rs` both exist, only one of them is hash-checked (Code F10) | Deductive | 85 | Error on a second file for the same id"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C10 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | No timeout: a looping fact file hangs the hook (Code F13) | Deductive | 80 | `timeout=` → FAIL"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C11 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Demonstrated defect | low | With a relative `--root .`, `path` is relative to the caller but the run uses cwd=FACTS, so true facts FAIL (Tests F18) | Deductive | 82 | `FACTS = os.path.abspath(...)`"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C12 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S),` | Preventive measure | low | A char literal `'\"'` or a raw string `r#\"...\"#` mis-strips the code, hiding or inventing an assertion. Found by Code F14, Documentation H4/H5 | Deductive | 80 | Strip char literals and raw strings first"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "C15 | scripts/check.py:255 | `terms = [l for l in decode(f.read())[0].splitlines() if not l.strip().startswith(\"#\")]` | Demonstrated defect | medium | The line `acme  # client` becomes the term `acme…client`, so `acme` is silently not checked (Category 3) | Deductive | 80 | Strip trailing `#` comments, or error on them"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C16 | scripts/check.py:316 | `except ValueError:` | Demonstrated defect | medium | A `.json` that is not strict JSON (comments, trailing comma) is not decoded and gives no warning, so `\\uXXXX`-escaped terms in it are missed. This contradicts scripts/check.py:20-21 (Category 5) | Deductive | 85 | Warn when a .json cannot be decoded"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C18 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 477,
+      "text": "C19 | scripts/check.py:477 | `m = re.search(r\"prompt-sha256:\\s*([0-9a-f]{64})\", head)` | Preventive measure | low | Only the first hash in the first 2000 characters is read (Category 2) | Deductive | 70 | Bind every hash line"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 114,
+      "text": "C20 | scripts/check.py:114 | `if data.startswith((b\"\\xff\\xfe\", b\"\\xfe\\xff\")):` | Preventive measure | low | UTF-32-LE decodes as UTF-16 with NULs and every term is missed, with no error (Category 6) | Deductive | 70 | Detect UTF-32 BOMs"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 49,
+      "text": "C21 | scripts/check_facts.py:49 | `return True  # let the run report the syntax error` | Preventive measure | medium | A BOM in a .py fact file may make ast.parse fail, so the file counts as asserting; whether it does depends on the version (run-only) (Category 7) | Deductive | 55 | Read with utf-8-sig"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 391,
+      "text": "C23 | scripts/check.py:391 | `out = subprocess.run([\"git\", \"-C\", root, \"ls-files\", \"-z\"], capture_output=True, check=True)` | Preventive measure | low | In a sparse checkout, ls-files lists files that checkout-index skipped, so they are reported unreadable or crash the run (Category 10) | Deductive | 55 | List only checked-out entries"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 527,
+      "text": "C24 | scripts/check.py:527 | `print(f\"checked ({scope}): {', '.join(rep.checked)} — {len(rep.errors)} error(s), {len(rep.warnings)} warning(s)\")` | Preventive measure | low | The em dash may fail to encode on a Windows pipe with a non-UTF-8 code page (run-only) (Category 11) | Deductive | 50 | Use ASCII, or reconfigure stdout"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "C25 | scripts/check.py:237 | `first = re.search(r\"^## +([0-9][0-9.]*)\\b\", read_text(root, CHANGELOG, rep), re.M)` | Preventive measure | low | `## v4.3` or `## [4.3]` is skipped and an older entry is compared (Category 21) | Deductive | 80 | Accept `v` and `[`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 216,
+      "text": "C26 | scripts/check.py:216 | `m = re.search(r'^\\s*version:\\s*\"?([0-9][0-9.]*)\"?\\s*$', fm.group(1), re.M) if fm else None` | Preventive measure | low | The first `version:` line at any indentation wins (Category 22) | Deductive | 65 | Anchor to `metadata.version`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "C27 | scripts/check.py:375 | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | low | A row with no pipe ends the table early; GFM still renders it as a row (Category 24) | Deductive | 75 | End only at a blank line or another block"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 126,
+      "text": "C29 | scripts/check.py:126 | `with open(os.path.join(root, rel), \"rb\") as f:` | Preventive measure | medium | A tracked symlink is scanned through its target, never as its committed link text (Category 26) | Deductive | 75 | `os.readlink` for links"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 465,
+      "text": "C30 | scripts/check.py:465 | `files = sorted(os.listdir(fdir)) if os.path.isdir(fdir) else []` | Preventive measure | low | Untracked fact files satisfy check 6 on a working-tree run (Category 27) | Deductive | 80 | Use the tracked file list"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C31 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | low | A set CHECK_PRIVATE_TERMS, even an empty one, silently overrides .check-private-terms. Found by Documentation HB1, Category 4 | Deductive | 88 | Merge both sources, or say which one is used"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 171,
+      "text": "T1 | scripts/test_check.py:171 | `def test_second_badge_mismatch(self):` | Demonstrated defect | medium | By trace, three tests are red on the current code: scripts/test_check.py:171-173 (C5), the two-space variant at scripts/test_check.py:286 (C4), and scripts/test_check.py:341-344 (C1). The suite contradicts scripts/test_check.py:1. Found by Code F6; Tests H2; Documentation H1-H3 | Deductive | 75 (run-only) | Fix C1, C4, C5; keep the tests"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "T4 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Preventive measure (Tests: demonstrated) | medium | Green without rustc or node while 52.rs and 53.ts never ran (C2). Found by Code F9, Tests F8, Documentation H8 | Deductive | 85 | Assert no `skip` line; add a test with PATH stripped"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | low | The test uses `terms=T1` (substring), so it duplicates scripts/test_check.py:331 and does not exercise its stated case. Found by Tests F9, Documentation F9 | Deductive | 85 | Use `\"=\" + T1`, or delete it"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T6 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Demonstrated defect | low | No skipUnless(git) guard, unlike scripts/test_check.py:369; without git the test errors instead of skipping (Tests F10) | Deductive | 85 | Add the guard"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 84,
+      "text": "T7 | scripts/test_check.py:84 | `with open(self.path(rel), \"a\", encoding=\"utf-8\") as f:` | Demonstrated defect | medium | Text mode writes `\\r\\n` on Windows: the `\\n` variant at scripts/test_check.py:286 is red on Windows and green on POSIX, so POSIX never covers CRLF files. Found by Category 12, Code F6, Tests F2 | Deductive | 85 | Write with `newline=\"\"`, plus an explicit CRLF variant"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 320,
+      "text": "T8 | scripts/test_check.py:320 | `r = self.run_check(terms_file=(\"﻿\" + f\"{T1}\\n# a comment\\n\").encode(\"utf-8\"))` | Demonstrated defect | low | Passes with or without BOM handling: U+FEFF is dropped by scripts/check.py:266 anyway (Category 15) | Deductive | 85 | Put the BOM before a term that only fails when the BOM is kept"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T9 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect | low | The script's default ROOT is already self.tmp, so a `--root` that is ignored still passes (Category 17) | Deductive | 85 | Run with a different root"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 595,
+      "text": "T10 | scripts/test_check.py:595 | `def test_runner_ignores_assertions_in_comments(self):` | Preventive measure | medium | Only the Python (AST) path is tested; the Rust/TS stripping (scripts/check_facts.py:34-39) is never exercised. Found by Tests F13, Category 19 | Deductive | 80 | Add .rs/.ts cases"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T12 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | low | A crash would also pass (Tests F15) | Deductive | 80 | Assert `0 fact file(s)`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 77,
+      "text": "T13 | scripts/check.py:77 | `FACTS_FROM = 29  # from here on, an eval that states facts needs a fact file or a reason` | Preventive measure | low | No test pins the 28/29 boundary (Tests F16) | Deductive | 75 | Boundary tests"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 302,
+      "text": "T14 | scripts/test_check.py:302 | `self.assert_fails(self.run_check(terms=T1), \"notes16.txt\")` | Preventive measure | low | Any error naming the file passes; the same at scripts/test_check.py:316 (Code F16) | Deductive | 85 | Also assert `private term #1`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T15 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | low | assert_no_leak runs only in assert_fails, so passing runs are never checked for leaks, contrary to scripts/test_check.py:4-5. Found by Documentation F8, Category 18 | Deductive | 75 | Call assert_no_leak in assert_passes"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T16 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink rights the test errors (false red). Found by Tests F11, Code H5 | Abductive | 65 | Skip on OSError"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 390,
+      "text": "T17 | scripts/test_check.py:390 | `shutil.rmtree(self.path(\".git\"))` | Preventive measure | low | Read-only git objects on Windows give PermissionError (Tests F12) | Abductive | 60 | An onerror handler"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 106,
+      "text": "T18 | scripts/test_check.py:106 | `open(self.path(EVALS), \"a\").write(\"{\")` | Preventive measure | low | Unclosed writes rely on CPython refcounting to flush; the same at :293, :297, :301, :383, :385, :400, :544, :559, :564, :599 (Category 13) | Deductive | 65 | Use `with`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T19 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Preventive measure | low | The fixture copies untracked files into a non-repo dir: Base tests use only the os.walk path, and results vary by machine (Category 14) | Deductive | 75 | Copy only `git ls-files`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 297,
+      "text": "T20 | scripts/test_check.py:297 | `open(self.path(\"notes.txt\"), \"wb\").write(f\"caf\\xe9 {T1}\\n\".encode(\"latin-1\"))` | Preventive measure | low | An ASCII term is found by any lossy decode, so the Latin-1 fallback is not shown (Category 16) | Deductive | 65 | Use a non-ASCII term"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D1 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | low | With --staged (the hook's mode), references/ is read from the index copy, so an untracked orphan is not reported. scripts/test_check.py:508 asserts that it passes (Documentation F6) | Deductive | 85 | State the --staged exception"
+    }
+  ]
+}

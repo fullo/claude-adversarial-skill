@@ -1,0 +1,126 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 10,
+  "hidden": 1,
+  "hypothesis_only": 0,
+  "missed": 1,
+  "recall": 0.833,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "missed",
+    "M1": "hidden",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 44,
+  "fail_rows": 22,
+  "citations_checked": 25,
+  "citations_verified": 21,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 4,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "C5 | `scripts/check.py:474-482` | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | The hash binds the prompt only. An edit to `expected_output` or `assertions` that contradicts the fact file passes. This is already the case for eval 56 (Data D2: the ass"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 484,
+      "text": "C6 | `scripts/check.py:484-494` | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an eval that does not exist, or whose prompt states no facts, is accepted silently. Fact files get that check (`:470-471`), reasons do not. Turns into a defect when an eval is renumber"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C7 | `scripts/check.py:436-437` | `if files or not args.staged: run_checks(...)` | Preventive measure | low | `--staged` in a repository whose index is empty (first commit before `git add`) runs no check and exits 0 with \"0 error(s)\". Turns into a defect only if a commit can be made with an empty in"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "T5 | `skills/adversarial-verify/evals/facts/_parse_day.py:1` | `# Shared by facts/37.py and facts/39.py` | Demonstrated defect (stale comment) | low | `facts/35.py:3` also imports `parse_day_v1` (the function's own comment `:5` says \"evals 29, 35 and 37\"). Someone editing the helper for 37/39 would "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T7 | `scripts/test_check.py:336-337` | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (stale comment) | low | The test uses `terms=T1` (no `=`), which is a substring term (`check.py:265`), so detection does flag `zqvorblaxlabs`. The"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "D3 | `skills/adversarial-verify/evals/evals.json:249` | `\"… 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect (stale assertion) | low | `SKILL.md:439` now reads `(code, data, tes"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc3 | `CHANGELOG.md:3` | `The version is the same in … the first entry below` | Demonstrated defect | low | The first entry below is `## Unreleased` (`:5`), which has no version. The check uses the first **numbered** entry (`check.py:11-12`, `:237`), and the README says \"newest entry\" (`README.md:2"
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc4 | `README.md:46` | `Propose project doc updates — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect (incomplete list) | low | `SKILL.md:462` also checks `CHANGELOG.md`, `ADR/` and agent instruction files. A reader expects no CHANGELOG proposals | Deductive | 82 | List th"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "C5 | `scripts/check.py:474-482` | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | The hash binds the prompt only. An edit to `expected_output` or `assertions` that contradicts the fact file passes. This is already the case for eval 56 (Data D2: the assertion says 11 excluded, `56.py:12` proves 12). Likelihood: shown to occur once | Deductive | 85 | Hash `prompt + expected_output + assertions`, or add numeric-consistency checks for the stated assertions"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 484,
+      "text": "C6 | `scripts/check.py:484-494` | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an eval that does not exist, or whose prompt states no facts, is accepted silently. Fact files get that check (`:470-471`), reasons do not. Turns into a defect when an eval is renumbered | Deductive | 82 | Error when a reason's id is not an eval id ≥ `FACTS_FROM` stating facts"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C7 | `scripts/check.py:436-437` | `if files or not args.staged: run_checks(...)` | Preventive measure | low | `--staged` in a repository whose index is empty (first commit before `git add`) runs no check and exits 0 with \"0 error(s)\". Turns into a defect only if a commit can be made with an empty index, which is rare | Deductive | 80 | Report \"nothing staged\" explicitly"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "T5 | `skills/adversarial-verify/evals/facts/_parse_day.py:1` | `# Shared by facts/37.py and facts/39.py` | Demonstrated defect (stale comment) | low | `facts/35.py:3` also imports `parse_day_v1` (the function's own comment `:5` says \"evals 29, 35 and 37\"). Someone editing the helper for 37/39 would not know 35 depends on it | Deductive | 92 | `# Shared by facts/35.py, 37.py and 39.py`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T7 | `scripts/test_check.py:336-337` | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (stale comment) | low | The test uses `terms=T1` (no `=`), which is a substring term (`check.py:265`), so detection does flag `zqvorblaxlabs`. The comment describes the next test (`:341-344`). A reader misjudges what each test covers | Deductive | 88 | Fix the comment, or make the test use `\"=\" + T1` and drop the duplicate"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "D3 | `skills/adversarial-verify/evals/evals.json:249` | `\"… 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect (stale assertion) | low | `SKILL.md:439` now reads `(code, data, tests, UX) … (plans, specs, docs, analyses, mock-ups)`. A grader checking the literal line fails an answer that follows the current skill | Deductive | 90 | Quote the current line, or assert the presence of the summary line without its wording"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc3 | `CHANGELOG.md:3` | `The version is the same in … the first entry below` | Demonstrated defect | low | The first entry below is `## Unreleased` (`:5`), which has no version. The check uses the first **numbered** entry (`check.py:11-12`, `:237`), and the README says \"newest entry\" (`README.md:250`) | Deductive | 88 | \"… and the first numbered entry below\""
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc4 | `README.md:46` | `Propose project doc updates — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect (incomplete list) | low | `SKILL.md:462` also checks `CHANGELOG.md`, `ADR/` and agent instruction files. A reader expects no CHANGELOG proposals | Deductive | 82 | List them, or say \"project docs (e.g. …)\""
+    }
+  ]
+}

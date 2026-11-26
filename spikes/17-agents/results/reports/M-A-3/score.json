@@ -1,0 +1,209 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "keyword",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line"
+  },
+  "rows": 51,
+  "fail_rows": 30,
+  "citations_checked": 32,
+  "citations_verified": 26,
+  "citations_wrong_line": 5,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "F5 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | high | Invariant I4 (\"the list is never committed\", check.py:423; README.md:250) rests only on `.gitignore:1`. A `git add -f .check-private-terms` (or a copy named that in any subfolder) puts **"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 82,
+      "text": "F7 | scripts/check_facts.py:82,89,100 | `FACTS = os.path.join(root, FACTS_REL)` … `path = os.path.join(FACTS, name)` … `subprocess.run(step, cwd=FACTS, …)` | Demonstrated defect | low | With a **relative** root (`python3 scripts/check_facts.py --root .`, a form the docstring at line 18 allows), `pat"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 43,
+      "text": "F8 | scripts/check_facts.py:43 | `text = open(path, encoding=\"utf-8\").read()` | Demonstrated defect | low | A fact file that is not valid UTF-8 (for example saved as Latin-1 with an accented comment) raises `UnicodeDecodeError` in `has_assertion`. The runner then dies with a traceback, its summary i"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "F9 | scripts/check.py:214,217,227-229,237 (also 331, 355) | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError as e:` | Demonstrated defect | low | `read_text` raises `OSError` when README.md, plugin.json, CHANGELOG.md or SKILL.md is missing (for example a staged deletion under"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 466,
+      "text": "F10 | scripts/check.py:466-473 | `with_file[int(stem)] = name` | Preventive measure | low | If two fact files share an id (`38.py` and `38.rs`, a plausible step when porting a fact to another language), the dict keeps only the last in sorted order (`38.rs`). The hash of `38.py` is **never checked**,"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "F11 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | There is no `timeout`. A fact file with an infinite loop (or a `rustc` that hangs) blocks `git commit` indefinitely, with no output because the hook captures it (pre-"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "F16 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 369,
+      "text": "T-F4 | scripts/test_check.py:369-380, 502-505 | `self.git(\"commit\", \"-q\", \"-m\", \"base\")` / `git = lambda *a: subprocess.run([\"git\", … \"-c\", \"user.email=t@t\", *a]` | Preventive measure (false red) | low | Both helpers inherit the developer's global git config. With `commit.gpgsign=true` (no agent in "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F6 | scripts/test_check.py (absent cases) | — | Preventive measure | medium | No test for: the hook itself (so F4 cannot be caught); a missing toolchain in check_facts.py (F6); a two-word term split across a **CRLF** line (F2's CRLF form); a tracked or staged `.check-private-terms` (F5); a relativ"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F7 | scripts/test_check.py:336-339 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` / `self.run_check(terms=T1)` | Demonstrated defect (test-code drift) | low | The comment describes whole-word detection, but `terms=T1` has no `=`, so detection is subs"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 4,
+      "text": "T-F8 | scripts/test_check.py:4-5, 64-68 | \"no private test term may ever be printed\" / `assert_passes` (no `assert_no_leak`) | Preventive measure | low | `assert_no_leak` is called only from `assert_fails` (62). Passing runs that use T1 (329, 387, 401-402, 257) and the `run_facts` tests never check "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D-F1 | scripts/check.py:46-47 | \"Files checked: the files tracked by git (all files outside .git if git is not available).\" | Demonstrated defect | low | `list_files` (145-158) also falls back to **every** file, untracked ones included, when git is installed but `--root` is not a repository, or when"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 16,
+      "text": "D-F2 | scripts/check_facts.py:16-18 | `python3 scripts/check_facts.py --root DIR      # the files under another checkout` | Demonstrated defect | low | The example accepts any DIR, but a relative DIR makes every file FAIL (F7). Counted once in Code as F7, and listed here because the text is the user"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "DA-F1 | scripts/check.py:255-256 (with 266) | `terms = [l for l in … if not l.strip().startswith(\"#\")]` | Preventive measure | medium | The terms file allows only whole-line comments, but nothing rejects an inline one. A user writes `acmecorp  # old client`. The term becomes the parts `[\"acmecorp\",\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "DA-F3 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and …` | Preventive measure | low | (HB7) Only the case-sensitive literal `(Facts` marks a prompt as stating facts. A new eval written as `(facts: …)` or `Facts: …` escapes the \"fact file or reason\" requirement with no error. No"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "DA-F2 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | Duplicate ids in NOT_COMPUTABLE are overwritten silently. Reasons for an id that does not exist, is below 29, or no longer states facts are never reported. The file can accumulate stale reasons that h"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 525,
+      "text": "U-F1 | scripts/check.py:525 (also 527) | `print(line)` | Preventive measure | low | Under the hook, stdout is a pipe to git. On Windows, Python then encodes with the ANSI code page (for example cp1252) with `errors=\"strict\"`. `-I` (pre-commit:9) also disables `PYTHONIOENCODING`/`PYTHONUTF8` from the"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "F5 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | high | Invariant I4 (\"the list is never committed\", check.py:423; README.md:250) rests only on `.gitignore:1`. A `git add -f .check-private-terms` (or a copy named that in any subfolder) puts **every private term in plain text** into the commit. Under `--staged` that file is in `files` (check.py:391-394) and is skipped by name, and no other line reports that it is tracked or staged. Nothing shows this happening today: no such file exists in `./tree`. Likelihood: low (a deliberate `-f`, or a tool that ignores `.gitignore`). Impact: the whole list leaks. | Deductive | 88 | In `check_private`, report `rep.error(rel, \"the private-terms list is tracked/staged: it must never be committed\")` for any `rel` whose basename is `TERMS_FILE`, instead of skipping it silently. Add a staged test for it."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 82,
+      "text": "F7 | scripts/check_facts.py:82,89,100 | `FACTS = os.path.join(root, FACTS_REL)` … `path = os.path.join(FACTS, name)` … `subprocess.run(step, cwd=FACTS, …)` | Demonstrated defect | low | With a **relative** root (`python3 scripts/check_facts.py --root .`, a form the docstring at line 18 allows), `path` is relative to the parent's cwd. The child is started with `cwd=FACTS`, so Python, rustc and node resolve `./skills/…/facts/38.py` again from inside `facts/`, giving `…/facts/skills/…/facts/38.py`, which is not found. Every file is reported `FAIL`. This is a false red, never a false green. The hook (`mktemp -d`, absolute) and the default `ROOT` (absolute, line 31) are not affected. | Deductive | 85 | `root = os.path.abspath(args.root)` at line 81."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 43,
+      "text": "F8 | scripts/check_facts.py:43 | `text = open(path, encoding=\"utf-8\").read()` | Demonstrated defect | low | A fact file that is not valid UTF-8 (for example saved as Latin-1 with an accented comment) raises `UnicodeDecodeError` in `has_assertion`. The runner then dies with a traceback, its summary is never printed and the remaining files are never run. The exit is non-zero, so the hook still blocks. The cost is a confusing message, not a false pass. | Deductive | 85 | Read with `errors=\"replace\"` (only the assertion scan needs the text), or catch the error and report `FAIL {name}: not UTF-8`."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "F9 | scripts/check.py:214,217,227-229,237 (also 331, 355) | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError as e:` | Demonstrated defect | low | `read_text` raises `OSError` when README.md, plugin.json, CHANGELOG.md or SKILL.md is missing (for example a staged deletion under `--staged`). `check_version` catches only `ValueError`, and `check_neutral`/`check_tables` catch nothing. The script ends with a traceback, no `ERROR` line and no summary, against test_check.py:4 (\"Every failing case must come from the script's own ERROR and summary\") and the pattern of `check_evals` (167). It still exits non-zero, so it blocks; the messages are what is lost. | Deductive | 85 | Wrap each file read in `try/except OSError` → `rep.error(rel, \"missing or unreadable\")`, as `check_evals` does."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 466,
+      "text": "F10 | scripts/check.py:466-473 | `with_file[int(stem)] = name` | Preventive measure | low | If two fact files share an id (`38.py` and `38.rs`, a plausible step when porting a fact to another language), the dict keeps only the last in sorted order (`38.rs`). The hash of `38.py` is **never checked**, so it can go stale after a prompt edit and invariant I8 does not bite on it. `check_facts.py` would still run both. Nothing shows this today: every fact id in `facts/` is unique. | Deductive | 85 | Collect `with_file.setdefault(id, []).append(name)` and check the hash of every file (or forbid two files per id with an error)."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "F11 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | There is no `timeout`. A fact file with an infinite loop (or a `rustc` that hangs) blocks `git commit` indefinitely, with no output because the hook captures it (pre-commit:15). Likelihood: low; these are small scripts reviewed before commit (pre-commit:11). | Deductive | 80 | `subprocess.run(..., timeout=120)` with `except subprocess.TimeoutExpired` → `FAIL {name}: timed out`."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "F16 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 369,
+      "text": "T-F4 | scripts/test_check.py:369-380, 502-505 | `self.git(\"commit\", \"-q\", \"-m\", \"base\")` / `git = lambda *a: subprocess.run([\"git\", … \"-c\", \"user.email=t@t\", *a]` | Preventive measure (false red) | low | Both helpers inherit the developer's global git config. With `commit.gpgsign=true` (no agent in the test shell) or a global `core.hooksPath` hook, `git commit` fails, so `CalledProcessError` and a red with no defect. `ReferencesTest.test_staged_content_is_what_is_checked` (502) also lacks the `@skipUnless(shutil.which(\"git\"))` that `StagedTest` has (369), so without git it errors instead of skipping. | Deductive | 80 | Pass `-c commit.gpgsign=false -c core.hooksPath=/dev/null` (or `GIT_CONFIG_GLOBAL=/dev/null` in `env`) and add the skip decorator to the staged test in `ReferencesTest`."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F6 | scripts/test_check.py (absent cases) | — | Preventive measure | medium | No test for: the hook itself (so F4 cannot be caught); a missing toolchain in check_facts.py (F6); a two-word term split across a **CRLF** line (F2's CRLF form); a tracked or staged `.check-private-terms` (F5); a relative `--root` for check_facts.py (F7); two fact files for one id (F10); an inline `#` comment in the terms file (DA-F1). I searched all 622 lines of test_check.py for each. | Deductive | 85 | Add one test per case. Each is a regression guard for a finding in this report."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F7 | scripts/test_check.py:336-339 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` / `self.run_check(terms=T1)` | Demonstrated defect (test-code drift) | low | The comment describes whole-word detection, but `terms=T1` has no `=`, so detection is substring and **does** flag `zqvorblaxlabs` (check.py:265). The test therefore duplicates `test_leak_through_another_check_is_masked` (331-334) instead of testing \"masked even if not detected\". The case the comment describes is the one at 341-344. | Deductive | 90 | Fix the comment, or delete the test as redundant with 331-334 and 341-344."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 4,
+      "text": "T-F8 | scripts/test_check.py:4-5, 64-68 | \"no private test term may ever be printed\" / `assert_passes` (no `assert_no_leak`) | Preventive measure | low | `assert_no_leak` is called only from `assert_fails` (62). Passing runs that use T1 (329, 387, 401-402, 257) and the `run_facts` tests never check for leaks, so a leak through a `WARNING` line on a passing run would go unnoticed, against the file's own rule. | Deductive | 85 | Call `self.assert_no_leak(r)` in `assert_passes` too."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D-F1 | scripts/check.py:46-47 | \"Files checked: the files tracked by git (all files outside .git if git is not available).\" | Demonstrated defect | low | `list_files` (145-158) also falls back to **every** file, untracked ones included, when git is installed but `--root` is not a repository, or when it is a repo with **zero tracked files** (`if files: return files`, 149-150). A user running `check.py --root some/export` (not a repo) gets untracked build output or virtualenvs scanned and reported, which the docstring says will not happen. | Deductive | 90 | Say \"the files tracked by git; every file outside .git when git is unavailable, the root is not a repository, or nothing is tracked yet\"."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 16,
+      "text": "D-F2 | scripts/check_facts.py:16-18 | `python3 scripts/check_facts.py --root DIR      # the files under another checkout` | Demonstrated defect | low | The example accepts any DIR, but a relative DIR makes every file FAIL (F7). Counted once in Code as F7, and listed here because the text is the user's entry point. | Deductive | 85 | Fix F7 (absolute path); no text change needed then."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "DA-F1 | scripts/check.py:255-256 (with 266) | `terms = [l for l in … if not l.strip().startswith(\"#\")]` | Preventive measure | medium | The terms file allows only whole-line comments, but nothing rejects an inline one. A user writes `acmecorp  # old client`. The term becomes the parts `[\"acmecorp\",\"old\",\"client\"]` (266), which matches only the literal sequence \"acmecorp old client\". The real name `acmecorp` is **silently no longer protected**, and no warning is given (the term has letters and is long). The docstring (check.py:15) and README.md:250 say \"one per line, # for comments\", which invites the inline form. | Deductive | 85 | Strip inline comments (`l.split(\"#\", 1)[0]`), or warn when a term contains `#`."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "DA-F3 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and …` | Preventive measure | low | (HB7) Only the case-sensitive literal `(Facts` marks a prompt as stating facts. A new eval written as `(facts: …)` or `Facts: …` escapes the \"fact file or reason\" requirement with no error. Nothing shows this today: all 21 stating evals use `(Facts` (evals.json:381…712). | Deductive | 85 | Match case-insensitively (`re.search(r\"\\(\\s*facts\\b\", prompt, re.I)`), or reject a lowercase marker with an error."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "DA-F2 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | Duplicate ids in NOT_COMPUTABLE are overwritten silently. Reasons for an id that does not exist, is below 29, or no longer states facts are never reported. The file can accumulate stale reasons that hide nothing today but mislead a reader about which evals are uncomputable. Nothing shows this in the current data (NOT_COMPUTABLE:4-12 are unique and all state facts). | Deductive | 85 | Report a duplicate id, and a reason for an eval that does not exist or does not state facts."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 525,
+      "text": "U-F1 | scripts/check.py:525 (also 527) | `print(line)` | Preventive measure | low | Under the hook, stdout is a pipe to git. On Windows, Python then encodes with the ANSI code page (for example cp1252) with `errors=\"strict\"`. `-I` (pre-commit:9) also disables `PYTHONIOENCODING`/`PYTHONUTF8` from the environment. An error line that carries a file name or an eval key with a character outside that code page (for example CJK, `→`) raises `UnicodeEncodeError`. The report is cut short, with a traceback and no summary (exit non-zero, so it still blocks). This depends on the Python version and the system code page, so it is not demonstrated. | Deductive | 60 | `sys.stdout.reconfigure(errors=\"backslashreplace\")` at the start of `main()` (Python 3.7+), or pass `-X utf8` in the hook."
+    }
+  ]
+}

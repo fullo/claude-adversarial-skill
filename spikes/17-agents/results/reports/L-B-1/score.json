@@ -1,0 +1,357 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 12,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "line",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 71,
+  "fail_rows": 46,
+  "citations_checked": 45,
+  "citations_verified": 43,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 2,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 17,
+      "text": "C5 | scripts/pre-commit:17 | `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | Medium | Output is printed only on failure, so the `skip … toolchain not found` line from C4 is discarded and the user never learns that facts were not run (category agent) | Deductive | 85 | Al"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "C7 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | Medium | The hash binds only the prompt, so expected_output and assertions can drift from the facts. Data F2 (evals.json:705) already happened this way | Deductive | 80 | Hash the asser"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C8 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | Medium | Any file named `.check-private-terms`, at any depth, skips the private-term scan. A tracked copy would ship the whole term list unscanned | Deductive | 85 | Skip only the untracked root file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C9 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | Low | Coverage depends on the literal, case-sensitive marker. Evals 54 and 55 state numbers without it (evals.json:672 `about 400 MB. The machine has "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "C10 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | Reasons for unknown ids, ids below 29 or fact-less ids are accepted silently. :495 compares reasons only with fact files | Deductive | 80 | Error on such reasons"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C11 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | Low | With 52.py and 52.rs both present, only the last name's hash is checked | Deductive | 85 | Error on two fact files for one id"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C13 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | Low | With `--staged` and an empty index, no check runs and the exit code is 0 | Deductive | 80 | Warn or fail on an empty staged list"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 186,
+      "text": "C14 | scripts/check.py:186-188 | `if type(i) is not int:  # bool is an int subclass: reject it` | Preventive measure | Low | The `continue` at :188 hides the other errors of that eval until the id is fixed | Deductive | 85 | Validate the fields before the id check"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C15 | scripts/check.py:316-317 | `except ValueError:` / `pass` | Preventive measure | Low | A tracked .json that does not parse loses the decoded-escape scan without a word, so a `\\uXXXX`-escaped term passes | Deductive | 85 | Warn: \"not valid JSON, escapes not decoded\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C16 | scripts/check.py:151-152 | `except (OSError, subprocess.CalledProcessError):` / `pass` | Preventive measure | Low | When git is unavailable the check walks every file on disk, and the summary still says \"working tree\" | Deductive | 80 | Warn that the file set changed"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C18 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | Low | Staged content is checked by the working-tree checkers (same at :9), so a staged change to a checker is committed without having been the code that checked it | Deductiv"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C19 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Preventive measure | Low | A mistyped id is ignored without a message (`38 3800` passes), and string matching means `038` matches nothing | Deductive | 85 | Report each requested id that has no file"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 83,
+      "text": "C20 | scripts/check_facts.py:83 | `files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith(\"_\"))` | Preventive measure | Low | `--root` without a facts directory ends in a traceback | Deductive | 85 | Check `isdir`, report and exit 1"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C22 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Preventive measure | Low | GFM splits cells on an unescaped pipe even inside a code span. A row with `` `a |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C24 | scripts/check.py:341 | ``DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")`` | Preventive measure | Low | GFM accepts `|-|-|`, but the check needs 3+ hyphens, so such a table is never checked (GFM from memory) | Deductive | 70 | `-+`"
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "C25 | README.md:255 | ``fails if a stated fact is false, if a file has no assertion outside comments, or if a needed toolchain (`rustc`, `node` 22.6 or later) is missing`` | Preventive measure | Low | scripts/check_facts.py:67 `return [[node, \"--experimental-strip-types\", \"--no-warnings\", path]]` ch"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "F3 | skills/adversarial-verify/evals/evals.json:249 | `\"Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect | Medium"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "F4 | skills/adversarial-verify/evals/evals.json:612 | `… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; …` | Demonstrated defect | Low | At 320 px the same two labels are clipped as at 375 px: evals.json:615 and skills/adversarial-verify/evals/facts/49.py:12-13 | Deductive"
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "text": "D3 | README.md:261 | `ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # runs --strict --staged before every commit` | Demonstrated defect | High | Doc side of C1 (also scripts/pre-commit:5). Counted once, in Code C1 | Deductive | 93 | With C1"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D4 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | Under `--staged` the root is the index export (scripts/check.py:433 `root = tmp`), so an untracked reference file is not seen. test_check.py:502-508 asserts exactly t"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "D5 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | Low | skills/adversarial-verify/evals/facts/35.py:3 `from _parse_day import parse_day_v1` also uses it | Deductive | 92 | \"Shared by fa"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "D6 | CHANGELOG.md:3 | `The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below` | Demonstrated defect | Low | The first entry is `## Unreleased` (CHANGELOG.md:5). The check skips it (CB1) | Deductive | 85 | \"the first numbered entr"
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "D7 | README.md:255 | `each fact file carries the sha256 of the prompt of every eval it covers` | Demonstrated defect | Low | A file is bound to the one eval named by its stem, and a single hash is read (scripts/check.py:477) | Deductive | 85 | ``each fact file `<id>.<ext>` carries the sha256 of eval"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 575,
+      "text": "T2 | scripts/test_check.py:575-578 | `def test_runner_passes_on_the_repo(self):` | Demonstrated defect | Medium | Without rustc or node, 52.rs and 53.ts are skipped (C4) and the test is green while proving nothing about them | Deductive | 80 | Assert no `skip` line"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T3 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect | Low | `--root` equals the script's default root, so the test stays green even if `--root` were ignored | Deductive | 90 | Use a different root that holds a broken 49.py"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T4 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Demonstrated defect | Low | Only a non-zero code is asserted, so a traceback also passes, against scripts/test_check.py:4 `Every failing case must come from the script's own ERROR and summary` | Deductive | 85 | Asse"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T6 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | Medium | `assert_no_leak` runs only in `assert_fails` (:62), so passing runs with terms configured are never checked for a leak, against scripts/test_check.py:4 | Deductive | 85 | Call `assert_no_leak` in `assert_pa"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T7 | scripts/test_check.py:336 | `def test_glued_term_in_output_is_masked_even_if_not_detected(self):` | Preventive measure | Low | It runs with `terms=T1` (substring), so the case it names is never run, and the comment at :337 `# whole-word detection does not flag \"<term>labs\"…` is wrong for it. It"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T8 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | Low | Without symlink privilege on Windows (README.md:264) this raises: a false red | Deductive | 80 | Skip on OSError"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T9 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | Low | No `skipUnless(shutil.which(\"git\"))`, unlike StagedTest (:369) | Deductive | 85 | Add the decorator"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 316,
+      "text": "T10 | scripts/test_check.py:316 | `self.assert_fails(self.run_check(terms=T1), \"plugin.json\")` | Preventive measure | Low | Any error on plugin.json satisfies it, and the same holds at :302 `\"notes16.txt\"` and :500 `self.assertIn(\"ux.md\", r.stdout)` | Deductive | 80 | Add the specific message token"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 17,
+      "text": "C5 | scripts/pre-commit:17 | `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | Medium | Output is printed only on failure, so the `skip … toolchain not found` line from C4 is discarded and the user never learns that facts were not run (category agent) | Deductive | 85 | Always print `$out`, or fail on any `skip`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "C7 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | Medium | The hash binds only the prompt, so expected_output and assertions can drift from the facts. Data F2 (evals.json:705) already happened this way | Deductive | 80 | Hash the assertions too, or assert the quoted numbers"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C8 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | Medium | Any file named `.check-private-terms`, at any depth, skips the private-term scan. A tracked copy would ship the whole term list unscanned | Deductive | 85 | Skip only the untracked root file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C9 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure | Low | Coverage depends on the literal, case-sensitive marker. Evals 54 and 55 state numbers without it (evals.json:672 `about 400 MB. The machine has 32 GB`, :686 `about 6 GB. The machine has 8 GB`), while CHANGELOG.md:24 says every eval that `states facts` is covered | Inductive | 70 | Require the marker or a reason for every eval from 29 on; match case-insensitively"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "C10 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | Reasons for unknown ids, ids below 29 or fact-less ids are accepted silently. :495 compares reasons only with fact files | Deductive | 80 | Error on such reasons"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C11 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | Low | With 52.py and 52.rs both present, only the last name's hash is checked | Deductive | 85 | Error on two fact files for one id"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C13 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | Low | With `--staged` and an empty index, no check runs and the exit code is 0 | Deductive | 80 | Warn or fail on an empty staged list"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 186,
+      "text": "C14 | scripts/check.py:186-188 | `if type(i) is not int:  # bool is an int subclass: reject it` | Preventive measure | Low | The `continue` at :188 hides the other errors of that eval until the id is fixed | Deductive | 85 | Validate the fields before the id check"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C15 | scripts/check.py:316-317 | `except ValueError:` / `pass` | Preventive measure | Low | A tracked .json that does not parse loses the decoded-escape scan without a word, so a `\\uXXXX`-escaped term passes | Deductive | 85 | Warn: \"not valid JSON, escapes not decoded\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C16 | scripts/check.py:151-152 | `except (OSError, subprocess.CalledProcessError):` / `pass` | Preventive measure | Low | When git is unavailable the check walks every file on disk, and the summary still says \"working tree\" | Deductive | 80 | Warn that the file set changed"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C18 | scripts/pre-commit:15 | `out=\"$(\"$py\" -I \"$root/scripts/check_facts.py\" --root \"$tmp\")\"; rc=$?` | Preventive measure | Low | Staged content is checked by the working-tree checkers (same at :9), so a staged change to a checker is committed without having been the code that checked it | Deductive | 75 | Run `$tmp/scripts/…` from the index copy"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C19 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Preventive measure | Low | A mistyped id is ignored without a message (`38 3800` passes), and string matching means `038` matches nothing | Deductive | 85 | Report each requested id that has no file"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 83,
+      "text": "C20 | scripts/check_facts.py:83 | `files = sorted(f for f in os.listdir(FACTS) if f.endswith(EXTS) and not f.startswith(\"_\"))` | Preventive measure | Low | `--root` without a facts directory ends in a traceback | Deductive | 85 | Check `isdir`, report and exit 1"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C22 | scripts/check.py:345 | ``s = re.sub(r\"`[^`]*`\", \"x\", line).replace(\"\\|\", \"x\").strip()`` | Preventive measure | Low | GFM splits cells on an unescaped pipe even inside a code span. A row with `` `a |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C24 | scripts/check.py:341 | ``DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")`` | Preventive measure | Low | GFM accepts `|-|-|`, but the check needs 3+ hyphens, so such a table is never checked (GFM from memory) | Deductive | 70 | `-+`"
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "C25 | README.md:255 | ``fails if a stated fact is false, if a file has no assertion outside comments, or if a needed toolchain (`rustc`, `node` 22.6 or later) is missing`` | Preventive measure | Low | scripts/check_facts.py:67 `return [[node, \"--experimental-strip-types\", \"--no-warnings\", path]]` checks that node exists, never its version | Abductive | 55 | Check `node --version`"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "F3 | skills/adversarial-verify/evals/evals.json:249 | `\"Fills the INVARIANTS section of the report and the summary line 'Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data) or respected (plans, specs, docs, analyses)'\"` | Demonstrated defect | Medium | Eval 18 quotes the SUMMARY line word for word, but skills/adversarial-verify/SKILL.md:439 now reads `(code, data, tests, UX) … (plans, specs, docs, analyses, mock-ups)`. A literal grader fails a correct answer (category agent) | Deductive | 90 | Quote the current line, or assert the fields"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "F4 | skills/adversarial-verify/evals/evals.json:612 | `… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; …` | Demonstrated defect | Low | At 320 px the same two labels are clipped as at 375 px: evals.json:615 and skills/adversarial-verify/evals/facts/49.py:12-13 | Deductive | 92 | \"the same labels are clipped with less room\""
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "text": "D3 | README.md:261 | `ln -s ../../scripts/pre-commit .git/hooks/pre-commit   # runs --strict --staged before every commit` | Demonstrated defect | High | Doc side of C1 (also scripts/pre-commit:5). Counted once, in Code C1 | Deductive | 93 | With C1"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D4 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | Under `--staged` the root is the index export (scripts/check.py:433 `root = tmp`), so an untracked reference file is not seen. test_check.py:502-508 asserts exactly that | Deductive | 88 | \"on disk in working-tree mode; the staged content with --staged\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "D5 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | Low | skills/adversarial-verify/evals/facts/35.py:3 `from _parse_day import parse_day_v1` also uses it | Deductive | 92 | \"Shared by facts/35.py, 37.py and 39.py\""
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "D6 | CHANGELOG.md:3 | `The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below` | Demonstrated defect | Low | The first entry is `## Unreleased` (CHANGELOG.md:5). The check skips it (CB1) | Deductive | 85 | \"the first numbered entry\""
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "text": "D7 | README.md:255 | `each fact file carries the sha256 of the prompt of every eval it covers` | Demonstrated defect | Low | A file is bound to the one eval named by its stem, and a single hash is read (scripts/check.py:477) | Deductive | 85 | ``each fact file `<id>.<ext>` carries the sha256 of eval `<id>`'s prompt``"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 575,
+      "text": "T2 | scripts/test_check.py:575-578 | `def test_runner_passes_on_the_repo(self):` | Demonstrated defect | Medium | Without rustc or node, 52.rs and 53.ts are skipped (C4) and the test is green while proving nothing about them | Deductive | 80 | Assert no `skip` line"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 605,
+      "text": "T3 | scripts/test_check.py:605 | `r = self.run_facts(\"49\", \"--root\", self.tmp)` | Demonstrated defect | Low | `--root` equals the script's default root, so the test stays green even if `--root` were ignored | Deductive | 90 | Use a different root that holds a broken 49.py"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T4 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Demonstrated defect | Low | Only a non-zero code is asserted, so a traceback also passes, against scripts/test_check.py:4 `Every failing case must come from the script's own ERROR and summary` | Deductive | 85 | Assert `\"0 fact file(s)\"` and no traceback"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T6 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | Medium | `assert_no_leak` runs only in `assert_fails` (:62), so passing runs with terms configured are never checked for a leak, against scripts/test_check.py:4 | Deductive | 85 | Call `assert_no_leak` in `assert_passes`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T7 | scripts/test_check.py:336 | `def test_glued_term_in_output_is_masked_even_if_not_detected(self):` | Preventive measure | Low | It runs with `terms=T1` (substring), so the case it names is never run, and the comment at :337 `# whole-word detection does not flag \"<term>labs\"…` is wrong for it. It duplicates :331-334 | Deductive | 88 | Rename and fix the comment, or drop it"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T8 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | Low | Without symlink privilege on Windows (README.md:264) this raises: a false red | Deductive | 80 | Skip on OSError"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T9 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | Low | No `skipUnless(shutil.which(\"git\"))`, unlike StagedTest (:369) | Deductive | 85 | Add the decorator"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 316,
+      "text": "T10 | scripts/test_check.py:316 | `self.assert_fails(self.run_check(terms=T1), \"plugin.json\")` | Preventive measure | Low | Any error on plugin.json satisfies it, and the same holds at :302 `\"notes16.txt\"` and :500 `self.assertIn(\"ux.md\", r.stdout)` | Deductive | 80 | Add the specific message token"
+    }
+  ]
+}

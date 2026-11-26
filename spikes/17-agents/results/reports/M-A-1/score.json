@@ -1,0 +1,189 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "line",
+    "M4": "line"
+  },
+  "rows": 44,
+  "fail_rows": 26,
+  "citations_checked": 29,
+  "citations_verified": 27,
+  "citations_wrong_line": 2,
+  "citations_unverifiable": 0,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 460,
+      "text": "C-F7 | scripts/check.py:460-463 (also :214, :217, :227, :237, :512) | `evals = json.loads(...).get(\"evals\", [])` … `ids = {e.get(\"id\") for e in evals …}` | Demonstrated defect | low | With `{\"evals\": null}`, check 1 reports \"no 'evals' list\". Then check_facts iterates `None` (`TypeError` outside the"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-F8 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | Any assert anywhere counts, including one in a function that is never called or under `if False:`. A file `def _(): assert 0` plus `print('ok 49')` passes the "
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C-F9 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | There is no `timeout`. A fact file with an infinite loop, or a hung `rustc`/`node`, blocks the pre-commit hook forever. Likelihood: low. | Deductive | 85 | `timeout="
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "C-F11 | scripts/check.py:237 | `re.search(r\"^## +([0-9][0-9.]*)\\b\", …)` | Preventive measure | low | From stress S6. If someone writes the next entry as `## v4.3` or `## [4.3]`, the regex skips it and compares the old `## 4.2`, so a stale version passes silently. Likelihood: medium (both styles are "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 171,
+      "text": "T-F1 | scripts/test_check.py:171-173, :286, :341-344 | `test_second_badge_mismatch`; the `f\"{a.upper()}  {b}\"` subtest; `test_whole_word_term_glued_in_output_is_still_masked` | Demonstrated defect | medium | Traced against the current code, these three tests should be **red**: C-F5 (only the first b"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F5 | scripts/test_check.py (whole file read) | (absence) | Preventive measure | medium | I found no test, anywhere in scripts/test_check.py, for: (a) a missing toolchain failing; (b) scripts/pre-commit itself (`--strict`, the evals trigger, tmp cleanup); (c) mismatched fence characters; (d) the `."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T-F6 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink privilege or Developer Mode, `os.symlink` raises `OSError`, so the test errors. That is a false red on a supported platform (REA"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 502,
+      "text": "T-F7 | scripts/test_check.py:502-505 | `git = lambda *a: subprocess.run([\"git\", …], check=True, …)` | Preventive measure | low | `ReferencesTest` has no `skipUnless(shutil.which(\"git\"))`, unlike `StagedTest` (:369). Without git, this test errors (`FileNotFoundError`) instead of skipping. | Deductive"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F8 | scripts/test_check.py:336-339 | `# whole-word detection does not flag \"<term>labs\"` … `self.run_check(terms=T1)` | Demonstrated defect | low | Test-code drift. `T1` without `=` is a **substring** term (scripts/check.py:265), so check 3 does flag `zqvorblaxlabs`. The comment describes an older"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "D-F1 | scripts/check.py:42-44 | \"The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.\" | Demonstrated defect | low | In `--staged` mode (the hook's mode), `root` is the `checkout-index` copy (scripts/check.py:433), so an untracked `references/"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 392,
+      "text": "D-F3 | scripts/check.py:392-393, :431 | `except (OSError, subprocess.CalledProcessError): return None` → \"not a git repository (or git is not available)\" | Demonstrated defect | low | Any `checkout-index` failure (a full disk, a path too long on Windows, an unmerged index during a conflicted merge) "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 15,
+      "text": "D-F4 | scripts/check.py:15 | \"Matching ignores case, accents and Unicode forms\" | Preventive measure | low | `normalize` (scripts/check.py:93-96) removes only **combining** marks after NFKD. Letters such as ø, ł, đ and æ have no decomposition, so a term \"Søren\" never matches \"Soren\" and the reverse."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "DA-F1 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A duplicate id overwrites silently. A reason for an id that does not exist, is below 29, or no longer states `(Facts` is never reported, so stale exemptions pile up. If an eval is renumbered, an old l"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "DA-F2 | scripts/check.py:469-473 | `if not stem.isdigit() or int(stem) not in ids: … else: with_file[int(stem)] = name` | Preventive measure | low | `040.py` and `40.py` both map to id 40. The second one silently replaces the first in `with_file`, so only one is hash-checked. check_facts.py would ex"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "U-F1 | scripts/pre-commit:15-17 | `out=\"$(…check_facts.py…)\"; rc=$?` … `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | low | On success the fact runner's output is discarded, including `skip <file>: toolchain not found` lines. The committer never learns that some facts w"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 460,
+      "text": "C-F7 | scripts/check.py:460-463 (also :214, :217, :227, :237, :512) | `evals = json.loads(...).get(\"evals\", [])` … `ids = {e.get(\"id\") for e in evals …}` | Demonstrated defect | low | With `{\"evals\": null}`, check 1 reports \"no 'evals' list\". Then check_facts iterates `None` (`TypeError` outside the `try`), the run dies with a traceback, every collected error is lost, and no summary is printed. The same happens when SKILL.md, README.md, CHANGELOG.md or plugin.json is missing (`read_text` raises `FileNotFoundError`, and only check_evals catches `OSError`). It fails closed (exit 1). | Deductive | 88 | `if not isinstance(evals, list): return` after :460. Wrap each `run_checks` call so that an exception becomes `rep.error(check, …)`."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-F8 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | Any assert anywhere counts, including one in a function that is never called or under `if False:`. A file `def _(): assert 0` plus `print('ok 49')` passes the \"asserts something\" rule while asserting nothing at run time. Likelihood: low (it needs a careless edit, and review is expected per scripts/pre-commit:11). | Deductive | 85 | State the limit in the docstring, or require at least one module-level `assert` (`tree.body`)."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C-F9 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | low | There is no `timeout`. A fact file with an infinite loop, or a hung `rustc`/`node`, blocks the pre-commit hook forever. Likelihood: low. | Deductive | 85 | `timeout=120`, then `TimeoutExpired` → FAIL."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 237,
+      "text": "C-F11 | scripts/check.py:237 | `re.search(r\"^## +([0-9][0-9.]*)\\b\", …)` | Preventive measure | low | From stress S6. If someone writes the next entry as `## v4.3` or `## [4.3]`, the regex skips it and compares the old `## 4.2`, so a stale version passes silently. Likelihood: medium (both styles are common). | Deductive | 85 | Take the first `## ` heading that is not `Unreleased`, and error if it does not parse as a version."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 171,
+      "text": "T-F1 | scripts/test_check.py:171-173, :286, :341-344 | `test_second_badge_mismatch`; the `f\"{a.upper()}  {b}\"` subtest; `test_whole_word_term_glued_in_output_is_still_masked` | Demonstrated defect | medium | Traced against the current code, these three tests should be **red**: C-F5 (only the first badge is checked), C-F2 (two spaces), C-F1 (key not masked, so `assert_no_leak` and \"message hidden\" both fail). The tests are right and the code is wrong, but the suite as shipped cannot pass, so the hook-plus-tests workflow is broken. On Windows the `\"\\n\"` subtest is red as well (CRLF written by :84-85). | Deductive (run-only, capped) | 75 | Fix C-F1, C-F2 and C-F5. No test change is needed."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F5 | scripts/test_check.py (whole file read) | (absence) | Preventive measure | medium | I found no test, anywhere in scripts/test_check.py, for: (a) a missing toolchain failing; (b) scripts/pre-commit itself (`--strict`, the evals trigger, tmp cleanup); (c) mismatched fence characters; (d) the `.rs`/`.ts` comment and string stripping of `has_assertion` (scripts/check_facts.py:35-51); (e) crash paths (C-F7). Three of the five gaps hide defects found above (C-F3, C-F4, C-F6). | Inductive (5 instances) | 78 | Add tests for (a)-(e). (b) can run the hook in StagedTest with `git commit`."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T-F6 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows without symlink privilege or Developer Mode, `os.symlink` raises `OSError`, so the test errors. That is a false red on a supported platform (README.md:263). | Deductive | 80 | Wrap it in `try/except OSError: self.skipTest(...)`."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 502,
+      "text": "T-F7 | scripts/test_check.py:502-505 | `git = lambda *a: subprocess.run([\"git\", …], check=True, …)` | Preventive measure | low | `ReferencesTest` has no `skipUnless(shutil.which(\"git\"))`, unlike `StagedTest` (:369). Without git, this test errors (`FileNotFoundError`) instead of skipping. | Deductive | 90 | Add `@unittest.skipUnless(shutil.which(\"git\"), …)` to this test."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F8 | scripts/test_check.py:336-339 | `# whole-word detection does not flag \"<term>labs\"` … `self.run_check(terms=T1)` | Demonstrated defect | low | Test-code drift. `T1` without `=` is a **substring** term (scripts/check.py:265), so check 3 does flag `zqvorblaxlabs`. The comment describes an older default. The test duplicates :331-334 and does not test what it says (that is done by :341-344). | Deductive | 90 | Fix the comment, or delete the test as a duplicate."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 42,
+      "text": "D-F1 | scripts/check.py:42-44 | \"The folder is read as it is on disk, tracked or not, since copying the skill's folder ships every file in it.\" | Demonstrated defect | low | In `--staged` mode (the hook's mode), `root` is the `checkout-index` copy (scripts/check.py:433), so an untracked `references/orphan.md` in the working tree is **not** seen. The test asserts exactly that (scripts/test_check.py:502-510, \"not staged: not part of the commit\"). The stated rationale (copying ships every file) holds only in working-tree mode. | Deductive | 90 | \"…read as it is on disk, tracked or not (with --staged: as it is in the index).\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 392,
+      "text": "D-F3 | scripts/check.py:392-393, :431 | `except (OSError, subprocess.CalledProcessError): return None` → \"not a git repository (or git is not available)\" | Demonstrated defect | low | Any `checkout-index` failure (a full disk, a path too long on Windows, an unmerged index during a conflicted merge) is reported as \"not a git repository\". | Deductive | 88 | Include git's stderr in the message."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 15,
+      "text": "D-F4 | scripts/check.py:15 | \"Matching ignores case, accents and Unicode forms\" | Preventive measure | low | `normalize` (scripts/check.py:93-96) removes only **combining** marks after NFKD. Letters such as ø, ł, đ and æ have no decomposition, so a term \"Søren\" never matches \"Soren\" and the reverse. Likelihood: medium for names from Nordic or Slavic languages. | Deductive (Unicode decomposition facts recalled, not cited from ./tree) | 75 | Document the limit in the \"Not caught\" list, or add a small transliteration table (ø→o, ł→l, đ→d, æ→ae, œ→oe)."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "DA-F1 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A duplicate id overwrites silently. A reason for an id that does not exist, is below 29, or no longer states `(Facts` is never reported, so stale exemptions pile up. If an eval is renumbered, an old line can exempt a different eval that does state facts. Likelihood: low to medium as evals are added and edited. | Deductive | 90 | Error on duplicates, and on ids not in `ids` or not stating facts."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "DA-F2 | scripts/check.py:469-473 | `if not stem.isdigit() or int(stem) not in ids: … else: with_file[int(stem)] = name` | Preventive measure | low | `040.py` and `40.py` both map to id 40. The second one silently replaces the first in `with_file`, so only one is hash-checked. check_facts.py would expect `ok 040` from the first (scripts/check_facts.py:94, 107). `isdigit()` also accepts non-ASCII digits. | Deductive | 88 | Require `stem == str(int(stem))` and ASCII digits (`re.fullmatch(r\"[1-9][0-9]*\", stem)`)."
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "U-F1 | scripts/pre-commit:15-17 | `out=\"$(…check_facts.py…)\"; rc=$?` … `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | low | On success the fact runner's output is discarded, including `skip <file>: toolchain not found` lines. The committer never learns that some facts were not checked. This compounds C-F4, but it is a separate state-visibility issue: it would still hide any future warning line. | Deductive | 90 | Always `printf \"%s\\n\" \"$out\"`, or at least print the lines starting with `skip`. Alternatives: (a) always print the output, which is noisier but complete; (b) print only non-`ok` lines, which is quiet but shows skips and warnings. (b) is recommended."
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "case": "S",
+  "defects": 4,
+  "found": 4,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "keyword",
+    "S3": "line",
+    "S4": "line"
+  },
+  "rows": 36,
+  "fail_rows": 18,
+  "citations_checked": 21,
+  "citations_verified": 14,
+  "citations_wrong_line": 2,
+  "citations_unverifiable": 5,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-4 | `scripts/check.py:301-302` | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | high | Likelihood low: someone runs `git add -f .check-private-terms`, or edits `.gitignore:1`, or a sub-folder copy gets tracked. `staged_tree` lists it, `:301` skips it silently, the hook ("
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C-8 | `scripts/check.py:341, 369` | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?…\")` / `\"|\" in lines[i] + lines[i - 1]` | Preventive measure | low | (a) A `---` thematic break (or setext underline) right after a paragraph line containing `|`, or right after a table without a blank line, is taken as a on"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C-9 | `scripts/check.py:345` |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "C-11 | `scripts/check.py:247-249` | `raw = os.environ.get(\"CHECK_PRIVATE_TERMS\")` / `if raw is not None:` | Preventive measure | low | `CHECK_PRIVATE_TERMS=` is exported empty (a CI template, a shell profile) while `.check-private-terms` exists. The result is `[]`, the file is ignored, and the messa"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C-12 | `scripts/check.py:436` | `if files or not args.staged:` | Preventive measure | low | `--staged` in a repository whose index is empty: `files == []`, and no check runs (not even the `--strict` \"no private terms\" failure). The script prints \"0 error(s)\" and exits 0. Likelihood very low (a commi"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "C-13 | `scripts/check.py:128, 214, 512` | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | A SKILL.md saved as Latin-1 is read with `rep` in `check_version` (`:214`) and in `check_references` (`:512`), so the same ERROR appears twice. Cosmetic, and it skews the error coun"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "C-14 | `scripts/check.py:470-473, 494` | `if not stem.isdigit() or int(stem) not in ids:` / `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | (a) `035.py` and `35.py` both map to eval 35, the later one overwrites, and `035.py` is never hash-checked (while `check_facts.py` would ru"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D-1 | `scripts/check.py:46-47` | \"(all files outside .git if git is not available)\" | Demonstrated defect | low | The fallback also runs when git *is* available but `--root` is not a repository, or has no tracked files (`:146-152`). This is the path every non-staged test takes (`scripts/test_check.p"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "D-4 | `scripts/check.py:462` | `return  # check 1 already reports it` | Preventive measure | low | True for unreadable or invalid JSON and for a non-dict top level. For `\"evals\": null` or `\"evals\": 5`, check 1 reports it, but check 6 then crashes at `:463` before returning (C-5). The comment gives f"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-4 | `scripts/check.py:301-302` | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | high | Likelihood low: someone runs `git add -f .check-private-terms`, or edits `.gitignore:1`, or a sub-folder copy gets tracked. `staged_tree` lists it, `:301` skips it silently, the hook (`scripts/pre-commit:9`) passes, and the **whole** private list is committed. The invariant at `:423` / `README.md:250` (\"never committed\") has no mechanism in `check.py` that bites. | Deductive | 85 | When the file list comes from git (`list_files` succeeded, or `--staged`), report `rep.error(rel, \"the private-terms list is tracked: remove it from the index\")` instead of `continue`. Keep the skip only for the untracked root file in fallback mode. Add a test."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C-8 | `scripts/check.py:341, 369` | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?…\")` / `\"|\" in lines[i] + lines[i - 1]` | Preventive measure | low | (a) A `---` thematic break (or setext underline) right after a paragraph line containing `|`, or right after a table without a blank line, is taken as a one-cell delimiter: false ERROR \"table delimiter has 1 cells\", and the commit is blocked. (b) A GFM delimiter with one or two dashes (`|-|-|`) is not recognized, so that table is never checked. | Deductive | 82 | Require the delimiter to have ≥2 cells, or a pipe on the delimiter line itself. Accept `-{1,}`."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C-9 | `scripts/check.py:345` |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "C-11 | `scripts/check.py:247-249` | `raw = os.environ.get(\"CHECK_PRIVATE_TERMS\")` / `if raw is not None:` | Preventive measure | low | `CHECK_PRIVATE_TERMS=` is exported empty (a CI template, a shell profile) while `.check-private-terms` exists. The result is `[]`, the file is ignored, and the message says \"set CHECK_PRIVATE_TERMS or create .check-private-terms\" although the file exists. Without `--strict` (the README's first command, `README.md:257`), private names go unchecked. The hook uses `--strict`, so commits are protected. | Deductive | 85 | Use the env var only if it yields at least one term (`if raw is not None and raw.strip(\",\"+\" \")`), or name the source in the message (\"CHECK_PRIVATE_TERMS is set but empty; .check-private-terms was ignored\")."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C-12 | `scripts/check.py:436` | `if files or not args.staged:` | Preventive measure | low | `--staged` in a repository whose index is empty: `files == []`, and no check runs (not even the `--strict` \"no private terms\" failure). The script prints \"0 error(s)\" and exits 0. Likelihood very low (a commit of an empty index is not normal). | Deductive | 82 | Run `run_checks` whenever `files is not None`, or report \"nothing staged\" explicitly."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "C-13 | `scripts/check.py:128, 214, 512` | `rep.error(rel, f\"not UTF-8 (read as {enc})\")` | Demonstrated defect | low | A SKILL.md saved as Latin-1 is read with `rep` in `check_version` (`:214`) and in `check_references` (`:512`), so the same ERROR appears twice. Cosmetic, and it skews the error count in the summary (`:527`). | Deductive | 88 | Record each file once (e.g. a `set` of reported files in `Report`)."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 470,
+      "text": "C-14 | `scripts/check.py:470-473, 494` | `if not stem.isdigit() or int(stem) not in ids:` / `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | (a) `035.py` and `35.py` both map to eval 35, the later one overwrites, and `035.py` is never hash-checked (while `check_facts.py` would run it expecting \"ok 035\"). (b) A NOT_COMPUTABLE line for a removed or non-existent eval, or for an eval that states no facts, is accepted silently. This is stale state. | Deductive | 82 | Reject stems with leading zeros or with a duplicate id. Report reasons whose id is not an eval from `FACTS_FROM` on that states facts."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D-1 | `scripts/check.py:46-47` | \"(all files outside .git if git is not available)\" | Demonstrated defect | low | The fallback also runs when git *is* available but `--root` is not a repository, or has no tracked files (`:146-152`). This is the path every non-staged test takes (`scripts/test_check.py:31-37`). A reader may assume that a non-repo root with git installed fails or scans nothing. | Deductive | 88 | \"(every file outside .git when git is not available, the root is not a repository, or nothing is tracked)\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 462,
+      "text": "D-4 | `scripts/check.py:462` | `return  # check 1 already reports it` | Preventive measure | low | True for unreadable or invalid JSON and for a non-dict top level. For `\"evals\": null` or `\"evals\": 5`, check 1 reports it, but check 6 then crashes at `:463` before returning (C-5). The comment gives false assurance. | Deductive | 85 | Fixed by the C-5 guard. Then the comment is true."
+    }
+  ]
+}

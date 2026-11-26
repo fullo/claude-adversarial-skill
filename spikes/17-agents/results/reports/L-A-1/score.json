@@ -1,0 +1,137 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 12,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 40,
+  "fail_rows": 21,
+  "citations_checked": 25,
+  "citations_verified": 20,
+  "citations_wrong_line": 1,
+  "citations_unverifiable": 4,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C-F4 | `scripts/pre-commit:15-17` | `out=\"$(\"$py\" -I …check_facts.py --root \"$tmp\")\"; rc=$?` … `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | medium | The trace chains C-F1 into this hook. The hook captures stdout and prints it only on failure. With `rustc` missing, che"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 34,
+      "text": "C-F7 | `scripts/check_facts.py:34` | `\".rs\": re.compile(r\"\\b(assert|assert_eq|assert_ne|panic)!\")` | Preventive measure | low | `facts/52.rs:9` has `panic!(\"bad month\")` inside the function under test. If every `assert…!` in `main` (`facts/52.rs:14-17`) were removed, `has_assertion` would still pass"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 467,
+      "text": "C-F9 | `scripts/check.py:467-473` | `with_file[int(stem)] = name` | Preventive measure | low | `40.py` and `40.ts` would both exist. The later name overwrites the earlier, so only one hash is checked, while `check_facts.py` runs both. A stale second file escapes the prompt-binding check. | Deductive"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "T-F2 | `skills/adversarial-verify/evals/evals.json:612` | `\"…and that at 320 px (80 px buttons, 64 px usable) more labels are clipped\"` | Demonstrated defect | low | At 320 px the same two labels are clipped as at 375 px: 61 and 50 both fit in 64 (`facts/49.py:13`). The eval's own assertion says so "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "T-F4 | `scripts/check.py:474-482` | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | The facts are bound only to the prompt. Numbers in `expected_output` and `assertions` can drift from the fact file without failing, and T-F1 and T-F2 are such drifts. S"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 350,
+      "text": "T-F6 | `scripts/test_check.py:350-352` | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows (supported, `README.md:264`), `os.symlink` needs Developer Mode or admin rights and otherwise raises `OSError`. The test errors (a false r"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F7 | `scripts/test_check.py:336-339` | `# whole-word detection does not flag \"<term>labs\", …` with `terms=T1` | Preventive measure | low | The comment is stale: with a plain term, detection is substring by default (`scripts/check.py:265`), so `<term>labs` **is** detected and the test does not exer"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 483,
+      "text": "DA-F2 | `scripts/check.py:483-494` | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an id that does not exist, or that states no facts, is accepted silently (HB6), so stale reasons accumulate. DA-F1 is the same staleness that happened to be caught. | Deductive | 80"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "DO-F3 | `CHANGELOG.md:3` | `…the README badge, .claude-plugin/plugin.json and the first entry below; scripts/check.py fails if they differ.` | Demonstrated defect | low | The first entry below is `## Unreleased` (`CHANGELOG.md:5`). The check uses the first **numbered** entry (`scripts/check.py:237`)"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "C-F4 | `scripts/pre-commit:15-17` | `out=\"$(\"$py\" -I …check_facts.py --root \"$tmp\")\"; rc=$?` … `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect | medium | The trace chains C-F1 into this hook. The hook captures stdout and prints it only on failure. With `rustc` missing, check_facts exits 0 (C-F1), so the `skip 52.rs` line is discarded and the commit passes with **no** output. The skip that the script at least prints becomes fully silent in the place it is used most. | Deductive | 88 | Fix C-F1. Independently, print `$out` whenever it contains a line starting `skip`."
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 34,
+      "text": "C-F7 | `scripts/check_facts.py:34` | `\".rs\": re.compile(r\"\\b(assert|assert_eq|assert_ne|panic)!\")` | Preventive measure | low | `facts/52.rs:9` has `panic!(\"bad month\")` inside the function under test. If every `assert…!` in `main` (`facts/52.rs:14-17`) were removed, `has_assertion` would still pass, the file would print `ok 52`, and it would verify nothing. Not happening today. | Deductive | 85 | Count only assertions inside `fn main`, or require at least one `assert*!` and drop `panic!`."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 467,
+      "text": "C-F9 | `scripts/check.py:467-473` | `with_file[int(stem)] = name` | Preventive measure | low | `40.py` and `40.ts` would both exist. The later name overwrites the earlier, so only one hash is checked, while `check_facts.py` runs both. A stale second file escapes the prompt-binding check. | Deductive | 80 | Error when a stem appears with two extensions."
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "T-F2 | `skills/adversarial-verify/evals/evals.json:612` | `\"…and that at 320 px (80 px buttons, 64 px usable) more labels are clipped\"` | Demonstrated defect | low | At 320 px the same two labels are clipped as at 375 px: 61 and 50 both fit in 64 (`facts/49.py:13`). The eval's own assertion says so (`evals.json:615`). The expected output claims \"more labels\". | Deductive | 92 | \"…the same two labels are clipped by more (15 and 18 px), and Startseite has 3 px to spare\"."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 474,
+      "text": "T-F4 | `scripts/check.py:474-482` | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | medium | The facts are bound only to the prompt. Numbers in `expected_output` and `assertions` can drift from the fact file without failing, and T-F1 and T-F2 are such drifts. Stress test S2 did not survive. | Deductive | 85 | Hash prompt + expected_output + assertions. Or let fact files assert the numbers quoted in the assertions (e.g. a test that each \"N are excluded\" equals the computed value)."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 350,
+      "text": "T-F6 | `scripts/test_check.py:350-352` | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Preventive measure | low | On Windows (supported, `README.md:264`), `os.symlink` needs Developer Mode or admin rights and otherwise raises `OSError`. The test errors (a false red) for a reason unrelated to `check.py`. | Deductive | 70 | Skip when `os.symlink` is unavailable, or make the file unreadable another way (`chmod 0` on POSIX)."
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 336,
+      "text": "T-F7 | `scripts/test_check.py:336-339` | `# whole-word detection does not flag \"<term>labs\", …` with `terms=T1` | Preventive measure | low | The comment is stale: with a plain term, detection is substring by default (`scripts/check.py:265`), so `<term>labs` **is** detected and the test does not exercise \"masked even if not detected\". The real case is the next test (`:341-344`), which is red by C-F2. A future reader trusting this test believes the gap is covered. | Deductive | 85 | Delete this test, or rename it and fix its comment. Keep `:341-344` as the guard."
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 483,
+      "text": "DA-F2 | `scripts/check.py:483-494` | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an id that does not exist, or that states no facts, is accepted silently (HB6), so stale reasons accumulate. DA-F1 is the same staleness that happened to be caught. | Deductive | 80 | Error on a reason whose eval does not exist or has no `(Facts`."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "DO-F3 | `CHANGELOG.md:3` | `…the README badge, .claude-plugin/plugin.json and the first entry below; scripts/check.py fails if they differ.` | Demonstrated defect | low | The first entry below is `## Unreleased` (`CHANGELOG.md:5`). The check uses the first **numbered** entry (`scripts/check.py:237`). It also says \"the README badge\" where the check promises every badge (`scripts/check.py:10`), and it compares only the first (C-F5). A reader adding a version above Unreleased, or expecting Unreleased to be compared, is misled. | Deductive | 85 | \"…every README skill badge, plugin.json and the newest numbered entry below (an `Unreleased` section is skipped)\"."
+    }
+  ]
+}

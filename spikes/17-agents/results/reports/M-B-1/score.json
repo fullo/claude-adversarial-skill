@@ -1,0 +1,359 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "line",
+    "M4": "line"
+  },
+  "rows": 76,
+  "fail_rows": 47,
+  "citations_checked": 47,
+  "citations_verified": 46,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 1,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "K6 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | High | Any file named `.check-private-terms`, at any depth and even tracked or staged (`git add -f`), is skipped: the term list itself can be committed while the check passes. Likelihood is low, because .git"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "K9 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")` | Preventive measure | Low | GFM accepts 1-2 dash delimiter cells. Such a table is not recognized, and its rows are never checked, with no message | Deductive | 85 | `-+`"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "K10 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | Low | There is no timeout. A fact file that loops forever hangs the runner and the pre-commit hook | Deductive | 80 | `timeout=`, and count TimeoutExpired as FAIL"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "K11 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | A NOT_COMPUTABLE reason for a non-existent eval, or a duplicate id, is accepted silently, while fact files get the opposite treatment (:470) | Deductive | 85 | Report reasons whose id is unknown, and du"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 423,
+      "text": "K12 | scripts/check.py:423 | `terms = load_terms(args.root)  # always from the working repo: the list is never committed` | Preventive measure | Medium | **Disputed, reported at the lower confidence.** Domain verdicts: Code PASS 88 (C14 \"--staged checks the index\", scripts/check.py:433 `root = tmp`)"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "K13 | scripts/check.py:248 | `if raw is not None:` | Demonstrated defect | Medium | CHECK_PRIVATE_TERMS, if set at all (even to \"\" or \" , \"), silently replaces the `.check-private-terms` file. The docstring (:14) says \"or\". An exported empty variable disables the file and turns the check into a warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 136,
+      "text": "K15 | scripts/check.py:136 | `names = sorted(os.listdir(d)) if os.path.isdir(d) else []` | Demonstrated defect | Medium | Checks 4, 5 and 7 read references/ from disk, tracked or not, but check 3 scans only git-tracked files. An untracked reference file that ships with the folder (:43-44) is never s"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "K16 | scripts/check.py:151 | `except (OSError, subprocess.CalledProcessError):` | Demonstrated defect | Medium | Any git failure (no repo, safe.directory, broken index) or an empty `ls-files` (:149) falls back silently to os.walk over every file on disk. The summary still says \"working tree\" | Deduc"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "K17 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | Medium | Two fact files for one eval (38.py and 38.rs) overwrite each other: only the last one is hash-checked, while check_facts.py runs both. Category agent | Deductive | 90 | Keep a list per id; error on more than "
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "K21 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Demonstrated defect | Low | `check_facts.py 38 999` runs 38, succeeds and never mentions 999. Documentation HB9 and category agent | Deductive | 90 | Report requested ids with no file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "K22 | scripts/check.py:316 | `except ValueError:` | Demonstrated defect | Low | A .json file that is not valid JSON is not decoded, without a word, so a `\\uXXXX`-escaped term in it passes. Category agent | Deductive | 85 | Warn when a .json file does not parse"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 75,
+      "text": "K23 | scripts/check.py:75 | `TAG_RE = re.compile(r\"^\\[(substance|format)\\]\\s+\\S\")` | Demonstrated defect | Low | It is stricter than \"followed by text\" (:9): `[substance]text` is rejected, and the message at :202 does not mention the space. Category agent | Deductive | 85 | State \"followed by a spac"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "K24 | scripts/check.py:128 | `if enc != \"utf-8\" and rep is not None and (rel in (SKILL, README, EVALS) or rel.startswith(REFS_DIR + \"/\")):` | Preventive measure | Low | CHANGELOG.md, plugin.json, fact files and NOT_COMPUTABLE are silently read as Latin-1, with no error. Documentation HB5 and categor"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 330,
+      "text": "K25 | scripts/check.py:330 | `patterns = [re.compile(t) for t in STACK_TERMS]` | Preventive measure | Low | There is no IGNORECASE, so \"python\" and \"Sqlite\" are not warned. Category agent | Deductive | 85 | `re.I` for the plain words"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "K26 | scripts/check.py:375 | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | Low | A row that lost all its pipes ends the table silently instead of being counted as a 1-cell row. Category agent | Deductive | 75 | Treat non-blank lines that follow as rows"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 15,
+      "text": "K27 | scripts/check.py:15 | `(one per line, # for comments). Matching ignores case, accents and Unicode` | Demonstrated defect | Medium | Only whole-line comments are recognized (:255). `term  # note` becomes a term whose parts include \"note\", so plain \"term\" is no longer detected. Category agent | "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "T2 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Demonstrated defect | Medium | Without rustc or node it is green while 52.rs and 53.ts never ran (K3): skips count as files with 0 failed. After K3 is fixed it becomes a false red on such machines, becau"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 85,
+      "text": "T4 | scripts/test_check.py:85 | `f.write(\"\\n\" + text + \"\\n\")` | Preventive measure | Low | On Windows (supported, README.md:263) text mode writes `\\r\\n`, so the variant `f\"{a}\\n{b}\"` (:286) is red on Windows only. On Linux the CRLF case is never exercised | Deductive | 80 | `newline=\"\\n\"` in `append"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T5 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Demonstrated defect | Low | On Windows without symlink privilege, the test errors: a false red. The same kind of risk holds for scripts/test_check.py:390 `shutil.rmtree(self.path(\".git"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T6 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | Low | Any crash also exits non-zero, so the test does not show that the \"no files\" rule (scripts/check_facts.py:113) is the cause | Deductive | 85 | Also assert `0 fact file(s)` and no Traceback"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 50,
+      "text": "T7 | scripts/test_check.py:50 | `[sys.executable, \"-I\", os.path.join(self.tmp, \"scripts\", \"check.py\"), \"--root\", self.tmp, *args],` | Preventive measure | Low | The Base copy is not a git repo, so non-git tests take the os.walk fallback (scripts/check.py:153), not production's `git ls-files`. Tests "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 498,
+      "text": "T8 | scripts/check.py:498 | `if not isinstance(e, dict) or type(e.get(\"id\")) is not int or e[\"id\"] < FACTS_FROM:` | Preventive measure | Low | Missing boundary test: eval 28 states facts and is exempt, and eval 29 does not state facts, so a `<=` mutant survives every test | Deductive | 80 | A test t"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T10 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | Low | `assert_no_leak` runs only inside `assert_fails` (:62). A passing run that printed a term in a WARNING would go unnoticed, against :4-5 | Deductive | 88 | Call `assert_no_leak` in `assert_passes`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T11 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | Low | Test-code drift: `terms=T1` (no `=`) is substring detection, so `<term>labs` is detected. The test duplicates :331-334, and its name (\"even if "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T12 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | Low | There is no `skipUnless(git)` guard (unlike :369), so it errors without git. It and StagedTest (:374) also inherit the global git"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 35,
+      "text": "T13 | scripts/test_check.py:35 | `shutil.copytree(src, dst, ignore=shutil.ignore_patterns(\"__pycache__\"))` | Preventive measure | Low | The fixture copies the developer's working tree, untracked files included. An untracked references/draft.md turns test_repo_passes red. Category agent | Deductive |"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D1 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | Low | The fallback also happens when root is not a repo, git errors, or nothing is tracked (:149-152) | Deductive | 85 | \"...if git is not available, root is not a repos"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "D2 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Preventive measure | Low | The module also tests check_facts.py (:571-617), which the docstring does not name | Deductive | 82 | Name check_facts.py"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D3 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | With --staged, the folder read is the staged copy (:433); test_check.py:508 relies on this | Deductive | 85 | Add \"(with --staged: as staged)\""
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 23,
+      "text": "D4 | scripts/test_check.py:23 | `# including this one (the check scans every file). Neither occurs in the repo.` | Demonstrated defect | Low | Three constants are defined (:24-26); \"Neither\" covers two | Deductive | 85 | \"None of them\""
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 7,
+      "text": "D5 | scripts/check_facts.py:7 | `are compiled with rustc; .ts files run with node --experimental-strip-types.` | Preventive measure | Low | The flag needs node 22.6 or later (README.md:246); the docstring states no version | Abductive | 65 | State the node version"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 4,
+      "text": "D6 | scripts/test_check.py:4 | `Every failing case must come from the script's own ERROR and summary, and no` | Demonstrated defect | Low | The check_facts runner tests (:580-617) assert on FAIL lines or return codes only, never ERROR, the summary or `assert_no_leak`. Category agent | Deductive | 88"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "K6 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | High | Any file named `.check-private-terms`, at any depth and even tracked or staged (`git add -f`), is skipped: the term list itself can be committed while the check passes. Likelihood is low, because .gitignore:1 ignores the name | Abductive | 85 | ERROR when a TERMS_FILE is among the tracked or staged files"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "K9 | scripts/check.py:341 | `DELIM = re.compile(r\"^\\s*|?\\s*:?-{3,}:?\\s*(|\\s*:?-{3,}:?\\s*)*|?\\s*$\")` | Preventive measure | Low | GFM accepts 1-2 dash delimiter cells. Such a table is not recognized, and its rows are never checked, with no message | Deductive | 85 | `-+`"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "K10 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | Low | There is no timeout. A fact file that loops forever hangs the runner and the pre-commit hook | Deductive | 80 | `timeout=`, and count TimeoutExpired as FAIL"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "K11 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | A NOT_COMPUTABLE reason for a non-existent eval, or a duplicate id, is accepted silently, while fact files get the opposite treatment (:470) | Deductive | 85 | Report reasons whose id is unknown, and duplicates"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 423,
+      "text": "K12 | scripts/check.py:423 | `terms = load_terms(args.root)  # always from the working repo: the list is never committed` | Preventive measure | Medium | **Disputed, reported at the lower confidence.** Domain verdicts: Code PASS 88 (C14 \"--staged checks the index\", scripts/check.py:433 `root = tmp`) and Documentation PASS 85 (P13). Independent verifier: FAIL 85. With --staged the file content comes from the index, but the term list comes from the working tree and the environment, and the hook runs the working-tree check.py and check_facts.py (scripts/pre-commit:9, :15). Unstaged edits to these, or deleting the untracked terms file, change the result of a staged check. The narrower claim (the checked content is the staged content) holds, apart from H-C5. The terms source is documented as intentional; the script source is not. The category agent found the same (rows 40-41, 90) | Deductive | 85 | Run the hook's checkers from the staged copy (`$tmp/scripts/...`), and document that terms come from the working tree"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "K13 | scripts/check.py:248 | `if raw is not None:` | Demonstrated defect | Medium | CHECK_PRIVATE_TERMS, if set at all (even to \"\" or \" , \"), silently replaces the `.check-private-terms` file. The docstring (:14) says \"or\". An exported empty variable disables the file and turns the check into a warning when --strict is not set (the hook does not set it, K1). Found by the category agent, and also Documentation HB2 | Deductive | 90 | Merge both sources, or warn when the variable shadows an existing file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 136,
+      "text": "K15 | scripts/check.py:136 | `names = sorted(os.listdir(d)) if os.path.isdir(d) else []` | Demonstrated defect | Medium | Checks 4, 5 and 7 read references/ from disk, tracked or not, but check 3 scans only git-tracked files. An untracked reference file that ships with the folder (:43-44) is never scanned for private terms. Category agent; also Code HB12 | Deductive | 88 | Add the files of the skill folder on disk to check 3's list"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "K16 | scripts/check.py:151 | `except (OSError, subprocess.CalledProcessError):` | Demonstrated defect | Medium | Any git failure (no repo, safe.directory, broken index) or an empty `ls-files` (:149) falls back silently to os.walk over every file on disk. The summary still says \"working tree\" | Deductive | 88 | Say in the summary which file list was used"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "K17 | scripts/check.py:473 | `with_file[int(stem)] = name` | Demonstrated defect | Medium | Two fact files for one eval (38.py and 38.rs) overwrite each other: only the last one is hash-checked, while check_facts.py runs both. Category agent | Deductive | 90 | Keep a list per id; error on more than one"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "K21 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Demonstrated defect | Low | `check_facts.py 38 999` runs 38, succeeds and never mentions 999. Documentation HB9 and category agent | Deductive | 90 | Report requested ids with no file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "K22 | scripts/check.py:316 | `except ValueError:` | Demonstrated defect | Low | A .json file that is not valid JSON is not decoded, without a word, so a `\\uXXXX`-escaped term in it passes. Category agent | Deductive | 85 | Warn when a .json file does not parse"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 75,
+      "text": "K23 | scripts/check.py:75 | `TAG_RE = re.compile(r\"^\\[(substance|format)\\]\\s+\\S\")` | Demonstrated defect | Low | It is stricter than \"followed by text\" (:9): `[substance]text` is rejected, and the message at :202 does not mention the space. Category agent | Deductive | 85 | State \"followed by a space and text\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 128,
+      "text": "K24 | scripts/check.py:128 | `if enc != \"utf-8\" and rep is not None and (rel in (SKILL, README, EVALS) or rel.startswith(REFS_DIR + \"/\")):` | Preventive measure | Low | CHANGELOG.md, plugin.json, fact files and NOT_COMPUTABLE are silently read as Latin-1, with no error. Documentation HB5 and category agent | Deductive | 85 | Extend the list, or document it"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 330,
+      "text": "K25 | scripts/check.py:330 | `patterns = [re.compile(t) for t in STACK_TERMS]` | Preventive measure | Low | There is no IGNORECASE, so \"python\" and \"Sqlite\" are not warned. Category agent | Deductive | 85 | `re.I` for the plain words"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 375,
+      "text": "K26 | scripts/check.py:375 | `while i < len(lines) and lines[i].strip() and \"|\" in lines[i]:` | Preventive measure | Low | A row that lost all its pipes ends the table silently instead of being counted as a 1-cell row. Category agent | Deductive | 75 | Treat non-blank lines that follow as rows"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 15,
+      "text": "K27 | scripts/check.py:15 | `(one per line, # for comments). Matching ignores case, accents and Unicode` | Demonstrated defect | Medium | Only whole-line comments are recognized (:255). `term  # note` becomes a term whose parts include \"note\", so plain \"term\" is no longer detected. Category agent | Deductive | 88 | Strip trailing `#` comments, or document whole-line only"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 578,
+      "text": "T2 | scripts/test_check.py:578 | `self.assertRegex(r.stdout, r\"\\d+ fact file\\(s\\), 0 failed\")` | Demonstrated defect | Medium | Without rustc or node it is green while 52.rs and 53.ts never ran (K3): skips count as files with 0 failed. After K3 is fixed it becomes a false red on such machines, because :576 has no skip guard | Deductive | 88 | Assert no `skip` line, or one `ok` line per file; skip when a toolchain is missing"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 85,
+      "text": "T4 | scripts/test_check.py:85 | `f.write(\"\\n\" + text + \"\\n\")` | Preventive measure | Low | On Windows (supported, README.md:263) text mode writes `\\r\\n`, so the variant `f\"{a}\\n{b}\"` (:286) is red on Windows only. On Linux the CRLF case is never exercised | Deductive | 80 | `newline=\"\\n\"` in `append`/`edit`; add an explicit CRLF test"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 351,
+      "text": "T5 | scripts/test_check.py:351 | `os.symlink(os.path.join(self.tmp, \"does-not-exist\"), self.path(\"dangling.md\"))` | Demonstrated defect | Low | On Windows without symlink privilege, the test errors: a false red. The same kind of risk holds for scripts/test_check.py:390 `shutil.rmtree(self.path(\".git\"))`, which hits read-only git objects on Windows (75) | Deductive | 80 | Skip on OSError; `onerror` handler for rmtree"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 617,
+      "text": "T6 | scripts/test_check.py:617 | `self.assertNotEqual(r.returncode, 0, r.stdout)` | Preventive measure | Low | Any crash also exits non-zero, so the test does not show that the \"no files\" rule (scripts/check_facts.py:113) is the cause | Deductive | 85 | Also assert `0 fact file(s)` and no Traceback"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 50,
+      "text": "T7 | scripts/test_check.py:50 | `[sys.executable, \"-I\", os.path.join(self.tmp, \"scripts\", \"check.py\"), \"--root\", self.tmp, *args],` | Preventive measure | Low | The Base copy is not a git repo, so non-git tests take the os.walk fallback (scripts/check.py:153), not production's `git ls-files`. Tests that rely on untracked files being scanned (file name, latin1, utf16, unreadable) pass only because of the fallback (category agent row 57, 88). LICENSE is not copied | Deductive | 80 | Run RepoTest and the scan tests on a `git init`-ed copy too"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 498,
+      "text": "T8 | scripts/check.py:498 | `if not isinstance(e, dict) or type(e.get(\"id\")) is not int or e[\"id\"] < FACTS_FROM:` | Preventive measure | Low | Missing boundary test: eval 28 states facts and is exempt, and eval 29 does not state facts, so a `<=` mutant survives every test | Deductive | 80 | A test that adds `(Facts:` to eval 29"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T10 | scripts/test_check.py:64 | `def assert_passes(self, r):` | Preventive measure | Low | `assert_no_leak` runs only inside `assert_fails` (:62). A passing run that printed a term in a WARNING would go unnoticed, against :4-5 | Deductive | 88 | Call `assert_no_leak` in `assert_passes`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T11 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect | Low | Test-code drift: `terms=T1` (no `=`) is substring detection, so `<term>labs` is detected. The test duplicates :331-334, and its name (\"even if not detected\", :336) is stale. Found by all three domain agents and the category agent | Deductive | 90 | Rename or delete; :341 is the real case"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 503,
+      "text": "T12 | scripts/test_check.py:503 | `git = lambda *a: subprocess.run([\"git\", \"-C\", self.tmp, \"-c\", \"user.name=t\", \"-c\", \"user.email=t@t\", *a],` | Preventive measure | Low | There is no `skipUnless(git)` guard (unlike :369), so it errors without git. It and StagedTest (:374) also inherit the global git config: commit.gpgsign or core.hooksPath break `check=True` | Deductive | 80 | Move it under the git skip; pass `-c commit.gpgsign=false -c core.hooksPath=`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 35,
+      "text": "T13 | scripts/test_check.py:35 | `shutil.copytree(src, dst, ignore=shutil.ignore_patterns(\"__pycache__\"))` | Preventive measure | Low | The fixture copies the developer's working tree, untracked files included. An untracked references/draft.md turns test_repo_passes red. Category agent | Deductive | 85 | Copy from `git ls-files`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 46,
+      "text": "D1 | scripts/check.py:46 | `Files checked: the files tracked by git (all files outside .git if git is not` | Demonstrated defect | Low | The fallback also happens when root is not a repo, git errors, or nothing is tracked (:149-152) | Deductive | 85 | \"...if git is not available, root is not a repository, or nothing is tracked\""
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "D2 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Preventive measure | Low | The module also tests check_facts.py (:571-617), which the docstring does not name | Deductive | 82 | Name check_facts.py"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "D3 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | With --staged, the folder read is the staged copy (:433); test_check.py:508 relies on this | Deductive | 85 | Add \"(with --staged: as staged)\""
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 23,
+      "text": "D4 | scripts/test_check.py:23 | `# including this one (the check scans every file). Neither occurs in the repo.` | Demonstrated defect | Low | Three constants are defined (:24-26); \"Neither\" covers two | Deductive | 85 | \"None of them\""
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 7,
+      "text": "D5 | scripts/check_facts.py:7 | `are compiled with rustc; .ts files run with node --experimental-strip-types.` | Preventive measure | Low | The flag needs node 22.6 or later (README.md:246); the docstring states no version | Abductive | 65 | State the node version"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 4,
+      "text": "D6 | scripts/test_check.py:4 | `Every failing case must come from the script's own ERROR and summary, and no` | Demonstrated defect | Low | The check_facts runner tests (:580-617) assert on FAIL lines or return codes only, never ERROR, the summary or `assert_no_leak`. Category agent | Deductive | 88 | Scope the sentence to check.py"
+    }
+  ]
+}

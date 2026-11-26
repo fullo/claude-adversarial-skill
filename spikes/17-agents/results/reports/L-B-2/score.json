@@ -1,0 +1,447 @@
+{
+  "case": "L",
+  "defects": 12,
+  "found": 12,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found",
+    "L1": "found",
+    "L2": "found",
+    "L3": "found",
+    "L4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line",
+    "L1": "line",
+    "L2": "line",
+    "L3": "line",
+    "L4": "line"
+  },
+  "rows": 84,
+  "fail_rows": 59,
+  "citations_checked": 59,
+  "citations_verified": 59,
+  "citations_wrong_line": 0,
+  "citations_unverifiable": 0,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 17,
+      "text": "C7 | scripts/pre-commit:17 | `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Preventive measure | Medium | Output is shown only on failure, so the skip of C5 is invisible at commit time | Deductive | 85 | Fix C5, or always print the summary"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C10 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | Low | With two fact files for one id (e.g. 38.py and 38.ts), only one is hash-checked | Deductive | 85 | Error on a second file for the same id"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "C11 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | Duplicate, unknown, below-29 and no-\"(Facts\" ids in NOT_COMPUTABLE are accepted silently, so stale reasons pile up (Data D1 is one) | Deductive | 82 | Report them"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "C12 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | With --staged (the hook), root is the index copy (scripts/check.py:433), so untracked reference files are not seen. test_check.py:508 relies on exactly that | Deduct"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C13 | scripts/check.py:341 | `:?-{3,}:?` (DELIM) | Preventive measure | Low | GFM accepts 1-dash delimiter cells, so such tables are never recognised or counted. No instance today | Deductive | 82 | `-+`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "C14 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | Medium | The fact binding covers the prompt only. expected_output and assertions can contradict the facts, as Data D2 and D3 show | Deductive | 85 | Hash the whole eval, or assert the "
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C15 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure (Data agent) / Demonstrated defect (category agent) | Medium | Evals 54 (evals.json:672) and 55 (evals.json:686) state computable facts without the \"(F"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C16 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | Low | An assert in an uncalled function or a dead branch counts, so a fact file that asserts nothing at run time passes (Documentation, Code and category agents) | De"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C17 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | High | Any file named `.check-private-terms`, anywhere and tracked or not, is exempt from the scan. A force-added list ships unreported, although README.md:251 says \"The list is never committed\" | Deductive"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C18 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | Low | A set but empty CHECK_PRIVATE_TERMS silently disables the terms file, and under the hook (C6) that is only a warning | Deductive | 85 | Treat an empty variable as unset, or warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C19 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | Low | With an empty index, --staged runs no check at all | Deductive | 85 | Run the checks or report \"nothing staged\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C20 | scripts/check.py:151 | `except (OSError, subprocess.CalledProcessError):` | Preventive measure | Medium | Any git failure (e.g. \"dubious ownership\") silently falls back to walking untracked files, while scripts/check.py:46 says the fallback applies only when git is unavailable | Deductive | 75"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C21 | scripts/check.py:316 | `except ValueError:` | Preventive measure | Low | A .json file that does not parse is scanned raw only, with no note that `\\u` escapes were not decoded | Deductive | 80 | Warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 440,
+      "text": "C22 | scripts/check.py:440 | `shutil.rmtree(tmp, ignore_errors=True)` | Preventive measure | Low | A failed cleanup leaves the staged copy in the system temp folder silently | Deductive | 70 | Warn with the leftover path"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C24 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | Low | Locale decoding of tool output can raise UnicodeDecodeError and abort the run (Code H8, category agent) | Abductive | 55 | `encoding=\"utf-8\", errors=\"replace\"`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 330,
+      "text": "C26 | scripts/check.py:330 | `patterns = [re.compile(t) for t in STACK_TERMS]` | Preventive measure | Low | The neutral-wording terms are case-sensitive, so lowercase \"python\" or \"docker\" are not warned about (Code H7, category agent) | Deductive | 80 | `re.I` for word-like terms"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C27 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Demonstrated defect | Low | `check_facts.py 38 99` drops 99 silently and exits 0 | Deductive | 85 | FAIL on a requested id with no file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "C28 | scripts/check.py:469 | `if ext in FACT_EXTS and not stem.startswith(\"_\"):` | Preventive measure | Low | `42.PY`, `53.mts` or `_38.py` are neither run nor reported as orphans. The rule also exempts the helper from any hash (see Data D4) | Deductive | 75 | Report unknown files in facts/"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 505,
+      "text": "T4 | scripts/test_check.py:505 | `git(\"init\", \"-q\"); git(\"add\", \"-A\"); git(\"commit\", \"-q\", \"-m\", \"base\")` | Preventive measure | Low | No `skipUnless(git)` guard, unlike scripts/test_check.py:369, so it errors (false red) without git | Deductive | 85 | Add the guard"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Preventive measure | Low | The comment describes the `=` case, but the test uses a plain term | Deductive | 85 | Fix the comment"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 571,
+      "text": "T6 | scripts/test_check.py:571 | `def run_facts(self, *ids):` | Preventive measure | Medium | Untested paths, as stated in the Tests return: a missing toolchain, .rs/.ts assertion detection, --staged with an empty index, the FACTS_FROM boundary, mixed fences, and the hook itself. C5 is a defect on o"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T7 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Demonstrated defect | Medium | Tests run on a partial copy that is not a git repository, so check.py takes the walk path (scripts/check.py:153), not `git ls-files`. LIC"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 374,
+      "text": "T8 | scripts/test_check.py:374 | `subprocess.run([\"git\", \"-C\", self.tmp, *args], check=True, capture_output=True, env=env)` | Preventive measure | Medium | Inherits global git config (gpgsign, hooksPath, autocrlf), so the result depends on the machine | Abductive | 65 | `GIT_CONFIG_GLOBAL=os.devnull"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 391,
+      "text": "T9 | scripts/test_check.py:391 | `before = {d for d in os.listdir(tempfile.gettempdir()) if d.startswith(\"check-staged-\")}` | Preventive measure | Low | Shared temp folder: a concurrent run makes the test fail | Abductive | 60 | Per-test TMPDIR"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 414,
+      "text": "T10 | scripts/test_check.py:414 | `self.assertIn(\"SQLite\", open(self.path(EVALS)).read())` | Preventive measure | Low | Opened with the locale encoding; evals.json is UTF-8 with U+2014 | Deductive | 65 | `encoding=\"utf-8\"`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 23,
+      "text": "T11 | scripts/test_check.py:23 | `# including this one (the check scans every file). Neither occurs in the repo.` | Demonstrated defect | Low | Three terms follow, not two, and only tracked files are scanned in a repo | Deductive | 75 | Reword"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/52.rs",
+      "line": 15,
+      "text": "T12 | skills/adversarial-verify/evals/facts/52.rs:15 | `assert_ne!(days_in_month(2024, 2), 29);` | Demonstrated defect | Low | Implied by line 14, so it can never be the assertion that fails. The same holds for facts/51.py:6 `assert before >= 44 > after  # the project's touch-target rule` (85) and f"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/35.py",
+      "line": 2,
+      "text": "T13 | skills/adversarial-verify/evals/facts/35.py:2 | `\"\"\"Eval 35: the function as shown accepts 31 February, which the three valid-date tests do not cover.\"\"\"` | Demonstrated defect (category agent) / not a problem, partial coverage (Tests agent HB11) | Low | The docstring claims a second fact that"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "D3 | skills/adversarial-verify/evals/evals.json:612 | `… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; …` | Demonstrated defect | Low (Tests, Documentation agents) / Medium (Code agent) | At 320 px the same two labels are clipped as at 375 px (facts/49.py:13 `assert clipp"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 5,
+      "text": "D4 | skills/adversarial-verify/evals/facts/_parse_day.py:5 | `def parse_day_v1(text):  # evals 29, 35 and 37` | Preventive measure | Low | The shared helper copies the functions of evals 29, 35, 37 and 39 but carries no hash (scripts/check.py:469 exempts `_` files), which contradicts README.md:255 \""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 166,
+      "text": "D5 | skills/adversarial-verify/evals/evals.json:166 | `\"Uses at least 3 different techniques (forced variety rule)\",` | Preventive measure | Low | The prompt (evals.json:160) names two techniques, and the eval grades three | Abductive | 55 | Reword the prompt or the assertion"
+    },
+    {
+      "file": "README.md",
+      "line": 247,
+      "text": "Doc3 | README.md:247 | `It needs `python3` 3.8 or later and nothing else.` | Demonstrated defect | Low | --staged and the hook need git (scripts/check.py:389-393), and README.md:264 says to use `py -3` on Windows (Documentation agent and category agent) | Deductive | 80 | Name git and `py -3`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc4 | CHANGELOG.md:3 | `… and the first entry below; `scripts/check.py` fails if they differ.` | Demonstrated defect | Low | The first entry is `## Unreleased` (CHANGELOG.md:5). check.py takes the first numbered entry | Deductive | 90 | \"the first numbered entry below\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "Doc5 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | Low | facts/35.py:3 `from _parse_day import parse_day_v1` also uses it | Deductive | 95 | Add 35.py"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "Doc6 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Demonstrated defect | Medium | The repo does not pass (D1), and T1 asserts nothing | Deductive | 90 | Fix D1 and T1"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 325,
+      "text": "Doc7 | skills/adversarial-verify/evals/evals.json:325 | `… proposes to comment on the existing issue #41 with the new evidence instead of opening a duplicate` | Demonstrated defect | Medium | The Documentation agent searched SKILL.md and references/*.md and did not find a rule on proposing issues or"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "Doc8 | skills/adversarial-verify/evals/evals.json:249 | `… (code, data) or respected (plans, specs, docs, analyses)` | Demonstrated defect | Low | skills/adversarial-verify/SKILL.md:439 now reads \"(code, data, tests, UX) or respected (plans, specs, docs, analyses, mock-ups)\" | Deductive | 90 | Quote"
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc9 | README.md:46 | `- **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect | Low | SKILL.md Step 5 also lists CHANGELOG.md, ADR/ and the agent instruction files | Deductive | 80 | Same list as Step 5"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 113,
+      "text": "Doc10 | skills/adversarial-verify/evals/evals.json:113 | `\"Checks for missing completeness in enums, switches, and factory methods\",` | Preventive measure | Low | Uses the language-bound vocabulary from before the 3.6 rewrite. evals.json:210 `\"Checks for flaky indicators: sleep(), retry, @Ignore/ski"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 69,
+      "text": "Doc12 | skills/adversarial-verify/evals/evals.json:69 | `\"Reads the migration file and the ORM model as artifacts\",` | Preventive measure | Low | SKILL.md Step 0a names no ORM model. evals.json:388 (`short list of choices` vs Intake rule 6's multiple-choice tool) and evals.json:707 (output file in M"
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/pre-commit",
+      "line": 17,
+      "text": "C7 | scripts/pre-commit:17 | `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Preventive measure | Medium | Output is shown only on failure, so the skip of C5 is invisible at commit time | Deductive | 85 | Fix C5, or always print the summary"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 473,
+      "text": "C10 | scripts/check.py:473 | `with_file[int(stem)] = name` | Preventive measure | Low | With two fact files for one id (e.g. 38.py and 38.ts), only one is hash-checked | Deductive | 85 | Error on a second file for the same id"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 494,
+      "text": "C11 | scripts/check.py:494 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | Low | Duplicate, unknown, below-29 and no-\"(Facts\" ids in NOT_COMPUTABLE are accepted silently, so stale reasons pile up (Data D1 is one) | Deductive | 82 | Report them"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 43,
+      "text": "C12 | scripts/check.py:43 | `reader nowhere. The folder is read as it is on disk, tracked or not, since` | Demonstrated defect | Low | With --staged (the hook), root is the index copy (scripts/check.py:433), so untracked reference files are not seen. test_check.py:508 relies on exactly that | Deductive | 88 | Say so in the docstring"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 341,
+      "text": "C13 | scripts/check.py:341 | `:?-{3,}:?` (DELIM) | Preventive measure | Low | GFM accepts 1-dash delimiter cells, so such tables are never recognised or counted. No instance today | Deductive | 82 | `-+`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 478,
+      "text": "C14 | scripts/check.py:478 | `want = hashlib.sha256(prompts[i].encode(\"utf-8\")).hexdigest()` | Preventive measure | Medium | The fact binding covers the prompt only. expected_output and assertions can contradict the facts, as Data D2 and D3 show | Deductive | 85 | Hash the whole eval, or assert the quoted numbers in the fact file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "C15 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\")) and e[\"id\"] not in with_file and e[\"id\"] not in reasons:` | Preventive measure (Data agent) / Demonstrated defect (category agent) | Medium | Evals 54 (evals.json:672) and 55 (evals.json:686) state computable facts without the \"(Facts\" marker and need neither a file nor a reason, while CHANGELOG.md:24 says \"every eval from 29 on that states facts\". The two agents disagree on the type; the lower confidence is kept | Inductive | 75 | Require a file or reason for every eval from 29 on, or reword the rule"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C16 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | Low | An assert in an uncalled function or a dead branch counts, so a fact file that asserts nothing at run time passes (Documentation, Code and category agents) | Deductive | 80 | Count only executed or top-level assertions"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C17 | scripts/check.py:301 | `if os.path.basename(rel) == TERMS_FILE:` | Preventive measure | High | Any file named `.check-private-terms`, anywhere and tracked or not, is exempt from the scan. A force-added list ships unreported, although README.md:251 says \"The list is never committed\" | Deductive | 80 | Exempt only the untracked root file, and error if it is tracked"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 248,
+      "text": "C18 | scripts/check.py:248 | `if raw is not None:` | Preventive measure | Low | A set but empty CHECK_PRIVATE_TERMS silently disables the terms file, and under the hook (C6) that is only a warning | Deductive | 85 | Treat an empty variable as unset, or warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 436,
+      "text": "C19 | scripts/check.py:436 | `if files or not args.staged:` | Preventive measure | Low | With an empty index, --staged runs no check at all | Deductive | 85 | Run the checks or report \"nothing staged\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 151,
+      "text": "C20 | scripts/check.py:151 | `except (OSError, subprocess.CalledProcessError):` | Preventive measure | Medium | Any git failure (e.g. \"dubious ownership\") silently falls back to walking untracked files, while scripts/check.py:46 says the fallback applies only when git is unavailable | Deductive | 75 | Fall back only on OSError, otherwise warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 316,
+      "text": "C21 | scripts/check.py:316 | `except ValueError:` | Preventive measure | Low | A .json file that does not parse is scanned raw only, with no note that `\\u` escapes were not decoded | Deductive | 80 | Warn"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 440,
+      "text": "C22 | scripts/check.py:440 | `shutil.rmtree(tmp, ignore_errors=True)` | Preventive measure | Low | A failed cleanup leaves the staged copy in the system temp folder silently | Deductive | 70 | Warn with the leftover path"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 100,
+      "text": "C24 | scripts/check_facts.py:100 | `r = subprocess.run(step, cwd=FACTS, capture_output=True, text=True)` | Preventive measure | Low | Locale decoding of tool output can raise UnicodeDecodeError and abort the run (Code H8, category agent) | Abductive | 55 | `encoding=\"utf-8\", errors=\"replace\"`"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 330,
+      "text": "C26 | scripts/check.py:330 | `patterns = [re.compile(t) for t in STACK_TERMS]` | Preventive measure | Low | The neutral-wording terms are case-sensitive, so lowercase \"python\" or \"docker\" are not warned about (Code H7, category agent) | Deductive | 80 | `re.I` for word-like terms"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 85,
+      "text": "C27 | scripts/check_facts.py:85 | `files = [f for f in files if os.path.splitext(f)[0] in ids]` | Demonstrated defect | Low | `check_facts.py 38 99` drops 99 silently and exits 0 | Deductive | 85 | FAIL on a requested id with no file"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 469,
+      "text": "C28 | scripts/check.py:469 | `if ext in FACT_EXTS and not stem.startswith(\"_\"):` | Preventive measure | Low | `42.PY`, `53.mts` or `_38.py` are neither run nor reported as orphans. The rule also exempts the helper from any hash (see Data D4) | Deductive | 75 | Report unknown files in facts/"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 505,
+      "text": "T4 | scripts/test_check.py:505 | `git(\"init\", \"-q\"); git(\"add\", \"-A\"); git(\"commit\", \"-q\", \"-m\", \"base\")` | Preventive measure | Low | No `skipUnless(git)` guard, unlike scripts/test_check.py:369, so it errors (false red) without git | Deductive | 85 | Add the guard"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "T5 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Preventive measure | Low | The comment describes the `=` case, but the test uses a plain term | Deductive | 85 | Fix the comment"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 571,
+      "text": "T6 | scripts/test_check.py:571 | `def run_facts(self, *ids):` | Preventive measure | Medium | Untested paths, as stated in the Tests return: a missing toolchain, .rs/.ts assertion detection, --staged with an empty index, the FACTS_FROM boundary, mixed fences, and the hook itself. C5 is a defect on one of these untested paths | Deductive | 82 | One test per path"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 32,
+      "text": "T7 | scripts/test_check.py:32 | `for item in (\"README.md\", \"CHANGELOG.md\", \"skills\", \".claude-plugin\", \"scripts\", \".gitignore\"):` | Demonstrated defect | Medium | Tests run on a partial copy that is not a git repository, so check.py takes the walk path (scripts/check.py:153), not `git ls-files`. LICENSE is not checked, and test_repo_passes does not reproduce the hook's path | Deductive | 80 | Copy the tracked files into a git-initialised temp repo"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 374,
+      "text": "T8 | scripts/test_check.py:374 | `subprocess.run([\"git\", \"-C\", self.tmp, *args], check=True, capture_output=True, env=env)` | Preventive measure | Medium | Inherits global git config (gpgsign, hooksPath, autocrlf), so the result depends on the machine | Abductive | 65 | `GIT_CONFIG_GLOBAL=os.devnull`, `GIT_CONFIG_NOSYSTEM=1`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 391,
+      "text": "T9 | scripts/test_check.py:391 | `before = {d for d in os.listdir(tempfile.gettempdir()) if d.startswith(\"check-staged-\")}` | Preventive measure | Low | Shared temp folder: a concurrent run makes the test fail | Abductive | 60 | Per-test TMPDIR"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 414,
+      "text": "T10 | scripts/test_check.py:414 | `self.assertIn(\"SQLite\", open(self.path(EVALS)).read())` | Preventive measure | Low | Opened with the locale encoding; evals.json is UTF-8 with U+2014 | Deductive | 65 | `encoding=\"utf-8\"`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 23,
+      "text": "T11 | scripts/test_check.py:23 | `# including this one (the check scans every file). Neither occurs in the repo.` | Demonstrated defect | Low | Three terms follow, not two, and only tracked files are scanned in a repo | Deductive | 75 | Reword"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/52.rs",
+      "line": 15,
+      "text": "T12 | skills/adversarial-verify/evals/facts/52.rs:15 | `assert_ne!(days_in_month(2024, 2), 29);` | Demonstrated defect | Low | Implied by line 14, so it can never be the assertion that fails. The same holds for facts/51.py:6 `assert before >= 44 > after  # the project's touch-target rule` (85) and facts/57.py:7 `assert discarded == 1` (70). facts/51.py:3 `before = 20 + 2 * 12` retypes the prompt's constants (Tests HB9, 80) | Deductive | 70 | Derive the values from the prompt, or drop the redundant asserts"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/35.py",
+      "line": 2,
+      "text": "T13 | skills/adversarial-verify/evals/facts/35.py:2 | `\"\"\"Eval 35: the function as shown accepts 31 February, which the three valid-date tests do not cover.\"\"\"` | Demonstrated defect (category agent) / not a problem, partial coverage (Tests agent HB11) | Low | The docstring claims a second fact that no line checks, and the body is identical to 37.py. The two agents disagree; the lower confidence is kept | Deductive | 75 | Limit the docstring to what is checked"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 612,
+      "text": "D3 | skills/adversarial-verify/evals/evals.json:612 | `… and that at 320 px (80 px buttons, 64 px usable) more labels are clipped; …` | Demonstrated defect | Low (Tests, Documentation agents) / Medium (Code agent) | At 320 px the same two labels are clipped as at 375 px (facts/49.py:13 `assert clipped(320) == (64.0, {'Bestellungen', 'Einstellungen'})`; evals.json:615) | Deductive | 90 | \"the same two labels are clipped, with less room\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 5,
+      "text": "D4 | skills/adversarial-verify/evals/facts/_parse_day.py:5 | `def parse_day_v1(text):  # evals 29, 35 and 37` | Preventive measure | Low | The shared helper copies the functions of evals 29, 35, 37 and 39 but carries no hash (scripts/check.py:469 exempts `_` files), which contradicts README.md:255 \"every eval it covers\" | Deductive | 75 | Hash each eval the helper copies, or narrow README.md:255"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 166,
+      "text": "D5 | skills/adversarial-verify/evals/evals.json:166 | `\"Uses at least 3 different techniques (forced variety rule)\",` | Preventive measure | Low | The prompt (evals.json:160) names two techniques, and the eval grades three | Abductive | 55 | Reword the prompt or the assertion"
+    },
+    {
+      "file": "README.md",
+      "line": 247,
+      "text": "Doc3 | README.md:247 | `It needs `python3` 3.8 or later and nothing else.` | Demonstrated defect | Low | --staged and the hook need git (scripts/check.py:389-393), and README.md:264 says to use `py -3` on Windows (Documentation agent and category agent) | Deductive | 80 | Name git and `py -3`"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 3,
+      "text": "Doc4 | CHANGELOG.md:3 | `… and the first entry below; `scripts/check.py` fails if they differ.` | Demonstrated defect | Low | The first entry is `## Unreleased` (CHANGELOG.md:5). check.py takes the first numbered entry | Deductive | 90 | \"the first numbered entry below\""
+    },
+    {
+      "file": "skills/adversarial-verify/evals/facts/_parse_day.py",
+      "line": 1,
+      "text": "Doc5 | skills/adversarial-verify/evals/facts/_parse_day.py:1 | `# Shared by facts/37.py and facts/39.py: the functions as shown in the evals.` | Demonstrated defect | Low | facts/35.py:3 `from _parse_day import parse_day_v1` also uses it | Deductive | 95 | Add 35.py"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 1,
+      "text": "Doc6 | scripts/test_check.py:1 | `\"\"\"Tests for scripts/check.py: the repo passes, and each invariant fails on a case built to break it.` | Demonstrated defect | Medium | The repo does not pass (D1), and T1 asserts nothing | Deductive | 90 | Fix D1 and T1"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 325,
+      "text": "Doc7 | skills/adversarial-verify/evals/evals.json:325 | `… proposes to comment on the existing issue #41 with the new evidence instead of opening a duplicate` | Demonstrated defect | Medium | The Documentation agent searched SKILL.md and references/*.md and did not find a rule on proposing issues or searching a tracker. Evals 25 and 26 (evals.json:337) grade behaviour the skill text does not define | Deductive | 80 | Add the rule to SKILL.md Step 5, or rewrite evals 25-26"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 249,
+      "text": "Doc8 | skills/adversarial-verify/evals/evals.json:249 | `… (code, data) or respected (plans, specs, docs, analyses)` | Demonstrated defect | Low | skills/adversarial-verify/SKILL.md:439 now reads \"(code, data, tests, UX) or respected (plans, specs, docs, analyses, mock-ups)\" | Deductive | 90 | Quote the current line"
+    },
+    {
+      "file": "README.md",
+      "line": 46,
+      "text": "Doc9 | README.md:46 | `- **Propose project doc updates** — TODO.md, SPEC.md, PLAN.md (with user confirmation)` | Demonstrated defect | Low | SKILL.md Step 5 also lists CHANGELOG.md, ADR/ and the agent instruction files | Deductive | 80 | Same list as Step 5"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 113,
+      "text": "Doc10 | skills/adversarial-verify/evals/evals.json:113 | `\"Checks for missing completeness in enums, switches, and factory methods\",` | Preventive measure | Low | Uses the language-bound vocabulary from before the 3.6 rewrite. evals.json:210 `\"Checks for flaky indicators: sleep(), retry, @Ignore/skip\"` has the same problem | Deductive | 65 | Reword to the current terms"
+    },
+    {
+      "file": "skills/adversarial-verify/evals/evals.json",
+      "line": 69,
+      "text": "Doc12 | skills/adversarial-verify/evals/evals.json:69 | `\"Reads the migration file and the ORM model as artifacts\",` | Preventive measure | Low | SKILL.md Step 0a names no ORM model. evals.json:388 (`short list of choices` vs Intake rule 6's multiple-choice tool) and evals.json:707 (output file in MUTATION PROBE vs execution.md's EXECUTED TESTS) also grade placements the skill does not define (category agent) | Deductive | 65 | Align the assertions with the skill text"
+    }
+  ]
+}

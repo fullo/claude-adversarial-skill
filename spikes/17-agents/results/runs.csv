@@ -1,1 +1,19 @@
 case,mode,run,date,model,effort,skill_commit,total_tokens,peak_context_tokens,wall_seconds,defects,found,hidden,hypothesis_only,missed,fail_rows,citations_checked,citations_wrong_line,citations_unverifiable,unmatched_fail_rows,false_positives_after_blind_review,rows_discarded_by_coordinator,notes
+S,A,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,318182,96118,259.4,4,4,0,0,0,8,9,1,2,3,0,,cost_usd=0.7311785000000002; agents=0; blind: real=3 cannot_tell=0
+S,B,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,1983976,81181,540.8,4,0,1,0,3,0,39,0,1,0,0,5,"cost_usd=2.2037241999999995; agents=5; blind: real=0 cannot_tell=0; FAIL tables without a Fix column: score.py reads no FAIL row; kept as scored (user, 2026-11-26)"
+S,A,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,650411,119290,355.4,4,4,0,0,0,18,21,2,5,9,1,,cost_usd=1.0075208; agents=0; blind: real=7 cannot_tell=1
+S,B,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,4038498,134166,854.8,4,4,0,0,0,46,46,0,1,37,15,0,cost_usd=3.8761997999999984; agents=6; blind: real=22 cannot_tell=0
+S,A,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,916426,118537,421.4,4,4,0,0,0,16,20,2,1,9,3,,cost_usd=1.1055498000000001; agents=0; blind: real=5 cannot_tell=1
+S,B,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,3942806,127899,674.0,4,4,0,0,0,50,49,0,2,37,16,1,cost_usd=3.4674423999999995; agents=7; blind: real=19 cannot_tell=2
+M,A,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,840903,127839,442.2,8,8,0,0,0,26,29,2,0,15,3,,cost_usd=1.1960875000000002; agents=0; blind: real=12 cannot_tell=0
+M,B,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,4633037,145958,941.3,8,8,0,0,0,47,47,0,1,32,5,1,cost_usd=4.137651399999999; agents=6; blind: real=27 cannot_tell=0
+M,A,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,801338,134062,445.1,8,8,0,0,0,28,31,3,2,15,3,,cost_usd=1.2103635999999998; agents=0; blind: real=11 cannot_tell=1
+M,B,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,5088131,134883,811.6,8,8,0,0,0,48,48,0,1,30,4,2,cost_usd=4.238911100000001; agents=7; blind: real=25 cannot_tell=1
+M,A,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,1300262,145253,530.0,8,8,0,0,0,30,32,5,1,17,2,,cost_usd=1.4075233999999999; agents=0; blind: real=13 cannot_tell=2
+M,B,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,4738298,132225,802.9,8,8,0,0,0,53,53,0,1,36,10,0,cost_usd=3.7471475; agents=5; blind: real=22 cannot_tell=4
+L,A,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,890745,137639,336.3,12,12,0,0,0,21,25,1,4,9,0,,cost_usd=1.0909062999999999; agents=0; blind: real=9 cannot_tell=0
+L,B,1,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,8479192,150116,801.2,12,12,0,0,0,46,45,0,2,31,5,3,cost_usd=5.1489948; agents=8; blind: real=26 cannot_tell=0
+L,A,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,1223718,151650,362.6,12,12,0,0,0,26,32,1,8,11,1,,cost_usd=1.2134089; agents=0; blind: real=10 cannot_tell=0
+L,B,2,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,8647725,161034,1031.3,12,12,0,0,0,59,59,0,0,40,7,0,cost_usd=5.8627341999999985; agents=6; blind: real=30 cannot_tell=3
+L,A,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,1170998,165496,428.3,12,10,1,0,1,22,25,0,4,8,0,,cost_usd=1.3535788; agents=0; blind: real=8 cannot_tell=0
+L,B,3,2026-11-25,claude-sonnet-5-5,medium,cb75e4e,9255533,172306,911.9,12,12,0,0,0,51,95,1,2,33,6,6,cost_usd=5.8478625; agents=7; blind: real=27 cannot_tell=0

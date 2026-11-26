@@ -1,0 +1,189 @@
+{
+  "case": "M",
+  "defects": 8,
+  "found": 8,
+  "hidden": 0,
+  "hypothesis_only": 0,
+  "missed": 0,
+  "recall": 1.0,
+  "status": {
+    "S1": "found",
+    "S2": "found",
+    "S3": "found",
+    "S4": "found",
+    "M1": "found",
+    "M2": "found",
+    "M3": "found",
+    "M4": "found"
+  },
+  "matched_by": {
+    "S1": "line",
+    "S2": "line",
+    "S3": "line",
+    "S4": "line",
+    "M1": "line",
+    "M2": "line",
+    "M3": "keyword",
+    "M4": "line"
+  },
+  "rows": 47,
+  "fail_rows": 28,
+  "citations_checked": 31,
+  "citations_verified": 26,
+  "citations_wrong_line": 3,
+  "citations_unverifiable": 2,
+  "unmatched_fail_rows": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-P1 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | medium | Turns into a defect if someone runs `git add -f .check-private-terms` (`.gitignore:1` does not stop a forced add). `--staged` lists it, skips it, and reports nothing, so the list of p"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "C-P2 | scripts/check.py:247-250 | `raw = os.environ.get(\"CHECK_PRIVATE_TERMS\")` / `if raw is not None: terms = raw.split(\",\")` | Preventive measure | medium | Turns into a defect if `CHECK_PRIVATE_TERMS` is set but empty (for example `export CHECK_PRIVATE_TERMS=` in a profile or CI template). The fi"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C-P4 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-P5 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | A `raise` in the *reproduced code under test* (like `raise ValueError('bad day')` in skills/adversarial-verify/evals/facts/_parse_day.py:11), copied into a fac"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C-P6 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S)` | Preventive measure | low | A char literal `'\"'` opens a \"string\" that swallows code up to the next `\"`, and raw strings `r#\"…\"#` are not handled. Both can hide a real `assert!` (false FAIL, the sa"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "C-P7 | scripts/check.py:214, 217, 227-230, 237 | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError` | Preventive measure | low | A staged deletion or rename of README.md, CHANGELOG.md, plugin.json or SKILL.md raises an uncaught `FileNotFoundError`. The run stops with a traceba"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F3 | scripts/test_check.py (whole file) | — (no test mentions `pre-commit`; I searched the file) | Demonstrated defect (missing completeness: touched invariant I10 with nothing that bites, and it is actually violated, C-F5) | medium | The hook's `--strict` promise is broken (scripts/pre-commit:9) "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 300,
+      "text": "T-P3 | scripts/test_check.py:300-302, :311-316 | `self.assert_fails(..., \"notes16.txt\")` / `self.assert_fails(..., \"plugin.json\")` | Preventive measure (weak assertion) | low | Any ERROR that mentions the file passes the test. For example, if plugin.json were broken by the edit, the \"not valid JSON\""
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T-P4 | scripts/test_check.py:64-68 | `def assert_passes(self, r): …` (no `assert_no_leak`) | Preventive measure | low | The docstring promises \"no private test term may ever be printed\" (:4-5), but passing runs are never leak-checked. Example: test_whole_word_opt_in (:257) passes with `=<T1>` while "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 580,
+      "text": "T-P5 | scripts/test_check.py:580-617 | — (only .py fact files are mutated) | Preventive measure (coverage gap) | low | The regexes `ASSERTS`/`STRIP` for `.rs`/`.ts` (scripts/check_facts.py:34-39) are never exercised by a negative test. A broken `STRIP` (C-P6) would pass the suite | Deductive | 85 | "
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "D-F1 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (stale comment) | low | The test (:338-339) passes the plain term `T1`, which is **substring** by default (scripts/check.py:265), so detection does fl"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 483,
+      "text": "DA-P1 | scripts/check.py:483-496 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an eval that does not exist, for one below 29, or for one whose prompt no longer has `(Facts` is accepted silently, while an orphan *fact file* is an error (:470-471). Turns into a de"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "DA-P2 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | low | `(facts:`, `( Facts`, or facts given without a parenthesis bypass the requirement. Turns into a defect at the first new eval written differently | Deductive | 85 | Use a case-insensitive regex `\\(\\s"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "DA-P3 | scripts/check.py:255-256 | `if not l.strip().startswith(\"#\")` | Preventive measure (silent fallthrough) | medium | `acme  # our client` becomes one term with the parts `acme`, `our`, `client`, joined by at most one character each (C-F2). It never matches the plain `acme`, so the user believe"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "UX-F1 | scripts/pre-commit:15-17 | `out=\"$(…check_facts.py…)\"; rc=$?` / `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect (state not shown) | medium | On success the runner's output is discarded, including `skip 52.rs: toolchain not found` (C-F4). The developer sees a clean "
+    }
+  ],
+  "unmatched_fail_rows_full": [
+    {
+      "file": "scripts/check.py",
+      "line": 301,
+      "text": "C-P1 | scripts/check.py:301-302 | `if os.path.basename(rel) == TERMS_FILE: continue` | Preventive measure | medium | Turns into a defect if someone runs `git add -f .check-private-terms` (`.gitignore:1` does not stop a forced add). `--staged` lists it, skips it, and reports nothing, so the list of private names is committed and pushed, contradicting \"the list is never committed\" (scripts/check.py:423, README.md:250). Likelihood: low, but the impact is total | Deductive | 88 | In `--staged` mode (and in tracked-file mode), report `ERROR .check-private-terms: the private terms list is tracked or staged`; add a StagedTest case"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 247,
+      "text": "C-P2 | scripts/check.py:247-250 | `raw = os.environ.get(\"CHECK_PRIVATE_TERMS\")` / `if raw is not None: terms = raw.split(\",\")` | Preventive measure | medium | Turns into a defect if `CHECK_PRIVATE_TERMS` is set but empty (for example `export CHECK_PRIVATE_TERMS=` in a profile or CI template). The file is then ignored, `terms == []`, and without `--strict` (C-F5) the run passes with only a warning | Deductive | 88 | Treat an empty or blank variable as unset (`if raw and raw.strip():`), or merge both sources; document the precedence"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 345,
+      "text": "C-P4 | scripts/check.py:345 |  |  |  |  |  |  | "
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 50,
+      "text": "C-P5 | scripts/check_facts.py:50 | `return any(isinstance(n, (ast.Assert, ast.Raise)) for n in ast.walk(tree))` | Preventive measure | low | A `raise` in the *reproduced code under test* (like `raise ValueError('bad day')` in skills/adversarial-verify/evals/facts/_parse_day.py:11), copied into a fact file that asserts nothing, passes the gate. So does an `assert` in a function that is never called. No current fact file does this (I grepped every facts/*.py) | Deductive | 85 | Require an `assert` (or a `raise` of `AssertionError`/`SystemExit`) at module level or reachable from it; keep the ok-line rule as the second guard"
+    },
+    {
+      "file": "scripts/check_facts.py",
+      "line": 37,
+      "text": "C-P6 | scripts/check_facts.py:37 | `\".rs\": re.compile(r'//[^\\n]*|/\\*.*?\\*/|\"(?:\\\\.|[^\"\\\\])*\"', re.S)` | Preventive measure | low | A char literal `'\"'` opens a \"string\" that swallows code up to the next `\"`, and raw strings `r#\"…\"#` are not handled. Both can hide a real `assert!` (false FAIL, the safe direction) or expose one inside a raw string (false pass). Turns into a defect with a fact file holding `'\"'` or `r#\"assert!\"#` | Deductive | 80 | Strip char literals and raw strings first, or compile with a `#[deny]` lint marker convention"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 214,
+      "text": "C-P7 | scripts/check.py:214, 217, 227-230, 237 | `plugin = json.loads(read_text(root, PLUGIN, rep))` / `except ValueError` | Preventive measure | low | A staged deletion or rename of README.md, CHANGELOG.md, plugin.json or SKILL.md raises an uncaught `FileNotFoundError`. The run stops with a traceback and no summary line. It still exits non-zero (fails closed), but the remaining checks never run and the message names no invariant | Deductive | 90 | Catch `OSError` in check_version (and check_neutral, check_tables) and report `ERROR <file>: missing`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": null,
+      "text": "T-F3 | scripts/test_check.py (whole file) | — (no test mentions `pre-commit`; I searched the file) | Demonstrated defect (missing completeness: touched invariant I10 with nothing that bites, and it is actually violated, C-F5) | medium | The hook's `--strict` promise is broken (scripts/pre-commit:9) and no test fails | Deductive | 90 | Add a StagedTest that runs `sh scripts/pre-commit` in the temp repo with no terms and asserts non-zero, and one that stages a fact change with a false fact"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 300,
+      "text": "T-P3 | scripts/test_check.py:300-302, :311-316 | `self.assert_fails(..., \"notes16.txt\")` / `self.assert_fails(..., \"plugin.json\")` | Preventive measure (weak assertion) | low | Any ERROR that mentions the file passes the test. For example, if plugin.json were broken by the edit, the \"not valid JSON\" error would satisfy test_json_escape without any private-term detection | Deductive | 85 | Also assert `\"private term #1\"` (and `\"after decoding JSON escapes\"` for :316)"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 64,
+      "text": "T-P4 | scripts/test_check.py:64-68 | `def assert_passes(self, r): …` (no `assert_no_leak`) | Preventive measure | low | The docstring promises \"no private test term may ever be printed\" (:4-5), but passing runs are never leak-checked. Example: test_whole_word_opt_in (:257) passes with `=<T1>` while a warning could echo the term | Deductive | 85 | Call `self.assert_no_leak(r)` in `assert_passes`"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 580,
+      "text": "T-P5 | scripts/test_check.py:580-617 | — (only .py fact files are mutated) | Preventive measure (coverage gap) | low | The regexes `ASSERTS`/`STRIP` for `.rs`/`.ts` (scripts/check_facts.py:34-39) are never exercised by a negative test. A broken `STRIP` (C-P6) would pass the suite | Deductive | 85 | Tests that comment out every `assert*!` in 52.rs and every `throw` in 53.ts and expect \"no assertion\". The gate runs only after `command` finds the toolchain (scripts/check_facts.py:90-95), so skip these tests when `shutil.which` finds no toolchain"
+    },
+    {
+      "file": "scripts/test_check.py",
+      "line": 337,
+      "text": "D-F1 | scripts/test_check.py:337 | `# whole-word detection does not flag \"<term>labs\", but the evals check prints the key name` | Demonstrated defect (stale comment) | low | The test (:338-339) passes the plain term `T1`, which is **substring** by default (scripts/check.py:265), so detection does flag `<term>labs`. The comment describes the `=` case of the next test (:341-344) | Deductive | 90 | Change the comment to \"substring detection flags it in the file; the evals check also prints the key name, which must be masked\""
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 483,
+      "text": "DA-P1 | scripts/check.py:483-496 | `reasons[int(m.group(1))] = m.group(2)` | Preventive measure | low | A reason for an eval that does not exist, for one below 29, or for one whose prompt no longer has `(Facts` is accepted silently, while an orphan *fact file* is an error (:470-471). Turns into a defect when an eval is renumbered or its facts removed: the stale reason hides that the new eval at that id needs a fact file | Deductive | 88 | Report reasons whose id is not an existing eval ≥ FACTS_FROM that states facts"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 500,
+      "text": "DA-P2 | scripts/check.py:500 | `if \"(Facts\" in str(e.get(\"prompt\", \"\"))` | Preventive measure | low | `(facts:`, `( Facts`, or facts given without a parenthesis bypass the requirement. Turns into a defect at the first new eval written differently | Deductive | 85 | Use a case-insensitive regex `\\(\\s*facts\\b`, and document the marker in scripts/check.py:34"
+    },
+    {
+      "file": "scripts/check.py",
+      "line": 255,
+      "text": "DA-P3 | scripts/check.py:255-256 | `if not l.strip().startswith(\"#\")` | Preventive measure (silent fallthrough) | medium | `acme  # our client` becomes one term with the parts `acme`, `our`, `client`, joined by at most one character each (C-F2). It never matches the plain `acme`, so the user believes the name is protected and it is not. No warning is given | Deductive | 88 | Strip ` #…` after a term, or warn when a term contains `#`"
+    },
+    {
+      "file": "scripts/pre-commit",
+      "line": 15,
+      "text": "UX-F1 | scripts/pre-commit:15-17 | `out=\"$(…check_facts.py…)\"; rc=$?` / `[ $rc -eq 0 ] || { printf \"%s\\n\" \"$out\"; exit 1; }` | Demonstrated defect (state not shown) | medium | On success the runner's output is discarded, including `skip 52.rs: toolchain not found` (C-F4). The developer sees a clean commit and no sign that two fact files never ran. The warning is not shown where it is seen | Deductive | 92 | Always print `out` (or at least the `skip`/summary lines), and fix C-F4 so a skip is a failure"
+    }
+  ]
+}
