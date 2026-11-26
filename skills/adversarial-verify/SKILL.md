@@ -344,13 +344,13 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 ### Quote lookup (before writing the report)
 
-A location written from memory is a claim, even your own. Before you write the report, take every row that cites a file and a line, in PASS, FAIL, FALSIFIED HYPOTHESES, HYPOTHESES and HIDDEN BEHAVIORS, and **search the file** for its quote, with a search of the file (not your memory of an earlier read). Then compare the line where the quote is with the line the row names. For a range, the quote must be inside it.
+A location written from memory is a claim, even your own. Before you write the report, take every row of the report that cites a file and a line (PASS, FAIL, FALSIFIED HYPOTHESES, HYPOTHESES, HIDDEN BEHAVIORS, INVARIANTS, STRESS TEST RESULTS) and **search the file** for its quote, with a search of the file (not your memory of an earlier read). Search the version of the file the row is about: the current one, or for a line a change removed, the version before the change. Then compare the line where the quote is with the line the row names. For a range, the quote must be inside it.
 
 1. **At the line named:** the row stands.
-2. **At another line:** correct the row's line. If the quote is at more than one line, keep the one the row's reasoning is about, and read it in place.
-3. **Not in the file:** copy the deciding line from the file, exactly as it is, at its line. If no line of the file carries what the row rests on, the row is not evidenced. A PASS or a FAIL moves to HYPOTHESES with what is missing; any other row is removed.
+2. **At another line:** correct the row's line and read it in place, with the lines around it: the reasoning was built on the wrong location. If the quote is at more than one line, keep the one the row's reasoning is about.
+3. **Not in the file:** copy the deciding line from the file, exactly as it is, at its line. If no line of the file carries what the row rests on, the row is not evidenced. A PASS or a FAIL moves to HYPOTHESES with what is missing. A falsified hypothesis whose check is not there was not falsified: it goes back to HYPOTHESES as an open suspicion. Any other row is removed.
 
-A quote is the line as it is in the file. A description of the code is not a quote: replace it with the line. A row above 79 whose quote was not looked up in this way goes down to 79 (Hard constraint). The lookup reads; it runs nothing. One search can cover several quotes of the same file. Count the rows looked up, corrected and removed for the SUMMARY.
+A quote is the line as it is in the file. A description of the code is not a quote: replace it with the line. A row that names a line and quotes nothing: read the line; if it carries the claim, quote it, otherwise apply case 3. A row above 79 whose quote was not looked up in this way goes down to 79 (Hard constraint). The lookup reads; it runs nothing. One search can cover several quotes of the same file. Count the rows looked up, corrected and removed for the SUMMARY.
 
 ### Finding format
 
