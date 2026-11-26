@@ -17,7 +17,7 @@ license: MIT
 compatibility: Uses a version control system (e.g. git, Mercurial) for diff analysis; plans, analyses and mock-ups need none
 metadata:
   author: fullo
-  version: "4.3"
+  version: "4.4"
   trigger: verify, adversarial check, CoV review, /adversarial-verify, review my changes, check architecture, verify data, verify docs, verify tests, verify analysis, verify this plan, verify this spike, check the UX, red-team, audit, stress test, chaos review
   references:
     - "Chain-of-Verification: Dhuliawala et al. 2023 — arxiv.org/abs/2309.11495"
@@ -342,6 +342,16 @@ Before claiming a mitigation, safeguard, or feature **doesn't exist**, you MUST 
 
 **Test-environment constraint:** a claim whose evidence is a test result CANNOT score above 79 until you have checked that the result would be the same in production (Step 2b, *test-environment artifact*). The check is quick when the test touches no fixture, store, fake, path, or resource that differs from production: say so in one line and score normally.
 
+### Quote lookup (before writing the report)
+
+A location written from memory is a claim, even your own. Before you write the report, take every row that cites a file and a line, in PASS, FAIL, FALSIFIED HYPOTHESES, HYPOTHESES and HIDDEN BEHAVIORS, and **search the file** for its quote, with a search of the file (not your memory of an earlier read). Then compare the line where the quote is with the line the row names. For a range, the quote must be inside it.
+
+1. **At the line named:** the row stands.
+2. **At another line:** correct the row's line. If the quote is at more than one line, keep the one the row's reasoning is about, and read it in place.
+3. **Not in the file:** copy the deciding line from the file, exactly as it is, at its line. If no line of the file carries what the row rests on, the row is not evidenced. A PASS or a FAIL moves to HYPOTHESES with what is missing; any other row is removed.
+
+A quote is the line as it is in the file. A description of the code is not a quote: replace it with the line. A row above 79 whose quote was not looked up in this way goes down to 79 (Hard constraint). The lookup reads; it runs nothing. One search can cover several quotes of the same file. Count the rows looked up, corrected and removed for the SUMMARY.
+
 ### Finding format
 
 Every problem or suspicion you report is a **finding**. Passed claims, surviving stress tests, and hidden behaviors have their own tables and need no Type unless they are a problem. A stress test that does not survive, or a hidden behavior that is a problem, is also reported as a finding in FAIL, with a reference to its row.
@@ -439,6 +449,7 @@ Every problem or suspicion you report is a **finding**. Passed claims, surviving
 - Invariants: N found, M touched, K enforced by a mechanism that bites on the changed path (code, data, tests, UX) or respected (plans, specs, docs, analyses, mock-ups)
 - Hypotheses: N requiring further investigation
 - Hidden behaviors: N detected
+- Quotes: N rows looked up in their file, M lines corrected, K rows moved to HYPOTHESES or removed (Step 4, Quote lookup)
 - Findings by type: N demonstrated defects, M preventive measures, K falsified hypotheses (J of them conditionally)
 - Critical issues: N demonstrated defects of critical severity (preventive measures of critical severity listed separately: M)
 - Pre-code: N evidenced, M technical assumptions (spikes suggested), K user-expectation assumptions (mock-ups suggested)

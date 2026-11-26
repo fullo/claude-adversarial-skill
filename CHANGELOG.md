@@ -2,6 +2,12 @@
 
 The newest version comes first. The version is the same in the skill's frontmatter, the README badge, `.claude-plugin/plugin.json` and the first entry below; `scripts/check.py` fails if they differ.
 
+## 4.4 - 2026-11-26
+
+Quote lookup in the single-agent mode (#34).
+
+- **Quote lookup before the report** (Step 4). Before writing the report, the verifier searches the file for the quote of every row that cites a file and a line (PASS, FAIL, FALSIFIED HYPOTHESES, HYPOTHESES, HIDDEN BEHAVIORS): it does not trust its memory of an earlier read. A quote at another line has its line corrected. A quote not in the file is replaced by the deciding line, copied as it is; if no line carries what the row rests on, a PASS or a FAIL moves to HYPOTHESES and any other row is removed. A description of the code in the Quote column is replaced by the line. A row above 79 whose quote was not looked up goes down to 79. The SUMMARY counts the rows looked up, corrected and removed. This is the rule that 4.3 gave for rows returned by another agent, applied to the verifier's own rows. It comes from the spike of #17: the coordinator, which looked up every returned quote, cited a wrong line once in 481 citations, against 17 in 224 for the single agent. Eval 58.
+
 ## 4.3 - 2026-11-25
 
 Long outputs of approved runs.
