@@ -720,6 +720,20 @@
         "[substance] Presents no survivor as a finding scored above 79 on the strength of the returned row alone",
         "[format] States in the report which output another agent read, how many rows came back, how many were discarded and how many the verifier read itself"
       ]
+    },
+    {
+      "id": 58,
+      "prompt": "Verify the change to scripts/billing.py on this branch, standard depth, reasoning only. Your analysis is done and you are about to write the report.\n\n(Facts: your draft has 7 rows that cite billing.py. You searched the file for each quote. Rows 1, 2 and 3 are at the line they name. Row 4, a FAIL, names billing.py:88 with the quote 'if total < 0:'; the search finds it at line 91 only, and line 88 is a comment. Row 5, a FAIL at confidence 85, has in its Quote cell 'the subtotal is rounded before the items are summed', which is not a line of the file; line 64 reads 'subtotal = round(price * qty, 2)'. Row 6, a PASS at confidence 85, names billing.py:120 with the quote 'validate_currency(code)'; the search finds no such text anywhere in the file, and no line of the file calls a currency check. Row 7, a FAIL at confidence 85, says the change removes the refund limit and quotes 'if amount > MAX_REFUND: raise RefundTooLarge' at billing.py:140 of the version before the change; the line is not in the current file, and the search of the version before the change finds it at line 140.)",
+      "expected_output": "Before writing the report the verifier treats its own locations as claims: it keeps rows 1-3, corrects row 4 to line 91 and reads it in place, replaces the description in row 5 with line 64 as it is in the file, moves the PASS of row 6 to HYPOTHESES because no line of the file carries it, and keeps row 7 because its quote is in the version the row is about, the one before the change; nothing whose quote was not found stays above 79; the SUMMARY counts 7 rows looked up, the corrections and the row moved",
+      "assertions": [
+        "[substance] Corrects row 4 to billing.py:91 and does not keep line 88, which is a comment",
+        "[substance] Replaces the Quote of row 5 with the line as it is in the file, 'subtotal = round(price * qty, 2)' at billing.py:64, instead of the description",
+        "[substance] Does not report row 6 as a PASS: the quoted call is not in the file, so the claim moves to HYPOTHESES (or is reported as not evidenced) with what is missing, and is not scored above 79",
+        "[substance] Keeps rows 1, 2 and 3 as they are, since their quotes are at the lines they name",
+        "[substance] Keeps row 7 as a FAIL: its quote is a line the change removed, and it is at billing.py:140 of the version before the change; it does not demote the row because the line is not in the current file",
+        "[substance] Looks the quotes up by searching the file, and does not rely on its memory of an earlier read",
+        "[format] The SUMMARY has a Quotes line: 7 rows looked up, the lines corrected and 1 row moved to HYPOTHESES or removed"
+      ]
     }
   ]
 }
